@@ -1,0 +1,9 @@
+[submodule "concordium-wasm-smart-contracts"]
+	path = concordium-wasm-smart-contracts
+	url = https://github.com/Concordium/concordium-wasm-smart-contracts.git
+[submodule "concordium-rust-smart-contracts"]
+	path = concordium-rust-smart-contracts
+	url = https://github.com/Concordium/concordium-rust-smart-contracts.git
+[submodule "concordium-client"]
+	path = concordium-client
+	url = https://github.com/Concordium/concordium-client.git

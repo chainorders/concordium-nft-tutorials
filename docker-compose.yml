@@ -1,0 +1,51 @@
+services:
+  concordium-client-build:
+    build:
+      dockerfile: scripts/distributables/linux-distributable-concordium-client.Dockerfile
+      context: ./concordium-client
+    volumes:
+      - ./dist/concordium-client:/out
+  cargo-concordium-build:
+    build:
+      dockerfile: ./cargo-concordium-build.Dockerfile
+      context: ./
+    volumes:
+      - ./dist/cargo-concordium:/out
+  dev-env:
+    build:
+      dockerfile: ./dev-env.Dockerfile
+      context: ./
+    working_dir: /src/examples/cis2-nft
+    volumes:
+      - ./concordium-rust-smart-contracts:/src:rw
+      - ./dist/smart-contract:/out:rw
+      - ./nft-artifacts:/nft-artifacts:rw
+      - ./dist/concordium-client-config:/root/.config/concordium:rw
+    ## should not exit as the development is to be done inside the container
+    entrypoint:
+      - sleep
+      - infinity
+    environment:
+      - GRPC_IP=node
+      - GRPC_PORT=${CONCORDIUM_NODE_PORT}
+    depends_on:
+      - node
+  node:
+    image: concordium/testnet-node:4.2.1-2
+    ports:
+      - ${CONCORDIUM_NODE_PORT}:${CONCORDIUM_NODE_PORT}
+    working_dir: /
+    environment:
+      ## Refer https://github.com/Concordium/concordium-node/blob/main/VARIABLES.md#grpc
+      CONCORDIUM_NODE_RPC_SERVER_ADDR: 0.0.0.0
+      CONCORDIUM_NODE_RPC_SERVER_PORT: ${CONCORDIUM_NODE_PORT}
+      CONCORDIUM_NODE_LISTEN_ADDRESS: 0.0.0.0
+      CONCORDIUM_NODE_CONSENSUS_GENESIS_DATA_FILE: /testnet-genesis.dat
+      CONCORDIUM_NODE_CONFIG_DIR: "/node/concordium-node-data"
+      CONCORDIUM_NODE_DATA_DIR: "/node/concordium-node-config"
+      CONCORDIUM_NODE_CONNECTION_BOOTSTRAP_NODES: bootstrap.testnet.concordium.com:8888
+    volumes:
+      - ./dist/node/data:/node/concordium-node-data
+      - ./dist/node/config:/node/concordium-node-config
+    entrypoint:
+      - ./concordium-node
