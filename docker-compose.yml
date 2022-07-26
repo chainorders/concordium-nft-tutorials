@@ -15,9 +15,9 @@ services:
     build:
       dockerfile: ./dev-env.Dockerfile
       context: ./
-    working_dir: /src/examples/cis2-nft
+    working_dir: /src
     volumes:
-      - ./concordium-rust-smart-contracts:/src:rw
+      - ./cis2-nft:/src:rw
       - ./dist/smart-contract:/out:rw
       - ./nft-artifacts:/nft-artifacts:rw
       - ./dist/concordium-client-config:/root/.config/concordium:rw
@@ -49,3 +49,23 @@ services:
       - ./dist/node/config:/node/concordium-node-config
     entrypoint:
       - ./concordium-node
+  ipfs:
+    image: ipfs/kubo
+    restart: unless-stopped
+    volumes:
+      - ./dist/ipfs/ipfs_data:/data/ipfs
+      - ./dist/ipfs/ipfs_fuse:/ipfs
+      - ./dist/ipfs/ipns_fuse:/ipns
+      - ./dist/ipfs/staging:/export
+    environment:
+      - IPFS_PATH=/data/ipfs
+    ports:
+      # Swarm listens on all interfaces, so is remotely reachable.
+      - 4001:4001/tcp
+      - 4001:4001/udp
+      # The following ports only listen on the loopback interface, so are not remotely reachable by default.
+      # If you want to override these or add more ports, see https://docs.docker.com/compose/extends/ .
+      # API port, which includes admin operations, so you probably don't want this remotely accessible.
+      - 5001:5001
+      # HTTP Gateway
+      - 8080:8080
