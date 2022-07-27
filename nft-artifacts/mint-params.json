@@ -1,4 +1,13 @@
 {
-    "owner": {"Account": ["48x2Uo8xCMMxwGuSQnwbqjzKtVqK5MaUud4vG7QEUgDmYkV85e"]},
-    "tokens": ["00000002", "00000003"]
+  "owner": {
+    "Account": ["48x2Uo8xCMMxwGuSQnwbqjzKtVqK5MaUud4vG7QEUgDmYkV85e"]
+  },
+  "tokens": [
+    [
+      "00000001",
+      {
+        "url": "https://ipfs.io/ipfs/QmV5REE3HJRLTHdmqG18Wc5PBF3Nc9W5dQL4Rp7MxBsx8q?filename=nft.jpg"
+      }
+    ]
+  ]
 }
