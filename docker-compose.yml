@@ -21,6 +21,7 @@ services:
       - ./dist/smart-contract:/out:rw
       - ./nft-artifacts:/nft-artifacts:rw
       - ./dist/concordium-client-config:/root/.config/concordium:rw
+      - ./dist/ipfs-cli:/data/ipfs:rw
     ## should not exit as the development is to be done inside the container
     entrypoint:
       - sleep
@@ -28,6 +29,7 @@ services:
     environment:
       - GRPC_IP=node
       - GRPC_PORT=${CONCORDIUM_NODE_PORT}
+      - IPFS_PATH=/data/ipfs
     depends_on:
       - node
   node:
