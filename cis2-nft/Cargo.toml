@@ -12,6 +12,7 @@ std = ["concordium-std/std", "concordium-cis2/std"]
 [dependencies]
 concordium-std = {git = "https://github.com/Concordium/concordium-rust-smart-contracts", default-features = false}
 concordium-cis2 = {git = "https://github.com/Concordium/concordium-rust-smart-contracts", default-features = false}
+hex = "*"
 
 [lib]
 crate-type=["cdylib", "rlib"]
