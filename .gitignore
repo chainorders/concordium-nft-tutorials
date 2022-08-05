@@ -1,3 +1,5 @@
 dist
 *.concordiumwallet
 logs/*
+backend/*
+concordium-backup.concordiumwallet.json
