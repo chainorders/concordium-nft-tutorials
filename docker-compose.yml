@@ -1,17 +1,20 @@
 services:
   concordium-client-build:
+    platform: linux/x86_64
     build:
       dockerfile: scripts/distributables/linux-distributable-concordium-client.Dockerfile
       context: ./concordium-client
     volumes:
       - ./dist/concordium-client:/out
   cargo-concordium-build:
+    platform: linux/x86_64
     build:
       dockerfile: ./cargo-concordium-build.Dockerfile
       context: ./
     volumes:
       - ./dist/cargo-concordium:/out
   dev-env:
+    platform: linux/x86_64
     build:
       dockerfile: ./dev-env.Dockerfile
       context: ./
@@ -33,6 +36,7 @@ services:
     depends_on:
       - node
   node:
+    platform: linux/x86_64
     image: concordium/testnet-node:4.2.1-2
     ports:
       - ${CONCORDIUM_NODE_PORT}:${CONCORDIUM_NODE_PORT}
@@ -52,6 +56,7 @@ services:
     entrypoint:
       - ./concordium-node
   ipfs:
+    platform: linux/x86_64
     image: ipfs/kubo
     restart: unless-stopped
     volumes:
