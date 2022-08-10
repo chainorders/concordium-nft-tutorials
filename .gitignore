@@ -1,4 +1,6 @@
-dist
+dist/ipfs/*
+dist/node/*
+dist/concordium-client-config/*
 *.concordiumwallet
 logs/*
 backend/*
