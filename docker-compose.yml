@@ -14,7 +14,7 @@ services:
     volumes:
       - ./dist/cargo-concordium:/out
   dev-env:
-    platform: linux/x86_64
+    platform: linux/amd64
     build:
       dockerfile: ./dev-env.Dockerfile
       context: ./
