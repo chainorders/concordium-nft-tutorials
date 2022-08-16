@@ -1,3 +1,6 @@
 dist
 *.concordiumwallet
 logs/*
+concordium-backup.concordiumwallet.json
+kubo
+kubo_v0.14.0_linux-amd64.tar.gz

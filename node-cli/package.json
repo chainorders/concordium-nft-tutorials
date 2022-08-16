@@ -1,0 +1,16 @@
+{
+  "name": "node-cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.6.3",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@concordium/node-sdk": "^3.0.2",
+    "@types/fs-extra": "^9.0.13",
+    "commander": "^9.4.0",
+    "fs-extra": "^10.1.0"
+  }
+}
