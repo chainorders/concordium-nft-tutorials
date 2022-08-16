@@ -1,14 +1,32 @@
+* ## [Download concordium-client](https://developer.concordium.software/en/mainnet/net/installation/downloads-testnet.html#concordium-client-v4-0-4)
+* ## Initialize concordium-client config
+    ```bash
+    concordium-client config init
+    ```
+    - Import Wallet
+        ```bash
+        concordium-client config account import concordium-backup.concordiumwallet
+        ```
+    - Now lets set the imported account name to an ENV variable so that its easier to use in subsequent steps
+        ```bash
+        export SENDER=<ACCOUNT-NAME>
+        ```
+    - Lets set the Node Endpoints as Env Variables. The values assume that the Node service of [`docker-compose.yml`](./docker-compose.yml) is running. `Port` is configured using the [.env](./.env) file
+        ```bash
+        export GRPC_IP=127.0.0.1
+        export GRPC_PORT=10001
+        ```
 * ## Deploy Module (Smart Contract)
     ### Command
     ```bash
-    concordium-client module deploy /out/module.wasm --sender $SENDER --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT
+    concordium-client module deploy ./dist/smart-contract/module.wasm --sender $SENDER --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT
     ```
     You can [read more](https://developer.concordium.software/en/mainnet/net/references/concordium-client.html#concordium-client) about `concordium-client` and its cli params like `--grpc-ip` & `--grpc-port`
     ### Output
     ```bash
-    root@ce56444bf2ef:/src# concordium-client module deploy /out/module.wasm --sender $SENDER --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT
+    root@ce56444bf2ef:/src# concordium-client module deploy ./dist/smart-contract/module.wasm --sender $SENDER --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT
     Using default energy amount of 96004 NRG.
-    Deploy the module '/out/module.wasm'.
+    Deploy the module './dist/smart-contract/module.wasm'.
     Allowing up to 96004 NRG to be spent as transaction fee.
     Confirm [yN]: y
     y
@@ -74,12 +92,12 @@
 * ## Mint NFT
     ### Command
     ```bash
-    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint mint --parameter-json /nft-artifacts/mint-params.json --schema /out/schema.bin --sender $SENDER --energy 6000
+    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint mint --parameter-json /nft-artifacts/mint-params.json --schema ./dist/smart-contract/schema.bin --sender $SENDER --energy 6000
     ```
 
     ### Output
     ```bash
-    root@ce56444bf2ef:/src#     concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint mint --parameter-json /nft-artifacts/mint-params.json --schema /out/schema.bin --sender $SENDER --energy 6000
+    root@ce56444bf2ef:/src#     concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint mint --parameter-json /nft-artifacts/mint-params.json --schema ./dist/smart-contract/schema.bin --sender $SENDER --energy 6000
     Update contract 'CIS2-NFT' using the function 'mint' with JSON parameters from '/nft-artifacts/mint-params.json'. Sending 0.000000 CCD.
     Allowing up to 6000 NRG to be spent as transaction fee.
     Transaction expires on Fri, 29 Jul 2022 02:33:47 UTC.
@@ -143,12 +161,12 @@
 * ## Transfer NFT
     ### Command
     ```bash
-    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint transfer --parameter-json /nft-artifacts/transfer-params.json --schema /out/schema.bin --sender $SENDER --energy 6000
+    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint transfer --parameter-json /nft-artifacts/transfer-params.json --schema ./dist/smart-contract/schema.bin --sender $SENDER --energy 6000
     ```
 
     ### Output
     ```bash
-    root@ce56444bf2ef:/src# concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint transfer --parameter-json /nft-artifacts/transfer-params.json --schema /out/schema.bin --sender $SENDER --energy 6000
+    root@ce56444bf2ef:/src# concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update nft --entrypoint transfer --parameter-json /nft-artifacts/transfer-params.json --schema ./dist/smart-contract/schema.bin --sender $SENDER --energy 6000
     Update contract 'CIS2-NFT' using the function 'transfer' with JSON parameters from '/nft-artifacts/transfer-params.json'. Sending 0.000000 CCD.
     Allowing up to 6000 NRG to be spent as transaction fee.
     Transaction expires on Fri, 29 Jul 2022 02:35:25 UTC.

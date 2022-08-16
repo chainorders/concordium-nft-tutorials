@@ -10,12 +10,12 @@ default = ["std"]
 std = ["concordium-std/std", "concordium-cis2/std"]
 
 [dependencies]
-concordium-std = {git = "https://github.com/Concordium/concordium-rust-smart-contracts", default-features = false}
-concordium-cis2 = {git = "https://github.com/Concordium/concordium-rust-smart-contracts", default-features = false}
+concordium-std = { version = "*", default-features = false }
+concordium-cis2 = { version = "*", default-features = false }
 hex = "*"
 
 [lib]
-crate-type=["cdylib", "rlib"]
+crate-type = ["cdylib", "rlib"]
 
 [profile.release]
 codegen-units = 1

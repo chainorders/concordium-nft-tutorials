@@ -6,7 +6,6 @@ import {
   AccountTransactionType,
   buildBasicAccountSigner,
   ConcordiumNodeClient,
-  deserializeContractState,
   getAccountTransactionHash,
   signTransaction,
   TransactionExpiry,
@@ -32,7 +31,7 @@ export async function viewContract(args: ViewContractArgs): Promise<string> {
     throw new Error("Could not invoke contract");
   } else if (result.tag === "failure") {
     throw new Error(result.reason.tag);
-  } else if(!result.returnValue){
+  } else if (!result.returnValue) {
     throw new Error("There is no return value");
   } else {
     return result.returnValue;

@@ -1,43 +1,8 @@
 services:
-  concordium-client-build:
-    platform: linux/x86_64
-    build:
-      dockerfile: scripts/distributables/linux-distributable-concordium-client.Dockerfile
-      context: ./concordium-client
-    volumes:
-      - ./dist/concordium-client:/out
-  cargo-concordium-build:
-    platform: linux/x86_64
-    build:
-      dockerfile: ./cargo-concordium-build.Dockerfile
-      context: ./
-    volumes:
-      - ./dist/cargo-concordium:/out
-  dev-env:
-    platform: linux/amd64
-    build:
-      dockerfile: ./dev-env.Dockerfile
-      context: ./
-    working_dir: /src
-    volumes:
-      - ./cis2-nft:/src:rw
-      - ./dist/smart-contract:/out:rw
-      - ./nft-artifacts:/nft-artifacts:rw
-      - ./dist/concordium-client-config:/root/.config/concordium:rw
-      - ./dist/ipfs-cli:/data/ipfs:rw
-    ## should not exit as the development is to be done inside the container
-    entrypoint:
-      - sleep
-      - infinity
-    environment:
-      - GRPC_IP=node
-      - GRPC_PORT=${CONCORDIUM_NODE_PORT}
-      - IPFS_PATH=/data/ipfs
-    depends_on:
-      - node
   node:
-    platform: linux/x86_64
-    image: concordium/testnet-node:4.2.1-2
+    # platform: linux/x86_64
+    # platform: linux/amd64
+    image: concordium/testnet-node:latest
     ports:
       - ${CONCORDIUM_NODE_PORT}:${CONCORDIUM_NODE_PORT}
     working_dir: /
@@ -55,24 +20,3 @@ services:
       - ./dist/node/config:/node/concordium-node-config
     entrypoint:
       - ./concordium-node
-  ipfs:
-    platform: linux/x86_64
-    image: ipfs/kubo
-    restart: unless-stopped
-    volumes:
-      - ./dist/ipfs/ipfs_data:/data/ipfs
-      - ./dist/ipfs/ipfs_fuse:/ipfs
-      - ./dist/ipfs/ipns_fuse:/ipns
-      - ./dist/ipfs/staging:/export
-    environment:
-      - IPFS_PATH=/data/ipfs
-    ports:
-      # Swarm listens on all interfaces, so is remotely reachable.
-      - 4001:4001/tcp
-      - 4001:4001/udp
-      # The following ports only listen on the loopback interface, so are not remotely reachable by default.
-      # If you want to override these or add more ports, see https://docs.docker.com/compose/extends/ .
-      # API port, which includes admin operations, so you probably don't want this remotely accessible.
-      - 5001:5001
-      # HTTP Gateway
-      - 8080:8080

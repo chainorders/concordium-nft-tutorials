@@ -6,6 +6,11 @@ Lets go through the minting and transferring process
 
 - This is a simple node project with support for typescript.
 - Support for parsing input cli crgs is done via [Commander](https://www.npmjs.com/package/commander). As can be seen in the [cli.ts](./src/cli.ts) file
+- Add Dependencies & [ts-node](https://www.npmjs.com/package/ts-node)
+    ```
+    yarn install
+    yarn add -g ts-node
+    ```
 - Add Code in the [cli.ts](./src/cli.ts) file
   ```typescript
   const cli = new commander.Command();
@@ -15,11 +20,6 @@ Lets go through the minting and transferring process
     .then((res) => console.log("cli exited"));
   cli.showHelpAfterError().showSuggestionAfterError().allowUnknownOption(false);
   ```
-- Add Dependencies & [ts-node](https://www.npmjs.com/package/ts-node)
-    ```
-    yarn install
-    yarn add -g ts-node
-    ```
 ## Decrypting Mobile Wallet Export
 
 - The [concordium-backup.concordiumwallet](../concordium-backup.concordiumwallet) previously explort via mobile wallet should be present

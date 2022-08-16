@@ -1,7 +1,6 @@
-dist/ipfs/*
-dist/node/*
-dist/concordium-client-config/*
+dist
 *.concordiumwallet
 logs/*
-backend/*
 concordium-backup.concordiumwallet.json
+kubo
+kubo_v0.14.0_linux-amd64.tar.gz
