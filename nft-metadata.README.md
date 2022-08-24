@@ -5,7 +5,7 @@
     - #### IPFS UI
         - ##### [Install IPFS Desktop APP](https://docs.ipfs.tech/install/ipfs-desktop/)
         - ##### Prepare NFT Image
-            - Click on files tab on the left side and upload any image [file to IPFS](https://docs.ipfs.io/basics/desktop-app/#add-local-files). For a sample you can use [this image](./nft-artifacts/nft.jpg). *This has been downloaded from <a href='https://www.freepik.com/vectors/nft-background'>Nft background vector created by starline - www.freepik.com</a>*
+            - Click on files tab on the left side and upload any image [file to IPFS](https://docs.ipfs.io/basics/desktop-app/#add-local-files). For a sample you can use [this image](./nft-artifacts/nft.jpg).
             - Notice that you can copy / share the file url from this [interface](https://github.com/ipfs/ipfs-webui/blob/main/docs/screenshots/ipfs-webui-files.png) on the [IPFS web UI](http://localhost:5001/webui)
             - The final uploaded url should look something like this [https://ipfs.io/ipfs/QmV5REE3HJRLTHdmqG18Wc5PBF3Nc9W5dQL4Rp7MxBsx8q?filename=nft.jpg](https://ipfs.io/ipfs/QmV5REE3HJRLTHdmqG18Wc5PBF3Nc9W5dQL4Rp7MxBsx8q?filename=nft.jpg)
         - ##### Prepare NFT Metadata
