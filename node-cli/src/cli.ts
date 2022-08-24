@@ -53,6 +53,7 @@ function setupCliDeployModule(cli: commander.Command) {
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
+      .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: DeployModuleArgs) =>
           await sendAccountTransaction(
@@ -63,6 +64,7 @@ function setupCliDeployModule(cli: commander.Command) {
             { content: Buffer.from(readFileSync(args.wasm)) } as DeployModulePayload,
             // Transaction Type
             AccountTransactionType.DeployModule,
+            args.wait,
           ),
       )
   );
@@ -75,9 +77,9 @@ function setupCliInitContract(cli: commander.Command) {
     cli
       .command("init")
       .description(`Initializes a Smart Contract`)
-      .requiredOption("--module <module>", "Module Reference", "CIS2-NFT")
+      .requiredOption("--module <module>", "Module Reference")
       .requiredOption("--energy <energy>", "Maximum Contract Execution Energy", (v) => BigInt(v), 6000n)
-      .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
+      .requiredOption("--contract <contract>", "Contract name")
       // Sender Account Args
       .requiredOption("--sender <sender>", "Sender Account Address. This should be the owner of the Contract")
       .requiredOption("--sign-key <signKey>", "Account Signing Key")
@@ -86,6 +88,7 @@ function setupCliInitContract(cli: commander.Command) {
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
+      .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: InitContractArgs) =>
           await sendAccountTransaction(
@@ -102,6 +105,7 @@ function setupCliInitContract(cli: commander.Command) {
             } as InitContractPayload,
             // Transaction Type
             AccountTransactionType.InitializeSmartContractInstance,
+            args.wait,
           ),
       )
   );
@@ -115,12 +119,7 @@ function setupCliUpdateContract(cli: commander.Command, updateContractAction: st
       .command(updateContractAction)
       .description(`${updateContractAction} an NFT`)
       .requiredOption("--params <params>", "params file path", (f) => fs.realpathSync(f), `../nft-artifacts/${updateContractAction}-params.json`)
-      .requiredOption(
-        "--schema <schema>",
-        "Contract schema file path",
-        (f) => fs.realpathSync(f),
-        "../dist/smart-contract/schema.bin",
-      )
+      .requiredOption("--schema <schema>", "Contract schema file path", (f) => fs.realpathSync(f))
       .requiredOption("--energy <energy>", "Maximum Contract Execution Energy", (v) => BigInt(v), 6000n)
       .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
       .requiredOption("--function <function>", "Contract function name to call", updateContractAction)
@@ -134,6 +133,7 @@ function setupCliUpdateContract(cli: commander.Command, updateContractAction: st
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
+      .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: UpdateContractArgs) =>
           await sendAccountTransaction(
@@ -159,6 +159,7 @@ function setupCliUpdateContract(cli: commander.Command, updateContractAction: st
             } as UpdateContractPayload,
             // Transaction Type
             AccountTransactionType.UpdateSmartContractInstance,
+            args.wait,
           ),
       )
   );

@@ -9,8 +9,10 @@ import {
   getAccountTransactionHash,
   signTransaction,
   TransactionExpiry,
+  TransactionStatusEnum,
 } from "@concordium/node-sdk";
 import { credentials, Metadata } from "@grpc/grpc-js";
+import { clearLine } from "readline";
 import { ClientCreateArgs, ViewContractArgs } from "./types";
 
 export async function viewContract(args: ViewContractArgs): Promise<string> {
@@ -44,6 +46,7 @@ export async function sendAccountTransaction(
   signKey: string,
   payload: AccountTransactionPayload,
   txnType: AccountTransactionType,
+  wait?: boolean,
 ) {
   const client = createClient(clientArgs);
   const sender = new AccountAddress(address);
@@ -63,6 +66,18 @@ export async function sendAccountTransaction(
   console.log(`Transaction sent to node : ${txnSent}`);
   console.log(`Transaction Hash : ${txnHash}`);
   console.log(`url : https://dashboard.testnet.concordium.com/lookup/${txnHash}`);
+  
+  let status = await client.getTransactionStatus(txnHash);
+  
+  if (txnSent && wait) {
+    while (status?.status != TransactionStatusEnum.Finalized) {
+      await new Promise(f => setTimeout(f, 1000));
+      status = await client.getTransactionStatus(txnHash);
+      console.log(`Transaction Status : ${status?.status}, waiting for Transaction Finalization...`);
+    }
+  }
+  
+  console.log(`Transaction Status : ${status?.status}`);
 }
 
 async function getAccountNonce(client: ConcordiumNodeClient, address: AccountAddress) {

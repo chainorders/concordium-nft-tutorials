@@ -12,5 +12,10 @@
     "@types/fs-extra": "^9.0.13",
     "commander": "^9.4.0",
     "fs-extra": "^10.1.0"
+  },
+  "scripts": {
+    "deploy-multi": "ts-node ./src/cli.ts deploy --sender $ACCOUNT --sign-key $SIGN_KEY --wait --wasm ../dist/smart-contract-multi/module.wasm",
+    "init-multi": "ts-node ./src/cli.ts init --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi",
+    "mint-multi": "ts-node ./src/cli.ts mint --sender $ACCOUNT --sign-key $SIGN_KEY --wait --schema ../dist/smart-contract-multi/schema.bin"
   }
 }
