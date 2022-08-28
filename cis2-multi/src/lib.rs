@@ -54,7 +54,7 @@ struct MintParams {
     /// Owner of the newly minted tokens.
     owner: Address,
     /// A collection of tokens to mint.
-    tokens: collections::BTreeMap<ContractTokenId, (ContractTokenMetadata, ContractTokenAmount)>,
+    tokens: collections::BTreeMap<ContractTokenId, (TokenMetadata, ContractTokenAmount)>,
 }
 
 /// The parameter type for the contract function `setImplementors`.
@@ -88,12 +88,34 @@ impl<S: HasStateApi> AddressState<S> {
 }
 
 #[derive(Debug, Serialize, Clone, SchemaType)]
-pub struct ContractTokenMetadata {
+pub struct TokenMetadata {
     /// The URL following the specification RFC1738.
     #[concordium(size_length = 2)]
-    pub url:  String,
+    pub url: String,
     /// A optional hash of the content.
-    pub hash: Option<Sha256>,
+    #[concordium(size_length = 2)]
+    pub hash: String,
+}
+
+impl TokenMetadata {
+    fn get_hash_bytes(&self) -> Option<[u8; 32]> {
+        let mut hash_bytes: [u8; 32] = Default::default();
+        let hex_res = hex::decode_to_slice(self.hash.to_owned(), &mut hash_bytes);
+
+        match hex_res {
+            Ok(_) => Some(hash_bytes),
+            Err(_) => Option::None,
+        }
+    }
+
+    fn to_metadata_url(&self) -> MetadataUrl {
+        let mut hash_bytes: [u8; 32] = Default::default();
+        hex::decode_to_slice(self.hash.to_string(), &mut hash_bytes).unwrap();
+        MetadataUrl {
+            url: self.url.to_string(),
+            hash: self.get_hash_bytes(),
+        }
+    }
 }
 
 /// The contract state,
@@ -106,7 +128,7 @@ struct State<S> {
     /// The state of addresses.
     state: StateMap<Address, AddressState<S>, S>,
     /// All of the token IDs
-    tokens: StateMap<ContractTokenId, ContractTokenMetadata, S>,
+    tokens: StateMap<ContractTokenId, MetadataUrl, S>,
     /// Map with contract addresses providing implementations of additional
     /// standards.
     implementors: StateMap<StandardIdentifierOwned, Vec<ContractAddress>, S>,
@@ -184,12 +206,13 @@ impl<S: HasStateApi> State<S> {
     fn mint(
         &mut self,
         token_id: &ContractTokenId,
-        token_metadata: &ContractTokenMetadata,
+        token_metadata: &TokenMetadata,
         amount: ContractTokenAmount,
         owner: &Address,
         state_builder: &mut StateBuilder<S>,
     ) {
-        self.tokens.insert(*token_id, token_metadata.clone());
+        self.tokens
+            .insert(*token_id, token_metadata.to_metadata_url());
         let mut owner_state = self
             .state
             .entry(*owner)
@@ -432,11 +455,12 @@ fn contract_mint<S: HasStateApi>(
     for (token_id, token_info) in params.tokens {
         // Mint the token in the state.
         state.mint(
-            &token_id, 
+            &token_id,
             &token_info.0,
-            token_info.1, 
-            &params.owner, 
-            builder);
+            token_info.1,
+            &params.owner,
+            builder,
+        );
 
         // Event for minted token.
         logger.log(&Cis2Event::Mint(MintEvent {
@@ -449,10 +473,7 @@ fn contract_mint<S: HasStateApi>(
         logger.log(&Cis2Event::TokenMetadata::<_, ContractTokenAmount>(
             TokenMetadataEvent {
                 token_id,
-                metadata_url: MetadataUrl {
-                    url: token_info.0.url,
-                    hash: token_info.0.hash,
-                },
+                metadata_url: token_info.0.to_metadata_url(),
             },
         ))?;
     }
@@ -832,8 +853,30 @@ mod tests {
     /// id `TOKEN_0` and id `TOKEN_1` owned by `ADDRESS_0`
     fn initial_state<S: HasStateApi>(state_builder: &mut StateBuilder<S>) -> State<S> {
         let mut state = State::empty(state_builder);
-        state.mint(&TOKEN_0, 400.into(), &ADDRESS_0, state_builder);
-        state.mint(&TOKEN_1, 1.into(), &ADDRESS_0, state_builder);
+        state.mint(
+            &TOKEN_0,
+            &{
+                let url = "url".to_owned();
+                let hash =
+                    "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73".to_owned();
+                TokenMetadata { url, hash }
+            },
+            400.into(),
+            &ADDRESS_0,
+            state_builder,
+        );
+        state.mint(
+            &TOKEN_1,
+            &{
+                let url = "url".to_owned();
+                let hash =
+                    "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73".to_owned();
+                TokenMetadata { url, hash }
+            },
+            1.into(),
+            &ADDRESS_0,
+            state_builder,
+        );
         state
     }
 
@@ -869,8 +912,30 @@ mod tests {
 
         // and parameter.
         let mut tokens = collections::BTreeMap::new();
-        tokens.insert(TOKEN_0, 400.into());
-        tokens.insert(TOKEN_1, 1.into());
+        tokens.insert(
+            TOKEN_0,
+            (
+                {
+                    let url = "url".to_owned();
+                    let hash = "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
+                        .to_owned();
+                    TokenMetadata { url, hash }
+                },
+                400.into(),
+            ),
+        );
+        tokens.insert(
+            TOKEN_1,
+            (
+                {
+                    let url = "url".to_owned();
+                    let hash = "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
+                        .to_owned();
+                    TokenMetadata { url, hash }
+                },
+                1.into(),
+            ),
+        );
         let parameter = MintParams {
             owner: ADDRESS_0,
             tokens,
@@ -909,54 +974,64 @@ mod tests {
             .state()
             .balance(&TOKEN_1, &ADDRESS_0)
             .expect_report("Token is expected to exist");
-        claim_eq!(
-            balance1,
-            1.into(),
-            "Initial tokens are owned by the contract instantiater"
-        );
+        unsafe {
+            claim_eq!(
+                balance1,
+                1.into(),
+                "Initial tokens are owned by the contract instantiater"
+            );
 
-        // Check the logs
-        claim_eq!(logger.logs.len(), 4, "Exactly four events should be logged");
-        claim!(
-            logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
-                owner: ADDRESS_0,
-                token_id: TOKEN_0,
-                amount: ContractTokenAmount::from(400),
-            }))),
-            "Expected an event for minting TOKEN_0"
-        );
-        claim!(
-            logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
-                owner: ADDRESS_0,
-                token_id: TOKEN_1,
-                amount: ContractTokenAmount::from(1),
-            }))),
-            "Expected an event for minting TOKEN_1"
-        );
-        claim!(
-            logger.logs.contains(&to_bytes(
-                &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
+            // Check the logs
+            claim_eq!(logger.logs.len(), 4, "Exactly four events should be logged");
+            claim!(
+                logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
+                    owner: ADDRESS_0,
                     token_id: TOKEN_0,
-                    metadata_url: MetadataUrl {
-                        url: "https://some.example/token/02".to_string(),
-                        hash: None,
-                    },
-                })
-            )),
-            "Expected an event for token metadata for TOKEN_0"
-        );
-        claim!(
-            logger.logs.contains(&to_bytes(
-                &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
+                    amount: ContractTokenAmount::from(400),
+                }))),
+                "Expected an event for minting TOKEN_0"
+            );
+            claim!(
+                logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
+                    owner: ADDRESS_0,
                     token_id: TOKEN_1,
-                    metadata_url: MetadataUrl {
-                        url: "https://some.example/token/2A".to_string(),
-                        hash: None,
-                    },
-                })
-            )),
-            "Expected an event for token metadata for TOKEN_1"
-        );
+                    amount: ContractTokenAmount::from(1),
+                }))),
+                "Expected an event for minting TOKEN_1"
+            );
+
+            claim!(
+                logger.logs.contains(&to_bytes(
+                    &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
+                        token_id: TOKEN_0,
+                        metadata_url: (TokenMetadata {
+                            url: "url".to_string(),
+                            hash:
+                                "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
+                                    .to_string()
+                        })
+                        .to_metadata_url(),
+                    })
+                )),
+                "Expected an event for token metadata for TOKEN_0"
+            );
+
+            claim!(
+                logger.logs.contains(&to_bytes(
+                    &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
+                        token_id: TOKEN_1,
+                        metadata_url: (TokenMetadata {
+                            url: "url".to_string(),
+                            hash:
+                                "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
+                                    .to_string()
+                        })
+                        .to_metadata_url(),
+                    })
+                )),
+                "Expected an event for token metadata for TOKEN_1"
+            );
+        }
     }
 
     /// Test transfer succeeds, when `from` is the sender.

@@ -12,7 +12,7 @@ import {
   TransactionStatusEnum,
 } from "@concordium/node-sdk";
 import { credentials, Metadata } from "@grpc/grpc-js";
-import { clearLine } from "readline";
+import { Buffer } from 'buffer/';
 import { ClientCreateArgs, ViewContractArgs } from "./types";
 
 export async function viewContract(args: ViewContractArgs): Promise<string> {
@@ -25,6 +25,7 @@ export async function viewContract(args: ViewContractArgs): Promise<string> {
       contract: { index: args.index, subindex: args.subIndex },
       invoker,
       method: `${args.contract}.${args.function}`,
+      parameter: Buffer.from([]),
     },
     consensusStatus.bestBlock,
   );

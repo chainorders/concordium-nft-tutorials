@@ -3,10 +3,7 @@
 ## Deploy Contract Module
 
 ```bash
-ts-node ./src/cli.ts deploy \
---wasm ../dist/smart-contract/module.wasm \
---sender <ACCOUNT-ADDRESS> \
---sign-key <SIGN-KEY>
+ts-node ./src/cli.ts deploy --wasm ../dist/smart-contract/module.wasm --sender <ACCOUNT-ADDRESS> --sign-key <SIGN-KEY>
 ```
 
 - This will output the Explorer URL

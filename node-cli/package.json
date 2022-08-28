@@ -8,14 +8,17 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@concordium/node-sdk": "^3.0.2",
+    "@concordium/node-sdk": "^4.0.0",
     "@types/fs-extra": "^9.0.13",
     "commander": "^9.4.0",
     "fs-extra": "^10.1.0"
   },
   "scripts": {
     "deploy-multi": "ts-node ./src/cli.ts deploy --sender $ACCOUNT --sign-key $SIGN_KEY --wait --wasm ../dist/smart-contract-multi/module.wasm",
-    "init-multi": "ts-node ./src/cli.ts init --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi",
-    "mint-multi": "ts-node ./src/cli.ts mint --sender $ACCOUNT --sign-key $SIGN_KEY --wait --schema ../dist/smart-contract-multi/schema.bin"
+    "init-multi": "ts-node ./src/cli.ts init --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi --module 7319718f5c5f1cd0275da13e2f211d1170dfe43d380713aa93b74e8ddf398eb7",
+    "mint-multi": "ts-node ./src/cli.ts mint --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi --schema ../dist/smart-contract-multi/schema.bin --params ../nft-artifacts/mint-multi.json --index 905",
+    "transfer-multi": "ts-node ./src/cli.ts transfer --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi --schema ../dist/smart-contract-multi/schema.bin --params ../nft-artifacts/transfer-multi.json --index 905",
+    "view-multi": "ts-node ./src/cli.ts view --sender $ACCOUNT --contract CIS2-Multi --schema ../dist/smart-contract-multi/schema.bin --index 905",
+    "view-multi-rust": "concordium-client --grpc-ip 127.0.0.1 --grpc-port 10001 contract invoke 905 --entrypoint view"
   }
 }

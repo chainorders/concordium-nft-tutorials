@@ -118,7 +118,12 @@ function setupCliUpdateContract(cli: commander.Command, updateContractAction: st
     cli
       .command(updateContractAction)
       .description(`${updateContractAction} an NFT`)
-      .requiredOption("--params <params>", "params file path", (f) => fs.realpathSync(f), `../nft-artifacts/${updateContractAction}-params.json`)
+      .requiredOption(
+        "--params <params>",
+        "params file path",
+        (f) => fs.realpathSync(f),
+        `../nft-artifacts/${updateContractAction}-params.json`,
+      )
       .requiredOption("--schema <schema>", "Contract schema file path", (f) => fs.realpathSync(f))
       .requiredOption("--energy <energy>", "Maximum Contract Execution Energy", (v) => BigInt(v), 6000n)
       .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
@@ -175,12 +180,7 @@ function setupCliInvokeContract(cli: commander.Command) {
   cli
     .command("view")
     .description(`View Contract state`)
-    .requiredOption(
-      "--schema <schema>",
-      "Contract schema file path",
-      (f) => fs.realpathSync(f),
-      "../dist/smart-contract/schema.bin",
-    )
+    .requiredOption("--schema <schema>", "Contract schema file path", (f) => fs.realpathSync(f))
     .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
     .requiredOption("--function <function>", "Contract function name to call", "view")
     .requiredOption("--index <index>", "Contract Address Index", (v) => BigInt(v))
@@ -194,6 +194,8 @@ function setupCliInvokeContract(cli: commander.Command) {
     .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
     .action(async (args: ViewContractArgs) => {
       const contractState = await invokeContract(args);
+      console.log("Contract State : ", contractState);
+
       const de = deserializeContractState(
         args.contract,
         Buffer.from(readFileSync(args.schema)),

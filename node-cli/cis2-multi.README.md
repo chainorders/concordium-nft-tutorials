@@ -23,16 +23,16 @@ ts-node ./src/cli.ts init --sender $ACCOUNT --sign-key $SIGN_KEY --contract CIS2
 
 ## Mint NFT : Update Contract
 ```bash
-ts-node ./src/cli.ts mint --sender $ACCOUNT --sign-key $SIGN_KEY --schema ../dist/smart-contract-multi/schema.bin --index 789 --params ../nft-artifacts/mint-multi.json
+ts-node ./src/cli.ts mint --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi --schema ../dist/smart-contract-multi/schema.bin --params ../nft-artifacts/mint-multi.json --index <CONTRACT_INDEX>
 ```
 
 ## Transfer NFT : Update Contract
 ```
-ts-node ./src/cli.ts transfer --params ../nft-artifacts/transfer-params.json --schema ../dist/smart-contract-multi/schema.bin --index 789 --sender $ACCOUNT --sign-key $SIGN_KEY
+ts-node ./src/cli.ts transfer --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi --schema ../dist/smart-contract-multi/schema.bin --params ../nft-artifacts/transfer-multi.json --index <CONTRACT_INDEX>
 ```
 
 ## View Balance : Invoke Contract
 ```
-ts-node src/cli.ts view --index 789 --sender 48x2Uo8xCMMxwGuSQnwbqjzKtVqK5MaUud4vG7QEUgDmYkV85e
+ts-node ./src/cli.ts view --sender $ACCOUNT --contract CIS2-Multi --schema ../dist/smart-contract-multi/schema.bin --index <CONTRACT_INDEX>
 ```
 This will print contracts state to console. 
