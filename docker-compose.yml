@@ -2,7 +2,7 @@ services:
   node:
     # platform: linux/x86_64
     # platform: linux/amd64
-    image: concordium/testnet-node:4.3.1-rc1
+    image: concordium/testnet-node:latest
     ports:
       - ${CONCORDIUM_NODE_PORT}:${CONCORDIUM_NODE_PORT}
     working_dir: /

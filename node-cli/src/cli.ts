@@ -18,6 +18,7 @@ import { Buffer } from "buffer/";
 import pkg from "fs-extra";
 import { DeployModuleArgs, InitContractArgs, UpdateContractArgs, ViewContractArgs } from "./node-client/types";
 import { writeFileSync } from "fs";
+import { ViewStateDeserializer } from "./models/viewStateDeserializer";
 const { readFileSync } = pkg;
 
 const cli = new commander.Command();
@@ -53,6 +54,7 @@ function setupCliDeployModule(cli: commander.Command) {
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
+      .option("--wait", "Should wait for transaction finalization", false)
       .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: DeployModuleArgs) =>
@@ -194,14 +196,8 @@ function setupCliInvokeContract(cli: commander.Command) {
     .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
     .action(async (args: ViewContractArgs) => {
       const contractState = await invokeContract(args);
-      console.log("Contract State : ", contractState);
-
-      const de = deserializeContractState(
-        args.contract,
-        Buffer.from(readFileSync(args.schema)),
-        Buffer.from(contractState, "hex"),
-      );
-      console.log(de);
+      const viewState = new ViewStateDeserializer(contractState).readViewState();
+      console.log(JSON.stringify(viewState, null, "\t"));
     });
 }
 setupCliInvokeContract(cli);
