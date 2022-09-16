@@ -1,11 +1,11 @@
-import { ConcordiumDeserializer } from "./concordiumDeserializer";
+import { ConcordiumDeserializer } from "./ConcordiumDeserializer";
 import {
 	ContractBalanceOfQueryResponse,
 	ContractTokenAmount,
 	OperatorOfQueryResponse,
 	SupportResult,
 	SupportsQueryResponse,
-	TokenMetadata,
+	MetadataUrl,
 } from "./Cis2Types";
 
 export class Cis2Deserializer extends ConcordiumDeserializer {
@@ -17,7 +17,7 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 		return tokenId;
 	}
 
-	readTokenMetadata(): TokenMetadata {
+	readTokenMetadata(): MetadataUrl {
 		let url = this.readString();
 		let hash = this.readString();
 

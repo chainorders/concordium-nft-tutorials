@@ -45,13 +45,16 @@ function ConnectedContent(props: {
 						element={
 							<AddNftPage
 								provider={props.provider}
+								account={props.account}
 								marketContractAddress={props.marketContractAddress}
 							/>
 						}
 					/>
 					<Route
 						path="/mint"
-						element={<MintNftPage provider={props.provider} />}
+						element={
+							<MintNftPage provider={props.provider} account={props.account} />
+						}
 					/>
 				</Routes>
 				<Paper

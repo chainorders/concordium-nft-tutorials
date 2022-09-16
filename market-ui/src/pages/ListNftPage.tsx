@@ -3,8 +3,8 @@ import { ContractAddress } from "@concordium/web-sdk";
 import { useEffect, useState } from "react";
 
 import NftList from "../components/NftList";
-import { TokenListItem } from "../models/TokenListItem";
-import { listTokens } from "../models/Utils";
+import { list } from "../models/MarketplaceClient";
+import { TokenListItem } from "../models/MarketplaceTypes";
 
 function ListNftPage(props: {
 	provider: WalletApi;
@@ -14,7 +14,7 @@ function ListNftPage(props: {
 	let [state, setState] = useState<{ tokens: TokenListItem[] }>({ tokens: [] });
 
 	useEffect(() => {
-		listTokens(props.provider, props.marketContractAddress).then((tokens) =>
+		list(props.provider, props.marketContractAddress).then((tokens) =>
 			setState({ ...state, tokens })
 		);
 	}, [props.account]);
@@ -25,8 +25,9 @@ function ListNftPage(props: {
 			<div>
 				<NftList
 					provider={props.provider as WalletApi}
-					tokens={state.tokens}
 					marketContractAddress={props.marketContractAddress}
+					account={props.account}
+					tokens={state.tokens}
 				/>
 			</div>
 		</>

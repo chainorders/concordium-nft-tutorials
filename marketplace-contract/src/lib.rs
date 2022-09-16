@@ -108,10 +108,6 @@ fn transfer<S: HasStateApi>(
         bail!(MarketplaceError::TokenNotListed)
     };
 
-    // host.state_mut()
-    //     .transfer_token(params.token_id, params.nft_contract_address, params.price)
-    //     .ok_or(MarketplaceError::StateInsertTokenError)?;
-
     ContractResult::Ok(())
 }
 

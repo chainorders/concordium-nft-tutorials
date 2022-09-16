@@ -3,9 +3,10 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Paper, TextField, Typography, Button } from "@mui/material";
 
-import { getInstanceInfo, ensureSupportsCis2 } from "../models/Utils";
+import { getInstanceInfo } from "../models/Utils";
+import { ensureSupportsCis2 } from "../models/Cis2Client";
 
-function FindNftCollection(props: {
+function Cis2FindInstance(props: {
 	provider: WalletApi;
 	onDone: (address: ContractAddress) => void;
 }) {
@@ -89,4 +90,4 @@ function FindNftCollection(props: {
 	);
 }
 
-export default FindNftCollection;
+export default Cis2FindInstance;

@@ -1,8 +1,6 @@
-import { AccountAddress, ContractAddress } from "@concordium/web-sdk";
 import { Buffer } from "buffer/";
 
-import { Address } from "./Cis2Types";
-export class ConcordiumDeserializer {
+export class GenericDeserializer {
 	private buffer: Buffer;
 	private counter: number;
 
@@ -33,39 +31,8 @@ export class ConcordiumDeserializer {
 		return ret;
 	}
 
-	readAddress(): Address {
-		let addressType = this.readEnumType();
-
-		let ret: Address;
-		switch (addressType) {
-			case 0:
-				ret = this.readAccountAddress();
-				break;
-			case 1:
-				ret = this.readContractAddress();
-				break;
-			default:
-				throw Error("invalid address type:" + addressType);
-		}
-
-		return ret;
-	}
-
-	readEnumType() {
+	readEnumType(): number {
 		return this.readUInt8();
-	}
-
-	readContractAddress(): ContractAddress {
-		let index = this.readUBigInt();
-		let subindex = this.readUBigInt();
-
-		return { index, subindex };
-	}
-
-	readAccountAddress(): string {
-		let ret = this.readBytes(32);
-
-		return AccountAddress.fromBytes(ret).address;
 	}
 
 	readString(): string {
@@ -73,14 +40,14 @@ export class ConcordiumDeserializer {
 		return this.readBytes(size).toString("utf8");
 	}
 
-	readUInt8() {
+	readUInt8(): number {
 		let ret = this.buffer.readUInt8(this.counter);
 		this.counter++;
 
 		return ret;
 	}
 
-	readUInt16() {
+	readUInt16(): number {
 		const ret = this.buffer.readUInt16LE(this.counter);
 		this.counter += 2;
 
@@ -102,11 +69,11 @@ export class ConcordiumDeserializer {
 		return this.readByte() === 1;
 	}
 
-	readByte() {
+	readByte(): number {
 		return this.readBytes(1)[0];
 	}
 
-	readBytes(bytesLength: number) {
+	readBytes(bytesLength: number): Buffer {
 		let ret = this.buffer.subarray(this.counter, this.counter + bytesLength);
 		this.counter += bytesLength;
 

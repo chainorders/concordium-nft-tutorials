@@ -1,10 +1,10 @@
-import { AddressAccount, ContractAddress } from "@concordium/web-sdk";
+import { ContractAddress } from "@concordium/web-sdk";
 
 export type TokenIdU32 = number;
 export type Address = string | ContractAddress;
 export type ContractTokenId = string;
 export type OperatorOfQueryResponse = boolean[];
-export interface TokenMetadata {
+export interface MetadataUrl {
 	url: string;
 	hash: string;
 }
@@ -47,3 +47,20 @@ export interface BalanceOfQueryParams<T extends IsTokenId> {
 }
 export type ContractBalanceOfQueryParams =
 	BalanceOfQueryParams<ContractTokenId>;
+
+	export interface Metadata {
+		name: string;
+		description: string;
+		display: Display;
+		attributes: Attribute[];
+	}
+	
+	export interface Display {
+		url: string;
+	}
+	
+	export interface Attribute {
+		name: string;
+		type: string;
+		value: string;
+	}
