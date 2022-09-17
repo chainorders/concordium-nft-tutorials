@@ -48,19 +48,19 @@ export interface BalanceOfQueryParams<T extends IsTokenId> {
 export type ContractBalanceOfQueryParams =
 	BalanceOfQueryParams<ContractTokenId>;
 
-	export interface Metadata {
-		name: string;
-		description: string;
-		display: Display;
-		attributes: Attribute[];
-	}
-	
-	export interface Display {
-		url: string;
-	}
-	
-	export interface Attribute {
-		name: string;
-		type: string;
-		value: string;
-	}
+export interface Metadata {
+	name: string;
+	description: string;
+	display: Display;
+	attributes: Attribute[];
+}
+
+export interface Display {
+	url: string;
+}
+
+export interface Attribute {
+	name: string;
+	type: string;
+	value: string;
+}

@@ -13,8 +13,8 @@ function NftList(props: {
 	account: string;
 }) {
 	return (
-		<Container>
-			<ImageList sx={{ width: 500 }} key="nft-image-list">
+		<Container maxWidth={"sm"}>
+			<ImageList key="nft-image-list">
 				{props.tokens.map((t) => (
 					<NftListItem
 						provider={props.provider}

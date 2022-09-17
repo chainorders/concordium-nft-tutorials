@@ -9,7 +9,6 @@ import {
 } from "./Cis2Types";
 
 export class Cis2Deserializer extends ConcordiumDeserializer {
-
 	readTokenId(): string {
 		let tokenByteSize = this.readUInt8();
 		const tokenId = this.readBytes(tokenByteSize).toString("hex");
@@ -55,7 +54,7 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 	}
 
 	readBalanceOfQueryResponse(): ContractBalanceOfQueryResponse {
-		return this.readVector(this.readTokenAmount, 2)
+		return this.readVector(this.readTokenAmount, 2);
 	}
 
 	readTokenAmount(): ContractTokenAmount {

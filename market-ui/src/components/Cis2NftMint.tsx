@@ -5,7 +5,6 @@ import { ContractAddress } from "@concordium/web-sdk";
 
 import { isValidTokenId, mintNft } from "../models/Cis2Client";
 import { MetadataUrl } from "../models/Cis2Types";
-import { ensureValidOutcome } from "../models/Utils";
 import Cis2MetadataDisplay from "./Cis2MetadataDisplay";
 
 function Cis2NftMint(props: {
@@ -40,7 +39,6 @@ function Cis2NftMint(props: {
 			props.metadata,
 			props.nftContractAddress
 		)
-			.then((o) => ensureValidOutcome(o))
 			.then((_) => {
 				setState({ ...state, error: "", checking: false });
 				props.onDone(state.tokenId as string);

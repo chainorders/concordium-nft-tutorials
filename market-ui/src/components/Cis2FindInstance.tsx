@@ -3,8 +3,8 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Paper, TextField, Typography, Button } from "@mui/material";
 
-import { getInstanceInfo } from "../models/Utils";
 import { ensureSupportsCis2 } from "../models/Cis2Client";
+import { getInstanceInfo } from "../models/ConcordiumContractClient";
 
 function Cis2FindInstance(props: {
 	provider: WalletApi;

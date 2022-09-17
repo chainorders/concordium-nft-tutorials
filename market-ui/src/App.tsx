@@ -1,12 +1,18 @@
 import "./App.css";
 
 import { useEffect, useState } from "react";
-import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import {
+	detectConcordiumProvider,
+	WalletApi,
+} from "@concordium/browser-wallet-api-helpers";
+import {
+	AppBar,
 	BottomNavigation,
 	BottomNavigationAction,
+	Box,
 	Button,
 	Paper,
+	Toolbar,
 	Typography,
 } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
@@ -16,9 +22,9 @@ import ListNftPage from "./pages/ListNftPage";
 import AddNftPage from "./pages/AddNftPage";
 import MintNftPage from "./pages/MintNftPage";
 
-import { connectWallet, getProvider } from "./models/Utils";
 import { ContractAddress } from "@concordium/web-sdk";
 import { MARKET_CONTRACT_ADDRESS } from "./Constants";
+import { Container, margin } from "@mui/system";
 
 function ConnectedContent(props: {
 	marketContractAddress: ContractAddress;
@@ -27,7 +33,6 @@ function ConnectedContent(props: {
 }) {
 	return (
 		<>
-			<h1>Concordium NFT Marketplace</h1>
 			<div className="App">
 				<Routes>
 					<Route
@@ -57,31 +62,6 @@ function ConnectedContent(props: {
 						}
 					/>
 				</Routes>
-				<Paper
-					sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
-					elevation={3}
-				>
-					<BottomNavigation showLabels>
-						<BottomNavigationAction
-							label="Add"
-							icon={<AddIcon />}
-							title="Adds a NFT to Marketplace Listing"
-							href="/add"
-						/>
-						<BottomNavigationAction
-							label="Mint"
-							icon={<AddIcon />}
-							title="Mints An NFT"
-							href="/mint"
-						/>
-						<BottomNavigationAction
-							label="List"
-							icon={<AddIcon />}
-							title="NFT's List"
-							href="/"
-						/>
-					</BottomNavigation>
-				</Paper>
 			</div>
 		</>
 	);
@@ -94,11 +74,24 @@ function App() {
 	}>({});
 
 	function connect() {
-		getProvider().then((provider) => {
-			connectWallet(provider).then((account) =>
-				setState({ ...state, provider, account })
-			);
-		});
+		detectConcordiumProvider()
+			.then((provider) => {
+				provider
+					.getMostRecentlySelectedAccount()
+					.then((account) =>
+						!!account ? Promise.resolve(account) : provider.connect()
+					)
+					.then((account) => {
+						setState({ ...state, provider, account });
+					})
+					.catch((_) => {
+						alert("Please allow wallet connection");
+					});
+			})
+			.catch((_) => {
+				console.error(`could not find provider`);
+				alert("Please download Concordium Wallet");
+			});
 	}
 
 	useEffect(() => {
@@ -109,23 +102,66 @@ function App() {
 		connect();
 	}, [state]);
 
-	if (state.provider && state.account) {
-		return (
-			<ConnectedContent
-				provider={state.provider}
-				account={state.account}
-				marketContractAddress={MARKET_CONTRACT_ADDRESS}
-			/>
-		);
+	function isConnected() {
+		return !!state.provider && !!state.account;
 	}
 
 	return (
-		<>
-			<h1>Concordium NFT Marketplace</h1>
-			<Button onClick={() => connect()}>
-				<Typography>Connect Wallet</Typography>
-			</Button>
-		</>
+		<Container>
+			<AppBar position="static">
+				<Toolbar>
+					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+						Concordium Nft Marketplace
+					</Typography>
+				</Toolbar>
+			</AppBar>
+
+			{isConnected() ? (
+				<ConnectedContent
+					provider={state.provider as WalletApi}
+					account={state.account as string}
+					marketContractAddress={MARKET_CONTRACT_ADDRESS}
+				/>
+			) : (
+				<Box
+					sx={{
+						display: "flex",
+						flexDirection: { xs: "column", md: "row" },
+						alignItems: "center",
+						justifyContent: "center",
+					}}
+				>
+					<Button onClick={() => connect()} sx={{ display: "flex" }}>
+						<Typography>Connect Wallet</Typography>
+					</Button>
+				</Box>
+			)}
+			<Paper
+				sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
+				elevation={3}
+			>
+				<BottomNavigation showLabels>
+					<BottomNavigationAction
+						label="Add"
+						icon={<AddIcon />}
+						title="Adds a NFT to Marketplace Listing"
+						href="/add"
+					/>
+					<BottomNavigationAction
+						label="Mint"
+						icon={<AddIcon />}
+						title="Mints An NFT"
+						href="/mint"
+					/>
+					<BottomNavigationAction
+						label="List"
+						icon={<AddIcon />}
+						title="NFT's List"
+						href="/"
+					/>
+				</BottomNavigation>
+			</Paper>
+		</Container>
 	);
 }
 

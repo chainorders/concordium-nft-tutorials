@@ -7,11 +7,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
-import {
-	ensureValidOutcome,
-	fetchJson,
-	toLocalstorageKey,
-} from "../models/Utils";
+import { fetchJson, toLocalstorageKey } from "../models/Utils";
 import { TokenListItem } from "../models/MarketplaceTypes";
 import { getTokenMetadata } from "../models/Cis2Client";
 import { transfer } from "../models/MarketplaceClient";
@@ -43,7 +39,6 @@ function NftListItem(props: {
 			item.tokenId,
 			item.price
 		)
-			.then((o) => ensureValidOutcome(o))
 			.then((_) => {
 				setState({
 					...state,
@@ -86,6 +81,7 @@ function NftListItem(props: {
 
 	return (
 		<ImageListItem
+			sx={{ display: state.isBought ? "none" : "" }}
 			key={item.tokenId + item.contract.index + item.contract.subindex}
 		>
 			<img src={state.url} srcSet={state.url} alt={state.name} loading="lazy" />

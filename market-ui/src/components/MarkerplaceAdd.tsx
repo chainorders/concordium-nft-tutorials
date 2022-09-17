@@ -4,7 +4,6 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
 import { add } from "../models/MarketplaceClient";
-import { ensureValidOutcome } from "../models/Utils";
 
 function MarkerplaceAdd(props: {
 	provider: WalletApi;
@@ -38,7 +37,6 @@ function MarkerplaceAdd(props: {
 			props.nftContractAddress,
 			parseInt(state.price)
 		)
-			.then((outcomes) => ensureValidOutcome(outcomes))
 			.then(() => {
 				setState({ ...state, error: "", adding: false });
 				props.onDone();
