@@ -8,6 +8,9 @@ import {
 	MetadataUrl,
 } from "./Cis2Types";
 
+/**
+ * Handles Deserialization of CIS2 types from underlying Buffer.
+ */
 export class Cis2Deserializer extends ConcordiumDeserializer {
 	readTokenId(): string {
 		let tokenByteSize = this.readUInt8();

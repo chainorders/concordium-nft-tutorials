@@ -1,7 +1,14 @@
 import { Buffer } from "buffer/";
 
+/**
+ * Handles deserialization from the underlying buffer. 
+ */
 export class GenericDeserializer {
 	private buffer: Buffer;
+
+	/**
+	 * Counter of how many bytes have been read from the input buffer.
+	 */
 	private counter: number;
 
 	constructor(buffer: Buffer) {

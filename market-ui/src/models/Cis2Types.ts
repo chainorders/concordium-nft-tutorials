@@ -8,7 +8,6 @@ export interface MetadataUrl {
 	url: string;
 	hash: string;
 }
-
 export interface SupportResult {
 	type: "NoSupport" | "Support" | "SupportBy";
 	supportBy?: ContractAddress[];

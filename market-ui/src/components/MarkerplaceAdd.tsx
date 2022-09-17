@@ -35,7 +35,7 @@ function MarkerplaceAdd(props: {
 			props.tokenId,
 			props.marketContractAddress,
 			props.nftContractAddress,
-			parseInt(state.price)
+			BigInt(state.price)
 		)
 			.then(() => {
 				setState({ ...state, error: "", adding: false });

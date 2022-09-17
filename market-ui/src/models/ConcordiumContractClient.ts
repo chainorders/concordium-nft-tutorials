@@ -3,7 +3,6 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import {
 	ContractAddress,
 	AccountAddress,
-	GtuAmount,
 	AccountTransactionType,
 	UpdateContractPayload,
 	serializeUpdateContractParameters,
@@ -13,10 +12,20 @@ import {
 	InstanceInfo,
 	TransactionStatusEnum,
 	TransactionSummary,
+	GtuAmount,
 } from "@concordium/web-sdk";
 
-import { toGtu } from "./Utils";
-
+/**
+ * Initializes a Smart Contract.
+ * @param provider Wallet Provider.
+ * @param moduleRef Contract Module Reference. Hash of the Deployed Conctract Module.
+ * @param schemaBuffer Buffer of Contract Schema.
+ * @param contractName Name of the Contract.
+ * @param account Account to Initialize the contract with.
+ * @param maxContractExecutionEnergy Maximum energy allowed to execute.
+ * @param ccdAmount CCD Amount to initialize the contract with.
+ * @returns Contract Address.
+ */
 export async function initContract(
 	provider: WalletApi,
 	moduleRef: ModuleReference,
@@ -24,8 +33,8 @@ export async function initContract(
 	contractName: string,
 	account: string,
 	maxContractExecutionEnergy = BigInt(9999),
-	amount = toGtu(BigInt(0))
-) {
+	ccdAmount = BigInt(0)
+): Promise<ContractAddress> {
 	let txnHash = await provider.sendTransaction(
 		account,
 		AccountTransactionType.InitializeSmartContractInstance,
@@ -34,7 +43,7 @@ export async function initContract(
 			maxContractExecutionEnergy,
 			contractName,
 			parameter: Buffer.from([]),
-			amount,
+			amount: toGtu(ccdAmount),
 		} as InitContractPayload,
 		{},
 		schemaBuffer.toString("base64"),
@@ -42,9 +51,21 @@ export async function initContract(
 	);
 
 	let outcomes = await waitForTransaction(provider, txnHash);
-	return ensureValidOutcome(outcomes);
+	outcomes = ensureValidOutcome(outcomes);
+	return parseContractAddress(outcomes);
 }
 
+/**
+ * Invokes a Smart Contract.
+ * @param provider Wallet Provider.
+ * @param schema Buffer of Contract Schema.
+ * @param contractName Name of the Contract.
+ * @param contract Contract Address.
+ * @param methodName Contract Method name to Call.
+ * @param params Parameters to call the Contract Method with.
+ * @param invoker Invoker Account.
+ * @returns Buffer of the return value.
+ */
 export async function invokeContract<T>(
 	provider: WalletApi,
 	schema: Buffer,
@@ -53,7 +74,7 @@ export async function invokeContract<T>(
 	methodName: string,
 	params?: T,
 	invoker?: ContractAddress | AccountAddress
-) {
+): Promise<Buffer> {
 	const parameter = !!params
 		? serializeParams(contractName, schema, methodName, params)
 		: undefined;
@@ -83,6 +104,19 @@ export async function invokeContract<T>(
 	return Buffer.from(res.returnValue, "hex");
 }
 
+/**
+ * Updates a Smart Contract.
+ * @param provider Wallet Provider.
+ * @param contractName Name of the Contract.
+ * @param schema Buffer of Contract Schema.
+ * @param paramJson Parameters to call the Contract Method with.
+ * @param account  Account to Update the contract with.
+ * @param contractAddress Contract Address.
+ * @param methodName Contract Method name to Call.
+ * @param maxContractExecutionEnergy Maximum energy allowed to execute.
+ * @param amount CCD Amount to update the contract with.
+ * @returns Update contract Outcomes.
+ */
 export async function updateContract<T>(
 	provider: WalletApi,
 	contractName: string,
@@ -92,8 +126,8 @@ export async function updateContract<T>(
 	contractAddress: ContractAddress,
 	methodName: string,
 	maxContractExecutionEnergy: bigint = BigInt(9999),
-	amount: GtuAmount = toGtu(BigInt(0))
-) {
+	amount: bigint = BigInt(0)
+): Promise<Record<string, TransactionSummary>> {
 	const parameter = serializeParams(
 		contractName,
 		schema,
@@ -107,7 +141,7 @@ export async function updateContract<T>(
 			maxContractExecutionEnergy,
 			contractAddress,
 			parameter,
-			amount,
+			amount: toGtu(amount),
 			receiveName: `${contractName}.${methodName}`,
 		} as UpdateContractPayload,
 		paramJson as any,
@@ -120,6 +154,12 @@ export async function updateContract<T>(
 	return ensureValidOutcome(outcomes);
 }
 
+/**
+ * Gets Information about a Smart Contract Instance.
+ * @param provider Wallet Provider.
+ * @param address Contract Address.
+ * @returns Smart Contract instance information.
+ */
 export async function getInstanceInfo(
 	provider: WalletApi,
 	address: ContractAddress
@@ -135,6 +175,12 @@ export async function getInstanceInfo(
 	return instanceInfo;
 }
 
+/**
+ * Waits for the input transaction to Finalize.
+ * @param provider Wallet Provider.
+ * @param txnhash Hash of Transaction.
+ * @returns Transaction outcomes.
+ */
 function waitForTransaction(
 	provider: WalletApi,
 	txnhash: string
@@ -142,6 +188,52 @@ function waitForTransaction(
 	return new Promise((res, rej) => {
 		_wait(provider, txnhash, res, rej);
 	});
+}
+
+function ensureValidOutcome(
+	outcomes?: Record<string, TransactionSummary>
+): Record<string, TransactionSummary> {
+	if (!outcomes) {
+		throw Error("Null Outcome");
+	}
+
+	let successTxnSummary = Object.keys(outcomes)
+		.map((k) => outcomes[k])
+		.find((s) => s.result.outcome === "success");
+
+	if (!successTxnSummary) {
+		let failures = Object.keys(outcomes)
+			.map((k) => outcomes[k])
+			.filter((s) => s.result.outcome === "reject")
+			.map((s) => (s.result as any).rejectReason.tag)
+			.join(",");
+		throw Error(`Transaction failed, reasons: ${failures}`);
+	}
+
+	return outcomes;
+}
+
+/**
+ * Uses Contract Schema to serialize the contract parameters.
+ * @param contractName Name of the Contract.
+ * @param schema  Buffer of Contract Schema.
+ * @param methodName Contract method name.
+ * @param params Contract Method params in JSON.
+ * @returns Serialize buffer of the input params.
+ */
+function serializeParams<T>(
+	contractName: string,
+	schema: Buffer,
+	methodName: string,
+	params: T
+) {
+	return serializeUpdateContractParameters(
+		contractName,
+		methodName,
+		params,
+		schema,
+		SchemaVersion.V2
+	);
 }
 
 function _wait(
@@ -170,40 +262,32 @@ function _wait(
 	}, 1000);
 }
 
-function ensureValidOutcome(
-	outcomes?: Record<string, TransactionSummary>
-): Record<string, TransactionSummary> {
-	if (!outcomes) {
-		throw Error("Null Outcome");
+function parseContractAddress(
+	outcomes: Record<string, TransactionSummary>
+): ContractAddress {
+	for (const blockHash in outcomes) {
+		const res = outcomes[blockHash];
+
+		if (res.result.outcome === "success") {
+			for (const event of res.result.events) {
+				if (event.tag === "ContractInitialized") {
+					return {
+						index: toBigInt((event as any).address.index),
+						subindex: toBigInt((event as any).address.subindex),
+					};
+				}
+			}
+		}
 	}
 
-	let successTxnSummary = Object.keys(outcomes)
-		.map((k) => outcomes[k])
-		.find((s) => s.result.outcome === "success");
-
-	if (!successTxnSummary) {
-		let failures = Object.keys(outcomes)
-			.map((k) => outcomes[k])
-			.filter((s) => s.result.outcome === "reject")
-			.map((s) => (s.result as any).rejectReason.tag)
-			.join(",");
-		throw Error(`Transaction failed, reasons: ${failures}`);
-	}
-
-	return outcomes;
+	throw Error(`unable to parse Contract Address from input outcomes`);
 }
 
-function serializeParams<T>(
-	contractName: string,
-	schema: Buffer,
-	methodName: string,
-	params: T
-) {
-	return serializeUpdateContractParameters(
-		contractName,
-		methodName,
-		params,
-		schema,
-		SchemaVersion.V2
-	);
+function toBigInt(num: BigInt | number): bigint {
+	return BigInt(num.toString(10));
+}
+
+const MICROCCD_IN_CCD = 1000000;
+function toGtu(ccdAmount: bigint): GtuAmount {
+	return new GtuAmount(ccdAmount * BigInt(MICROCCD_IN_CCD));
 }

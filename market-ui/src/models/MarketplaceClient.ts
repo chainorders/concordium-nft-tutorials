@@ -1,10 +1,9 @@
 import { Buffer } from "buffer/";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
-import { ContractAddress } from "@concordium/web-sdk";
+import { ContractAddress, TransactionSummary } from "@concordium/web-sdk";
 
 import { MarketplaceDeserializer } from "./MarketplaceDesrializer";
 import { TokenList } from "./MarketplaceTypes";
-import { toGtu } from "./Utils";
 import { MARKET_CONTRACT_SCHEMA } from "../Constants";
 import { invokeContract, updateContract } from "./ConcordiumContractClient";
 
@@ -16,6 +15,12 @@ const enum MethodNames {
 	list = "list",
 }
 
+/**
+ * Gets a list of Tokens available to buy.
+ * @param provider Wallet Provider.
+ * @param marketContractAddress Contract Address.
+ * @returns List of buyable tokens.
+ */
 export async function list(
 	provider: WalletApi,
 	marketContractAddress: ContractAddress
@@ -30,15 +35,26 @@ export async function list(
 	return new MarketplaceDeserializer(retValue).readTokenList();
 }
 
+/**
+ * Adds a token to buyable list of tokens in marketplace.
+ * @param provider Wallet Provider.
+ * @param account Account address.
+ * @param tokenId Token id.
+ * @param marketContractAddress Market place contract Address.
+ * @param nftContractAddress CIS2-NFT contract address.
+ * @param price Selling Price of the Token.
+ * @param maxContractExecutionEnergy Max energy allowed for the transaction.
+ * @returns Transaction outcomes.
+ */
 export async function add(
 	provider: WalletApi,
 	account: string,
 	tokenId: string,
 	marketContractAddress: ContractAddress,
 	nftContractAddress: ContractAddress,
-	price: number,
+	price: bigint,
 	maxContractExecutionEnergy = BigInt(9999)
-) {
+): Promise<Record<string, TransactionSummary>> {
 	const paramJson = {
 		nft_contract_address: {
 			index: nftContractAddress.index.toString(),
@@ -59,6 +75,17 @@ export async function add(
 	);
 }
 
+/**
+ * Transfers token ownership from the current owner to {@link account}.
+ * @param provider Wallet Provider.
+ * @param account Account address buying the token.
+ * @param marketContractAddress Market contract address.
+ * @param nftContractAddress CIS-NFT contract address.
+ * @param tokenId Hex encoded Token Id
+ * @param priceCcd Price of the Token
+ * @param maxContractExecutionEnergy Max Energy allowed for the transaction.
+ * @returns Transaction outcomes.
+ */
 export async function transfer(
 	provider: WalletApi,
 	account: string,
@@ -67,7 +94,7 @@ export async function transfer(
 	tokenId: string,
 	priceCcd: bigint,
 	maxContractExecutionEnergy = BigInt(6000)
-) {
+): Promise<Record<string, TransactionSummary>> {
 	const paramJson = {
 		nft_contract_address: {
 			index: nftContractAddress.index.toString(),
@@ -86,6 +113,6 @@ export async function transfer(
 		marketContractAddress,
 		MethodNames.transfer,
 		maxContractExecutionEnergy,
-		toGtu(priceCcd)
+		priceCcd
 	);
 }

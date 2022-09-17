@@ -3,6 +3,9 @@ import { AccountAddress, ContractAddress } from "@concordium/web-sdk";
 import { Address } from "./Cis2Types";
 import { GenericDeserializer } from "./GenericDeserializer";
 
+/**
+ * Handles reading General Concordium Smart Contract types from Underlying Schema.
+ */
 export class ConcordiumDeserializer extends GenericDeserializer {
 	readAddress(): Address {
 		let addressType = this.readEnumType();
