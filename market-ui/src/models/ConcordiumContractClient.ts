@@ -178,15 +178,15 @@ export async function getInstanceInfo(
 /**
  * Waits for the input transaction to Finalize.
  * @param provider Wallet Provider.
- * @param txnhash Hash of Transaction.
+ * @param txnHash Hash of Transaction.
  * @returns Transaction outcomes.
  */
 function waitForTransaction(
 	provider: WalletApi,
-	txnhash: string
+	txnHash: string
 ): Promise<Record<string, TransactionSummary> | undefined> {
 	return new Promise((res, rej) => {
-		_wait(provider, txnhash, res, rej);
+		_wait(provider, txnHash, res, rej);
 	});
 }
 
@@ -238,25 +238,25 @@ function serializeParams<T>(
 
 function _wait(
 	provider: WalletApi,
-	txnhash: string,
+	txnHash: string,
 	res: (p: Record<string, TransactionSummary> | undefined) => void,
 	rej: (reason: any) => void
 ) {
 	setTimeout(() => {
 		provider
 			.getJsonRpcClient()
-			.getTransactionStatus(txnhash)
+			.getTransactionStatus(txnHash)
 			.then((txnStatus) => {
 				if (!txnStatus) {
 					return rej("Transaction Status is null");
 				}
 
-				console.info(`txn : ${txnhash}, status: ${txnStatus?.status}`);
+				console.info(`txn : ${txnHash}, status: ${txnStatus?.status}`);
 				if (txnStatus?.status === TransactionStatusEnum.Finalized) {
 					return res(txnStatus.outcomes);
 				}
 
-				_wait(provider, txnhash, res, rej);
+				_wait(provider, txnHash, res, rej);
 			})
 			.catch((err) => rej(err));
 	}, 1000);

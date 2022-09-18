@@ -28,7 +28,6 @@ function Cis2BalanceOf(props: {
 			state.tokenId
 		)
 			.then((balance) => {
-				console.log(`balance: ${balance}`);
 				if (balance > 0) {
 					setState({ ...state, checking: false, error: "" });
 					props.onDone(state.tokenId, balance);

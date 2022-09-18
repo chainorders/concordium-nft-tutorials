@@ -12,8 +12,9 @@ import { TokenListItem } from "../models/MarketplaceTypes";
 import { getTokenMetadata } from "../models/Cis2Client";
 import { transfer } from "../models/MarketplaceClient";
 import { Metadata } from "../models/Cis2Types";
+import Nft from "./Nft";
 
-function NftListItem(props: {
+function MarketplaceTransfer(props: {
 	item: TokenListItem;
 	provider: WalletApi;
 	account: string;
@@ -45,7 +46,7 @@ function NftListItem(props: {
 					isBought: true,
 				});
 
-				console.log("bought nft : " + item.tokenId.toString());
+				console.info("bought nft : " + item.tokenId.toString());
 			})
 			.catch((err) => {
 				console.error(err);
@@ -84,7 +85,13 @@ function NftListItem(props: {
 			sx={{ display: state.isBought ? "none" : "" }}
 			key={item.tokenId + item.contract.index + item.contract.subindex}
 		>
-			<img src={state.url} srcSet={state.url} alt={state.name} loading="lazy" />
+			{/* <img src={state.url} srcSet={state.url} alt={state.name} loading="lazy" /> */}
+			<Nft
+				provider={props.provider}
+				account={props.account}
+				contractAddress={item.contract}
+				tokenId={item.tokenId}
+			/>
 			<ImageListItemBar
 				title={`Cost: ${state.price} CCD`}
 				subtitle={state.desc}
@@ -102,4 +109,4 @@ function NftListItem(props: {
 	);
 }
 
-export default NftListItem;
+export default MarketplaceTransfer;

@@ -3,20 +3,30 @@ import ImageList from "@mui/material/ImageList";
 import Container from "@mui/material/Container";
 import { ContractAddress } from "@concordium/web-sdk";
 
-import NftListItem from "./NftListItem";
-import { TokenListItem } from "../models/MarketplaceTypes";
+import { useState, useEffect } from "react";
 
-function NftList(props: {
+import MarketplaceTransfer from "./MarketplaceTransfer";
+import { TokenListItem } from "../models/MarketplaceTypes";
+import { list } from "../models/MarketplaceClient";
+
+function MarketplaceList(props: {
 	marketContractAddress: ContractAddress;
-	tokens: TokenListItem[];
 	provider: WalletApi;
 	account: string;
 }) {
+	let [state, setState] = useState<{ tokens: TokenListItem[] }>({ tokens: [] });
+
+	useEffect(() => {
+		list(props.provider, props.marketContractAddress).then((tokens) =>
+			setState({ ...state, tokens })
+		);
+	}, [props.account]);
+
 	return (
 		<Container maxWidth={"sm"}>
 			<ImageList key="nft-image-list">
-				{props.tokens.map((t) => (
-					<NftListItem
+				{state.tokens.map((t) => (
+					<MarketplaceTransfer
 						provider={props.provider}
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
@@ -29,4 +39,4 @@ function NftList(props: {
 	);
 }
 
-export default NftList;
+export default MarketplaceList;

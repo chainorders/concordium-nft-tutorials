@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
+import { Container } from "@mui/system";
 
 import ListNftPage from "./pages/ListNftPage";
 import AddNftPage from "./pages/AddNftPage";
@@ -24,7 +25,6 @@ import MintNftPage from "./pages/MintNftPage";
 
 import { ContractAddress } from "@concordium/web-sdk";
 import { MARKET_CONTRACT_ADDRESS } from "./Constants";
-import { Container, margin } from "@mui/system";
 
 function ConnectedContent(props: {
 	marketContractAddress: ContractAddress;
@@ -87,6 +87,15 @@ function App() {
 					.catch((_) => {
 						alert("Please allow wallet connection");
 					});
+				provider.on("accountDisconnected", () => {
+					setState({ ...state, account: undefined });
+				});
+				provider.on("accountChanged", (account) => {
+					setState({ ...state, account });
+				});
+				provider.on("chainChanged", () => {
+					setState({ ...state, account: undefined, provider: undefined });
+				});
 			})
 			.catch((_) => {
 				console.error(`could not find provider`);
@@ -100,7 +109,10 @@ function App() {
 		}
 
 		connect();
-	}, [state]);
+		return () => {
+			state.provider?.removeAllListeners();
+		};
+	}, [state.account]);
 
 	function isConnected() {
 		return !!state.provider && !!state.account;
@@ -113,6 +125,7 @@ function App() {
 					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 						Concordium Nft Marketplace
 					</Typography>
+					<Typography>Account : {state.account}</Typography>
 				</Toolbar>
 			</AppBar>
 
