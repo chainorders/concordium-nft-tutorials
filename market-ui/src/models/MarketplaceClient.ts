@@ -2,7 +2,7 @@ import { Buffer } from "buffer/";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress, TransactionSummary } from "@concordium/web-sdk";
 
-import { MarketplaceDeserializer } from "./MarketplaceDesrializer";
+import { MarketplaceDeserializer } from "./MarketplaceDeserializer";
 import { TokenList } from "./MarketplaceTypes";
 import { MARKET_CONTRACT_SCHEMA } from "../Constants";
 import { invokeContract, updateContract } from "./ConcordiumContractClient";

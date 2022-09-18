@@ -9,7 +9,7 @@ import Cis2BalanceOf from "../components/Cis2BalanceOf";
 import Cis2OperatorOf from "../components/Cis2OperatorOf";
 import Cis2UpdateOperator from "../components/Cis2UpdateOperator";
 import Cis2FindInstance from "../components/Cis2FindInstance";
-import MarkerplaceAdd from "../components/MarkerplaceAdd";
+import MarkerplaceAdd from "../components/MarketplaceAdd";
 
 enum Steps {
 	FindCollection,
