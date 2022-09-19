@@ -18,6 +18,7 @@ import { Buffer } from "buffer/";
 import pkg from "fs-extra";
 import { DeployModuleArgs, InitContractArgs, UpdateContractArgs, ViewContractArgs } from "./node-client/types";
 import { writeFileSync } from "fs";
+import { ViewStateDeserializer } from "./models/viewStateDeserializer";
 const { readFileSync } = pkg;
 
 const cli = new commander.Command();
@@ -194,14 +195,8 @@ function setupCliInvokeContract(cli: commander.Command) {
     .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
     .action(async (args: ViewContractArgs) => {
       const contractState = await invokeContract(args);
-      console.log("Contract State : ", contractState);
-
-      const de = deserializeContractState(
-        args.contract,
-        Buffer.from(readFileSync(args.schema)),
-        Buffer.from(contractState, "hex"),
-      );
-      console.log(de);
+      const viewState = new ViewStateDeserializer(contractState).readViewState();
+      console.log(JSON.stringify(viewState, null, "\t"));
     });
 }
 setupCliInvokeContract(cli);
