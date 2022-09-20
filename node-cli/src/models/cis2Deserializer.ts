@@ -1,5 +1,5 @@
 import { ConcordiumDeserializer } from "./concordiumDeserializer";
-import { TokenMetadata } from "./types";
+import { TokenMetadata } from "./cis2Types";
 
 export class Cis2Deserializer extends ConcordiumDeserializer {
   readTokenId(): string {

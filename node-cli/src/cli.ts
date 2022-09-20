@@ -5,7 +5,6 @@ import {
   AccountTransactionType,
   decryptMobileWalletExport,
   DeployModulePayload,
-  deserializeContractState,
   GtuAmount,
   InitContractPayload,
   ModuleReference,
@@ -18,7 +17,8 @@ import { Buffer } from "buffer/";
 import pkg from "fs-extra";
 import { DeployModuleArgs, InitContractArgs, UpdateContractArgs, ViewContractArgs } from "./node-client/types";
 import { writeFileSync } from "fs";
-import { ViewStateDeserializer } from "./models/viewStateDeserializer";
+import { Cis2NftViewStateDeserializer } from "./models/cis2NftviewStateDeserializer";
+import { Cis2MultiViewStateDeserializer } from "./models/cis2MultiviewStateDeserializer";
 const { readFileSync } = pkg;
 
 const cli = new commander.Command();
@@ -196,8 +196,13 @@ function setupCliInvokeContract(cli: commander.Command) {
     .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
     .action(async (args: ViewContractArgs) => {
       const contractState = await invokeContract(args);
-      const viewState = new ViewStateDeserializer(contractState).readViewState();
-      console.log(JSON.stringify(viewState, null, "\t"));
+      if (args.contract === "CIS2-NFT") {
+        const viewState = new Cis2NftViewStateDeserializer(contractState).readViewState();
+        console.log(JSON.stringify(viewState, null, "\t"));
+      } else if (args.contract === "CIS2-Multi") {
+        const viewState = new Cis2MultiViewStateDeserializer(contractState).readViewState();
+        console.log(JSON.stringify(viewState, null, "\t"));
+      }
     });
 }
 setupCliInvokeContract(cli);
