@@ -94,10 +94,11 @@ function MarketplaceTransfer(props: {
 			/>
 			<ImageListItemBar
 				title={`Cost: ${state.price} CCD`}
+				position="below"
 				subtitle={state.desc}
 				actionIcon={
 					<IconButton
-						sx={{ color: "rgba(255, 255, 255, 0.54)" }}
+						sx={{ height: "100%" }}
 						aria-label={`info about ${item.tokenId}`}
 						onClick={() => buy(item)}
 					>

@@ -20,10 +20,13 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 	}
 
 	readTokenMetadata(): MetadataUrl {
+		this.readBytes(2);
 		let url = this.readString();
 		let hash = this.readString();
 
-		return { url, hash };
+		console.log("url", url);
+		console.log("hash", hash);
+		return { url, hash: "" };
 	}
 
 	readSupportsQueryResponse(): SupportsQueryResponse {

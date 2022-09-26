@@ -1,9 +1,8 @@
+import { useState, useEffect } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import ImageList from "@mui/material/ImageList";
 import Container from "@mui/material/Container";
 import { ContractAddress } from "@concordium/web-sdk";
-
-import { useState, useEffect } from "react";
 
 import MarketplaceTransfer from "./MarketplaceTransfer";
 import { TokenListItem } from "../models/MarketplaceTypes";

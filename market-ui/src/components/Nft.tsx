@@ -1,5 +1,6 @@
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
+import { Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getTokenMetadata } from "../models/Cis2Client";
 import { Metadata } from "../models/Cis2Types";
@@ -27,6 +28,10 @@ function Nft(props: {
 	);
 
 	useEffect(() => {
+		if(state.metadata) {
+			return;
+		}
+
 		setState({ ...state, loading: true });
 		let nftJson = localStorage.getItem(localStorageKey);
 		if (nftJson) {
@@ -51,7 +56,7 @@ function Nft(props: {
 	]);
 
 	return state.loading ? (
-		<p>Loading</p>
+		<Skeleton variant="rectangular" width={"100%"} height={"200px"}/>
 	) : (
 		<img
 			src={state.metadata?.display.url}

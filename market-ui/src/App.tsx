@@ -15,9 +15,11 @@ import {
 	Toolbar,
 	Typography,
 } from "@mui/material";
+import { Container } from "@mui/system";
 import { Route, Routes } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import { Container } from "@mui/system";
+import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import StoreIcon from '@mui/icons-material/Store';
 
 import ListNftPage from "./pages/ListNftPage";
 import AddNftPage from "./pages/AddNftPage";
@@ -129,51 +131,54 @@ function App() {
 				</Toolbar>
 			</AppBar>
 
-			{isConnected() ? (
-				<ConnectedContent
-					provider={state.provider as WalletApi}
-					account={state.account as string}
-					marketContractAddress={MARKET_CONTRACT_ADDRESS}
-				/>
-			) : (
-				<Box
-					sx={{
-						display: "flex",
-						flexDirection: { xs: "column", md: "row" },
-						alignItems: "center",
-						justifyContent: "center",
-					}}
+			<Box>
+				{isConnected() ? (
+					<ConnectedContent
+						provider={state.provider as WalletApi}
+						account={state.account as string}
+						marketContractAddress={MARKET_CONTRACT_ADDRESS}
+					/>
+				) : (
+					<Box
+						sx={{
+							display: "flex",
+							flexDirection: { xs: "column", md: "row" },
+							alignItems: "center",
+							justifyContent: "center",
+						}}
+					>
+						<Button onClick={() => connect()} sx={{ display: "flex" }}>
+							<Typography>Connect Wallet</Typography>
+						</Button>
+					</Box>
+				)}
+				<div style={{ height: "4em" }}></div>
+				<Paper
+					sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
+					elevation={3}
 				>
-					<Button onClick={() => connect()} sx={{ display: "flex" }}>
-						<Typography>Connect Wallet</Typography>
-					</Button>
-				</Box>
-			)}
-			<Paper
-				sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
-				elevation={3}
-			>
-				<BottomNavigation showLabels>
-					<BottomNavigationAction
-						label="Add"
-						icon={<AddIcon />}
-						title="Adds a NFT to Marketplace Listing"
-						href="/add"
-					/>
-					<BottomNavigationAction
-						label="Mint"
-						icon={<AddIcon />}
-						title="Mints An NFT"
-						href="/mint"
-					/>
-					<BottomNavigationAction
-						label="List"
-						icon={<AddIcon />}
-						title="NFT's List"
-						href="/"
-					/>
-				</BottomNavigation>
-			</Paper>
+					<BottomNavigation showLabels>
+						<BottomNavigationAction
+							label="Add"
+							icon={<AddIcon />}
+							title="Adds a NFT to Marketplace Listing"
+							href="/add"
+						/>
+						<BottomNavigationAction
+							label="Mint"
+							icon={<AddAPhotoIcon />}
+							title="Mints An NFT"
+							href="/mint"
+						/>
+						<BottomNavigationAction
+							label="Marketplace"
+							icon={<StoreIcon />}
+							title="NFT's List"
+							href="/"
+						/>
+					</BottomNavigation>
+				</Paper>
+			</Box>
 		</Container>
 	);
 }
