@@ -181,7 +181,7 @@ fn calculate_amounts(amount: &Amount, commission: &Commission) -> DistributableA
 
     DistributableAmounts {
         to_owner: amount.subtract_micro_ccd(commission_fraction.0.micro_ccd()),
-        to_marketplace: Amount { micro_ccd: 1 }
+        to_marketplace: Amount { micro_ccd: 0 }
             .add_micro_ccd(commission_fraction.0.micro_ccd())
             .add_micro_ccd(commission_fraction.1.micro_ccd()),
     }
@@ -378,32 +378,23 @@ mod test {
 
     #[test]
     fn callculate_commissions_test() {
-        let cases: Vec<u64> = (1..500).collect();
         let percentage_basis: u8 = 250;
+        let init_amount = Amount::from_ccd(11);
+        let distributable_amounts =
+            calculate_amounts(&init_amount, &Commission { percentage_basis });
 
-        for ele in cases {
-            let init_amount = Amount::from_ccd(ele);
-            let distributable_amounts =
-                calculate_amounts(&init_amount, &Commission { percentage_basis });
-
-            let cc = init_amount
-                .mul(u64::from(percentage_basis))
-                .quotient_remainder(10000)
-                .0;
-
-            unsafe {
-                claim_eq!(
-                    distributable_amounts.to_owner,
-                    Amount::from_ccd(ele).sub(cc)
-                );
-                claim_eq!(distributable_amounts.to_marketplace, cc);
-                claim_eq!(
-                    init_amount,
-                    Amount::from_ccd(0)
-                        .add_micro_ccd(distributable_amounts.to_owner.micro_ccd())
-                        .add_micro_ccd(distributable_amounts.to_marketplace.micro_ccd())
-                )
-            }
+        unsafe {
+            claim_eq!(
+                distributable_amounts.to_owner,
+                Amount::from_micro_ccd(10725000)
+            );
+            claim_eq!(distributable_amounts.to_marketplace, Amount::from_micro_ccd(275000));
+            claim_eq!(
+                init_amount,
+                Amount::from_ccd(0)
+                    .add_micro_ccd(distributable_amounts.to_owner.micro_ccd())
+                    .add_micro_ccd(distributable_amounts.to_marketplace.micro_ccd())
+            )
         }
     }
 }
