@@ -10,8 +10,8 @@ default = ["std"]
 std = ["concordium-std/std", "concordium-cis2/std"]
 
 [dependencies]
-concordium-std = { version = "*", default-features = false }
-concordium-cis2 = { version = "*", default-features = false }
+concordium-std = { version = "4.0.0", default-features = false }
+concordium-cis2 = { version = "1.1.0", default-features = false }
 hex = "*"
 
 [lib]

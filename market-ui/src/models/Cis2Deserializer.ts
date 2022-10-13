@@ -24,9 +24,7 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 		let url = this.readString();
 		let hash = this.readString();
 
-		console.log("url", url);
-		console.log("hash", hash);
-		return { url, hash: "" };
+		return { url, hash };
 	}
 
 	readSupportsQueryResponse(): SupportsQueryResponse {

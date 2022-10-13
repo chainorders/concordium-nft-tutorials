@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { TextField, Typography, Button } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
-import { ContractAddress } from "@concordium/web-sdk";
+import {
+	ContractAddress,
+	InvokeContractFailedResult,
+	RejectReasonTag,
+} from "@concordium/web-sdk";
 
-import { balanceOf } from "../models/Cis2Client";
+import { balanceOf, isValidTokenId } from "../models/Cis2Client";
 
 function Cis2BalanceOf(props: {
 	provider: WalletApi;
@@ -18,9 +22,7 @@ function Cis2BalanceOf(props: {
 	});
 
 	function checkBalance() {
-		let s = { ...state, checking: true };
-		setState(s);
-
+		setState({ ...state, checking: true });
 		balanceOf(
 			props.provider,
 			props.account,
@@ -36,15 +38,36 @@ function Cis2BalanceOf(props: {
 				}
 			})
 			.catch((err: Error) => {
-				s.checking = false;
-				s.error = err.message;
-				console.error(err);
-				setState(s);
+				if (err.cause) {
+					let cause = err.cause as InvokeContractFailedResult;
+					if (cause.reason.tag === RejectReasonTag.RejectedReceive) {
+						switch (cause.reason.rejectReason) {
+							case -42000001:
+								setState({
+									...state,
+									checking: false,
+									error: "Token not found",
+								});
+								return;
+							case -42000002:
+								setState({
+									...state,
+									checking: false,
+									error: "Insufficient Funds",
+								});
+								return;
+							case -42000003:
+								setState({ ...state, checking: false, error: "Unauthorized" });
+								return;
+						}
+					}
+				}
+				setState({ ...state, checking: false, error: err.message });
 			});
 	}
 
 	function isValid() {
-		return !!state.tokenId;
+		return !!state.tokenId && isValidTokenId(state.tokenId);
 	}
 
 	function onOkClicked() {
@@ -65,7 +88,9 @@ function Cis2BalanceOf(props: {
 						disabled={state.checking}
 					/>
 				</div>
-				<div>{state.error && <Typography>{state.error}</Typography>}</div>
+				<div>
+					{state.error ? <Typography>{state.error}</Typography> : <></>}
+				</div>
 				<div>{state.checking && <Typography>Checking..</Typography>}</div>
 				<div>
 					<Button

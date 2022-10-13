@@ -86,19 +86,19 @@ export async function invokeContract<T>(
 	});
 
 	if (!res || res.tag === "failure") {
-		return Promise.reject(
+		const msg =
 			`failed invoking contract ` +
-				`method:${methodName}, ` +
-				`contract:(index: ${contract.index.toString()}, subindex: ${contract.subindex.toString()})`
-		);
+			`method:${methodName}, ` +
+			`contract:(index: ${contract.index.toString()}, subindex: ${contract.subindex.toString()})`;
+		return Promise.reject(new Error(msg, { cause: res }));
 	}
 
 	if (!res.returnValue) {
-		return Promise.reject(
+		const msg =
 			`failed invoking contract, null return value` +
-				`method:${methodName}, ` +
-				`contract:(index: ${contract.index.toString()}, subindex: ${contract.subindex.toString()})`
-		);
+			`method:${methodName}, ` +
+			`contract:(index: ${contract.index.toString()}, subindex: ${contract.subindex.toString()})`;
+		return Promise.reject(new Error(msg, { cause: res }));
 	}
 
 	return Buffer.from(res.returnValue, "hex");
