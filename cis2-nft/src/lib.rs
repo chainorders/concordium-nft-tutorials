@@ -21,8 +21,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use core::{convert::TryInto, hash::Hash};
-use std::fs::Metadata;
+use core::convert::TryInto;
 
 use concordium_cis2::*;
 use concordium_std::*;
@@ -670,25 +669,21 @@ fn contract_token_metadata<S: HasStateApi>(
             host.state().contains_token(&token_id),
             ContractError::InvalidTokenId
         );
+        ensure!(
+            host.state().contains_metadata(&token_id),
+            ContractError::InvalidTokenId
+        );
+        let metadata = host.state().metadata.get(&token_id);
+        ensure!(metadata.is_none(), ContractError::InvalidTokenId);
 
-        let metadata_url = host
-            .state()
-            .metadata
-            .get(&token_id)
-            .map(|metadata| {
-                let mut hash: [u8; 32] = Default::default();
-                hex::decode_to_slice(metadata.hash.to_owned(), &mut hash).is_ok();
-                MetadataUrl {
-                    url: metadata.url.to_owned(),
-                    hash: Option::Some(hash),
-                }
-            })
-            .ok_or(ContractError::InvalidTokenId)?;
-
+        let metadata_url = MetadataUrl {
+            url: metadata.unwrap().url.to_owned(),
+            hash: None,
+        };
         response.push(metadata_url);
     }
-
-    Ok(TokenMetadataQueryResponse::from(response))
+    let result = TokenMetadataQueryResponse::from(response);
+    Ok(result)
 }
 
 /// Get the supported standards or addresses for a implementation given list of
@@ -774,8 +769,8 @@ mod tests {
             .mint(
                 TOKEN_0,
                 &TokenMetadata {
-                    url: String::from("https://ipfs.io/ipfs/QmNtmosch32wpGXhXvpStMsM9orBBVFWD88F6kRYdeg88K?filename=nft_00000001_metadata.json"),
-                    hash: hex::encode("ed7a966d4ca7dbf7e362ae27aaaf6755a93063a7e16dc5dc6f7024f75c7bd912"),
+                    url: String::from("https://example.com/tokens/token0"),
+                    hash: hex::encode(Sha256::default()),
                 },
                 &ADDRESS_0,
                 state_builder,
@@ -785,8 +780,8 @@ mod tests {
             .mint(
                 TOKEN_1,
                 &TokenMetadata {
-                    url: String::from("https://ipfs.io/ipfs/QmS73fGyPGW9xbjTuaJmANDZch2Ev2ghxpMfV1eDCKNr7X?filename=nft_00000002_metadata.json"),
-                    hash: hex::encode("f806d1ac55e02cd979dc3b910a1ba6509f6269480371d234b5122e85559146be"),
+                    url: String::from("https://example.com/tokens/token1"),
+                    hash: hex::encode(Sha256::default()),
                 },
                 &ADDRESS_0,
                 state_builder,
@@ -1196,28 +1191,5 @@ mod tests {
             ),
             "Incorrect event emitted"
         )
-    }
-
-    #[concordium_test]
-    fn test_get_metadata() {
-        let mut ctx = TestReceiveContext::empty();
-        ctx.set_sender(ADDRESS_0);
-
-        let parameter = TokenMetadataQueryParams::<ContractTokenId> {
-            queries: vec![TOKEN_0],
-        };
-
-        let parameter_bytes = to_bytes(&parameter);
-        ctx.set_parameter(&parameter_bytes);
-
-        let mut state_builder = TestStateBuilder::new();
-        let state = initial_state(&mut state_builder);
-        let host = TestHost::new(state, state_builder);
-
-        let result: ContractResult<TokenMetadataQueryResponse> =
-            contract_token_metadata(&ctx, &host);
-
-        claim!(result.is_ok());
-        claim!(result.unwrap().0.first().is_some())
     }
 }

@@ -31,5 +31,5 @@ The NFT to be minted is [present here](./nft-artifacts/nft.jpg).
         The [docker compose configuration](./docker-compose.yml) is inspired from the [docker docs](https://developer.concordium.software/en/mainnet/net/guides/run-node.html#run-a-testnet-node) from Concordium. 
 
     - ### We cover the following ways to interact with the smart contract.
-        - [Using Rust CLI](./rust-cli-cis2-nft.README.md). Using [`concordium-client`](https://developer.concordium.software/en/mainnet/smart-contracts/guides/on-chain-index.html) which is a pre built client offered by Concordium to interact with the node
+        - [Using Rust CLI](./rust-cli.README.md). Using [`concordium-client`](https://developer.concordium.software/en/mainnet/smart-contracts/guides/on-chain-index.html) which is a pre built client offered by Concordium to interact with the node
         - [Using Node CLI](./node-cli/README.md). Using Node enviornment with provided code samples.

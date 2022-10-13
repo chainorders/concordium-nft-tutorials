@@ -1,28 +1,14 @@
 {
-	"owner": {
-		"Account": ["48x2Uo8xCMMxwGuSQnwbqjzKtVqK5MaUud4vG7QEUgDmYkV85e"]
-	},
-	"tokens": [
-		[
-			"00000004",
-			{
-				"url": "https://ipfs.io/ipfs/QmW5E7HcubzxcZgAN7VTMtpbYY2sBQuVuvDUJNPmZhwQ14?filename=nft_00000004_metadata.json",
-				"hash": "484f9f8e951a5023482088cc6a398ce89561f487f082b6f38bf4c4dce98a845c"
-			}
-		],
-		[
-			"00000005",
-			{
-				"url": "https://ipfs.io/ipfs/QmXYdQT6pCYKBtnJ3L9xttzq5GZoErV3o9jEY28v7iLsM4?filename=nft_00000005_metadata.json",
-				"hash": "2e85fa9ff2d1bc19a7640aedd19b1e1b65c20462a9c0a873695defc855413a1b"
-			}
-		],
-		[
-			"00000006",
-			{
-				"url": "https://ipfs.io/ipfs/QmUj34oKWgVtWgJ34jZ9ysUwtFDhJ1acKtEKRbtHiorvtL?filename=nft_00000006_metadata.json",
-				"hash": "791aa05fd700c19334f03631b61d50fcd24362d01e73537c6eb34bfc27243efd"
-			}
-		]
-	]
+  "owner": {
+    "Account": ["48x2Uo8xCMMxwGuSQnwbqjzKtVqK5MaUud4vG7QEUgDmYkV85e"]
+  },
+  "tokens": [
+    [
+      "00000001",
+      {
+        "url": "https://ipfs.io/ipfs/QmV5REE3HJRLTHdmqG18Wc5PBF3Nc9W5dQL4Rp7MxBsx8q?filename=nft.jpg",
+        "hash": "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
+      }
+    ]
+  ]
 }

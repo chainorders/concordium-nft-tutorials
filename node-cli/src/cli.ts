@@ -55,7 +55,6 @@ function setupCliDeployModule(cli: commander.Command) {
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
       .option("--wait", "Should wait for transaction finalization", false)
-      .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: DeployModuleArgs) =>
           await sendAccountTransaction(
