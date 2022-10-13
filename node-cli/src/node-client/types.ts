@@ -10,17 +10,22 @@ export interface SenderAccountArgs {
   sender: string;
 }
 
-export interface DeployModuleArgs extends ClientCreateArgs, SenderAccountArgs {
+export interface CommonArgs {
+  wait?: boolean;
+}
+
+export interface DeployModuleArgs extends ClientCreateArgs, SenderAccountArgs, CommonArgs {
+  energy: bigint;
   wasm: string;
 }
 
-export interface InitContractArgs extends ClientCreateArgs, SenderAccountArgs {
+export interface InitContractArgs extends ClientCreateArgs, SenderAccountArgs, CommonArgs {
   module: string;
   energy: bigint;
   contract: string;
 }
 
-export interface UpdateContractArgs extends ClientCreateArgs, SenderAccountArgs {
+export interface UpdateContractArgs extends ClientCreateArgs, SenderAccountArgs, CommonArgs {
   params: string;
   schema: string;
   energy: number;

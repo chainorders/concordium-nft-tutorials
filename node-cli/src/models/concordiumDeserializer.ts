@@ -1,20 +1,34 @@
 import { AccountAddress, ContractAddress } from "@concordium/node-sdk";
 import { Buffer } from "buffer/";
 
-import { Address } from "./types";
+import { Address } from "./cis2Types";
+
 export class ConcordiumDeserializer {
-  private buffer: Buffer;
-  private counter: number;
+  protected buffer: Buffer;
+  protected counter: number;
 
   constructor(buffer: Buffer) {
     this.buffer = buffer;
     this.counter = 0;
   }
 
-  readVector<T>(itemDesrialFn: () => T): T[] {
+  readVector<T>(itemDesrialFn: () => T, sizeLength: number = 4): T[] {
     let ret: T[] = [];
+    let vectorLength: number;
+    switch (sizeLength) {
+      case 1:
+        vectorLength = this.readUInt8();
+        break;
+      case 2:
+        vectorLength = this.readUInt16();
+        break;
+      case 4:
+        vectorLength = this.readUInt32();
+        break;
+      default:
+        throw new Error(`Invalid vector size length: ${sizeLength}`);
+    }
 
-    let vectorLength = this.readUInt32();
     for (let i = 0; i < vectorLength; i++) {
       const item = itemDesrialFn.apply(this);
       ret.push(item);

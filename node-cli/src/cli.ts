@@ -5,7 +5,6 @@ import {
   AccountTransactionType,
   decryptMobileWalletExport,
   DeployModulePayload,
-  deserializeContractState,
   GtuAmount,
   InitContractPayload,
   ModuleReference,
@@ -18,7 +17,8 @@ import { Buffer } from "buffer/";
 import pkg from "fs-extra";
 import { DeployModuleArgs, InitContractArgs, UpdateContractArgs, ViewContractArgs } from "./node-client/types";
 import { writeFileSync } from "fs";
-import { ViewStateDeserializer } from "./models/viewStateDeserializer";
+import { Cis2NftViewStateDeserializer } from "./models/cis2NftviewStateDeserializer";
+import { Cis2MultiViewStateDeserializer } from "./models/cis2MultiviewStateDeserializer";
 const { readFileSync } = pkg;
 
 const cli = new commander.Command();
@@ -54,6 +54,7 @@ function setupCliDeployModule(cli: commander.Command) {
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
+      .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: DeployModuleArgs) =>
           await sendAccountTransaction(
@@ -64,6 +65,7 @@ function setupCliDeployModule(cli: commander.Command) {
             { content: Buffer.from(readFileSync(args.wasm)) } as DeployModulePayload,
             // Transaction Type
             AccountTransactionType.DeployModule,
+            args.wait,
           ),
       )
   );
@@ -76,9 +78,9 @@ function setupCliInitContract(cli: commander.Command) {
     cli
       .command("init")
       .description(`Initializes a Smart Contract`)
-      .requiredOption("--module <module>", "Module Reference", "CIS2-NFT")
+      .requiredOption("--module <module>", "Module Reference")
       .requiredOption("--energy <energy>", "Maximum Contract Execution Energy", (v) => BigInt(v), 6000n)
-      .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
+      .requiredOption("--contract <contract>", "Contract name")
       // Sender Account Args
       .requiredOption("--sender <sender>", "Sender Account Address. This should be the owner of the Contract")
       .requiredOption("--sign-key <signKey>", "Account Signing Key")
@@ -87,6 +89,7 @@ function setupCliInitContract(cli: commander.Command) {
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
+      .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: InitContractArgs) =>
           await sendAccountTransaction(
@@ -103,6 +106,7 @@ function setupCliInitContract(cli: commander.Command) {
             } as InitContractPayload,
             // Transaction Type
             AccountTransactionType.InitializeSmartContractInstance,
+            args.wait,
           ),
       )
   );
@@ -115,13 +119,13 @@ function setupCliUpdateContract(cli: commander.Command, updateContractAction: st
     cli
       .command(updateContractAction)
       .description(`${updateContractAction} an NFT`)
-      .requiredOption("--params <params>", "params file path", (f) => fs.realpathSync(f), `../nft-artifacts/${updateContractAction}-params.json`)
       .requiredOption(
-        "--schema <schema>",
-        "Contract schema file path",
+        "--params <params>",
+        "params file path",
         (f) => fs.realpathSync(f),
-        "../dist/smart-contract/schema.bin",
+        `../nft-artifacts/${updateContractAction}-params.json`,
       )
+      .requiredOption("--schema <schema>", "Contract schema file path", (f) => fs.realpathSync(f))
       .requiredOption("--energy <energy>", "Maximum Contract Execution Energy", (v) => BigInt(v), 6000n)
       .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
       .requiredOption("--function <function>", "Contract function name to call", updateContractAction)
@@ -135,6 +139,7 @@ function setupCliUpdateContract(cli: commander.Command, updateContractAction: st
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
       .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
+      .option("--wait", "Should wait for transaction finalization", false)
       .action(
         async (args: UpdateContractArgs) =>
           await sendAccountTransaction(
@@ -160,6 +165,7 @@ function setupCliUpdateContract(cli: commander.Command, updateContractAction: st
             } as UpdateContractPayload,
             // Transaction Type
             AccountTransactionType.UpdateSmartContractInstance,
+            args.wait,
           ),
       )
   );
@@ -175,12 +181,7 @@ function setupCliInvokeContract(cli: commander.Command) {
   cli
     .command("view")
     .description(`View Contract state`)
-    .requiredOption(
-      "--schema <schema>",
-      "Contract schema file path",
-      (f) => fs.realpathSync(f),
-      "../dist/smart-contract/schema.bin",
-    )
+    .requiredOption("--schema <schema>", "Contract schema file path", (f) => fs.realpathSync(f))
     .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
     .requiredOption("--function <function>", "Contract function name to call", "view")
     .requiredOption("--index <index>", "Contract Address Index", (v) => BigInt(v))
@@ -194,8 +195,13 @@ function setupCliInvokeContract(cli: commander.Command) {
     .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
     .action(async (args: ViewContractArgs) => {
       const contractState = await invokeContract(args);
-      const viewState = new ViewStateDeserializer(contractState).readViewState();
-      console.log(JSON.stringify(viewState, null, "\t"));
+      if (args.contract === "CIS2-NFT") {
+        const viewState = new Cis2NftViewStateDeserializer(contractState).readViewState();
+        console.log(JSON.stringify(viewState, null, "\t"));
+      } else if (args.contract === "CIS2-Multi") {
+        const viewState = new Cis2MultiViewStateDeserializer(contractState).readViewState();
+        console.log(JSON.stringify(viewState, null, "\t"));
+      }
     });
 }
 setupCliInvokeContract(cli);
