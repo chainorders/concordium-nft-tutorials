@@ -1,9 +1,9 @@
 import { Buffer } from "buffer/";
 import { Cis2Deserializer } from "./cis2Deserializer";
 
-import { ViewState, Metadata, StateItem, ViewAddressState, ContractTokenId, Address } from "./types";
+import { ViewState, Metadata, StateItem, ViewAddressState, ContractTokenId, Address } from "./cis2Types";
 
-export class ViewStateDeserializer extends Cis2Deserializer {
+export class Cis2NftViewStateDeserializer extends Cis2Deserializer {
   constructor(hex: string) {
     super(Buffer.from(hex, "hex"));
   }
