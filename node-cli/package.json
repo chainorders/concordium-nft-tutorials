@@ -9,16 +9,19 @@
   },
   "dependencies": {
     "@concordium/node-sdk": "^4.0.0",
+    "@pinata/sdk": "^1.1.26",
     "@types/fs-extra": "^9.0.13",
+    "@types/prompts": "^2.4.1",
     "commander": "^9.4.0",
-    "fs-extra": "^10.1.0"
+    "fs-extra": "^10.1.0",
+    "prompts": "^2.4.2"
   },
   "scripts": {
     "deploy-nft": "ts-node  ./src/cli.ts deploy --sender $ACCOUNT --sign-key $SIGN_KEY --wait --wasm ../dist/smart-contract/module.wasm",
     "init-nft": "ts-node ./src/cli.ts init --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-NFT   --module 8e8e7beaa6a1ced4041077c641efb10bbf0f6b8c4f3614d1861d06a6fc6b40dc",
     "mint-nft": "ts-node ./src/cli.ts mint --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-NFT   --schema ../dist/smart-contract/schema.bin --params ../nft-artifacts/mint-params.json --index 983",
     "transfer-nft": "ts-node ./src/cli.ts transfer --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-NFT --params ../nft-artifacts/transfer-params.json --schema ../dist/smart-contract/schema.bin --index 983",
-    "view-nft": "concordium-client --grpc-ip 127.0.0.1 --grpc-port 10001 contract invoke 983 --entrypoint view --schema ../dist/smart-contract/schema.bin",
+    "view-nft": "ts-node ./src/cli.ts view --sender $ACCOUNT --contract CIS2-NFT --schema ../dist/smart-contract/schema.bin --index 983",
     "deploy-multi": "ts-node ./src/cli.ts deploy --sender $ACCOUNT --sign-key $SIGN_KEY --wait --wasm ../dist/smart-contract-multi/module.wasm",
     "init-multi": "ts-node ./src/cli.ts init --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi --module 7319718f5c5f1cd0275da13e2f211d1170dfe43d380713aa93b74e8ddf398eb7",
     "mint-multi": "ts-node ./src/cli.ts mint --sender $ACCOUNT --sign-key $SIGN_KEY --wait --contract CIS2-Multi --schema ../dist/smart-contract-multi/schema.bin --params ../nft-artifacts/mint-multi.json --index 905",
