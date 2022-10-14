@@ -264,8 +264,7 @@ function setupPinataUploads(cli: commander.Command) {
       const pinata = pinataSdk(args.pinataKey, args.pinataSecret);
       const mintParams: MintParams = fs.readJsonSync(args.mintParamsFile);
       const metadataUrlsMap = new Map(mintParams.tokens);
-      console.log(metadataUrlsMap);
-
+      
       var files = fs
         .readdirSync(args.dir, { withFileTypes: true })
         .filter((f) => f.isFile() && f.name.endsWith(".jpg"))
