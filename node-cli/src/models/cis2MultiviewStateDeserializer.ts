@@ -39,8 +39,18 @@ export class Cis2MultiViewStateDeserializer extends Cis2Deserializer {
   }
 
   readTokenAmount(): ContractTokenAmount {
-    //todo: correct uleb128 decode.
-    let num = this.readUInt8();
-    return BigInt(num);
+    let result = BigInt(0);
+
+    for (let index = 0; index <= 37; index++) {
+      let byte = this.readUInt8();
+      let valueByte = byte & 0b0111_111;
+      result = result + BigInt(valueByte << (index * 7))
+
+      if(0 === (byte & 0b1000_0000)) {
+        return result;
+      }
+    }
+
+    return result;
   }
 }
