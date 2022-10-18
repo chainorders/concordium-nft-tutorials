@@ -1,7 +1,12 @@
 import { Buffer } from "buffer/";
+//@ts-ignore
+import * as leb from "leb128";
+
 import { Cis2Deserializer } from "./cis2Deserializer";
 import { ViewState, ViewAddressState, Tuple, ContractTokenAmount } from "./cis2MultiTypes";
 import { Address, ContractTokenId } from "./cis2Types";
+
+const MAX_LEB_BYTE_VALUE = Math.pow(2, 7);
 
 export class Cis2MultiViewStateDeserializer extends Cis2Deserializer {
   constructor(hex: string) {
@@ -38,19 +43,38 @@ export class Cis2MultiViewStateDeserializer extends Cis2Deserializer {
     return [tokenId, amount];
   }
 
-  readTokenAmount(): ContractTokenAmount {
+  /**
+   * @deprecated The method should not be used
+   */
+  readTokenAmount2(): ContractTokenAmount {
     let result = BigInt(0);
 
     for (let index = 0; index <= 37; index++) {
       let byte = this.readUInt8();
-      let valueByte = byte & 0b0111_111;
-      result = result + BigInt(valueByte << (index * 7))
-
-      if(0 === (byte & 0b1000_0000)) {
+      let valueByte = byte & 0b0111_1111;
+      const res = valueByte << (index * 7);
+      result = result + BigInt(res);
+      if (0 === (byte & 0b1000_0000)) {
         return result;
       }
     }
 
     return result;
+  }
+
+  readTokenAmount(): ContractTokenAmount {
+    let buff = new Buffer(37);
+
+    for (let index = 0; index <= 37; index++) {
+      let byte = this.readUInt8();
+      console.log(index, byte);
+      buff[index] = byte;
+
+      if (byte <= MAX_LEB_BYTE_VALUE) {
+        break;
+      }
+    }
+
+    return BigInt(leb.unsigned.decode(buff));
   }
 }
