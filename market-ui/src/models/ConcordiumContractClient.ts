@@ -1,5 +1,6 @@
-import { Buffer } from "buffer/";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
+import { Buffer } from 'buffer/';
+
 import {
 	ContractAddress,
 	AccountAddress,
@@ -231,7 +232,7 @@ function serializeParams<T>(
 		contractName,
 		methodName,
 		params,
-		schema,
+		schema as any,
 		SchemaVersion.V2
 	);
 }

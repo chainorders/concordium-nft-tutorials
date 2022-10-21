@@ -35,6 +35,6 @@ export class ConcordiumDeserializer extends GenericDeserializer {
 	readAccountAddress(): string {
 		let ret = this.readBytes(32);
 
-		return AccountAddress.fromBytes(ret).address;
+		return AccountAddress.fromBytes(ret as any).address;
 	}
 }
