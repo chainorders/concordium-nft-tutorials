@@ -10,8 +10,8 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
   }
 
   readTokenMetadata(): TokenMetadata {
-    let url = this.readString();
-    let hash = this.readString();
+    let url = this.readString(1);
+    let hash = this.readString(1);
 
     return { url, hash };
   }
