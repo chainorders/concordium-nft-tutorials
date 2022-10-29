@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Box, Stepper, Step, StepLabel } from "@mui/material";
+import { Box, Stepper, Step, StepLabel, Typography } from "@mui/material";
 
 import { MetadataUrl } from "../models/Cis2Types";
-import Cis2NftMint from "../components/Cis2NftMint";
 import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
-import Cis2BatchMetadataPrepare from "../components/Cis2BatchMetadataPrepare";
 import ConnectPinata from "../components/ConnectPinata";
 import UploadFiles from "../components/UploadFiles";
 import Cis2NftBatchMint from "../components/Cis2NftBatchMint";
+import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
 
 enum Steps {
 	GetOrInitCis2,
@@ -68,6 +66,14 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		});
 	}
 
+	function onPinataSkipped() {
+		setState({
+			...state,
+			pinataJwt: "",
+			activeStep: Steps.PrepareNftMetadata,
+		});
+	}
+
 	function onFilesUploaded(files: File[]) {
 		setState({
 			...state,
@@ -103,11 +109,12 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 			case Steps.UploadFiles:
 				return <UploadFiles onDone={onFilesUploaded} />;
 			case Steps.ConnectPinata:
-				return <ConnectPinata onDone={onPinataConnected} />;
+				return (
+					<ConnectPinata onDone={onPinataConnected} onSkip={onPinataSkipped} />
+				);
 			case Steps.PrepareNftMetadata:
 				return (
-					<Cis2BatchMetadataPrepare
-						provider={props.provider}
+					<Cis2BatchMetadataPrepareOrAdd
 						pinataJwt={state.pinataJwt}
 						files={state.files}
 						onDone={onMetadataPrepared}
@@ -130,8 +137,8 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 
 	return (
 		<>
-			<h1>Mint NFT</h1>
-			<Box sx={{ width: "100%" }}>
+			<Typography variant="h2">Mint NFTs</Typography>
+			<Box>
 				<Stepper activeStep={state.activeStep} alternativeLabel>
 					{steps.map((step) => (
 						<Step key={step.step}>
@@ -139,8 +146,8 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 						</Step>
 					))}
 				</Stepper>
+				<StepContent />
 			</Box>
-			<StepContent />
 		</>
 	);
 }

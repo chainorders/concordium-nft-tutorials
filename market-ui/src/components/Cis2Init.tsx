@@ -29,8 +29,8 @@ function Cis2Init(props: {
 	}
 
 	return (
-		<Paper>
-			<h3>Deploy NFT Collection</h3>
+		<Paper sx={{padding: "10px"}} variant="outlined">
+			<Typography variant="h3">Deploy NFT Collection</Typography>
 			<form>
 				<div>{state.error && <Typography>{state.error}</Typography>}</div>
 				<div>{state.processing && <Typography>Deploying..</Typography>}</div>

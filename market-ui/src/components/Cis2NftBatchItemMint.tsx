@@ -1,6 +1,5 @@
 import {
 	Card,
-	CardActionArea,
 	CardContent,
 	CardMedia,
 	Link,
@@ -29,7 +28,6 @@ function Cis2NftBatchItemMint(props: {
 
 	return (
 		<Card variant="outlined">
-			<CardActionArea>
 				<LazyNftMetadata
 					metadataUrl={props.metadataUrl}
 					loadedTemplate={(metadata) => (
@@ -59,7 +57,6 @@ function Cis2NftBatchItemMint(props: {
 					</Link>
 					{props.error && <Typography>{props.error}</Typography>}
 				</CardContent>
-			</CardActionArea>
 		</Card>
 	);
 }

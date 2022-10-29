@@ -1,8 +1,17 @@
-import { Paper, Typography, Button, TextField } from "@mui/material";
+import {
+	Paper,
+	Typography,
+	Button,
+	TextField,
+	ButtonGroup,
+} from "@mui/material";
 import { useState } from "react";
 import { PinataClient } from "../models/PinataClient";
 
-function ConnectPinata(props: { onDone: (jwt: string) => void }) {
+function ConnectPinata(props: {
+	onDone: (jwt: string) => void;
+	onSkip: () => void;
+}) {
 	const [state, setState] = useState({
 		error: "",
 		processing: false,
@@ -29,18 +38,21 @@ function ConnectPinata(props: { onDone: (jwt: string) => void }) {
 
 	return (
 		<Paper>
-			<h3>Deploy NFT Collection</h3>
+			<Typography variant="h3" gutterBottom>
+				Connect Pinata
+			</Typography>
 			<form>
 				<TextField
 					name="pinataJwt"
 					id="pinata-jwt"
 					label="Pinata JWT"
 					required={true}
+					error={!!state.error}
 					onChange={(e) => setState({ ...state, pinataJwt: e.target.value })}
 				/>
 				<div>{state.error && <Typography>{state.error}</Typography>}</div>
-				<div>{state.processing && <Typography>Deploying..</Typography>}</div>
-				<div>
+				<div>{state.processing && <Typography>Connecting..</Typography>}</div>
+				<ButtonGroup sx={{padding: "10px"}}>
 					<Button
 						variant="contained"
 						disabled={state.processing}
@@ -48,7 +60,15 @@ function ConnectPinata(props: { onDone: (jwt: string) => void }) {
 					>
 						Connect
 					</Button>
-				</div>
+
+					<Button
+						variant="contained"
+						disabled={state.processing}
+						onClick={() => props.onSkip()}
+					>
+						Skip
+					</Button>
+				</ButtonGroup>
 			</form>
 		</Paper>
 	);

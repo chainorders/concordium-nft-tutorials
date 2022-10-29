@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { Typography, Grid } from "@mui/material";
-import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 
 import { MetadataUrl } from "../models/Cis2Types";
 import Cis2BatchItemMetadataPrepare from "./Cis2BatchItemMetadataPrepare";
 
-function Cis2MetadataPrepare(props: {
-	provider: WalletApi;
+function Cis2BatchMetadataPrepare(props: {
 	files: File[];
 	pinataJwt: string;
 	onDone: (tokens: { [tokenId: string]: MetadataUrl }) => void;
@@ -59,6 +57,8 @@ function Cis2MetadataPrepare(props: {
 		}
 	}
 
+	const toTokenId = (integer: number) => integer.toString(16).padStart(8, "0");
+
 	return (
 		<>
 			<h3>Prepare NFT Metadata</h3>
@@ -72,10 +72,10 @@ function Cis2MetadataPrepare(props: {
 			</Typography>
 			<Grid container spacing={2}>
 				{props.files.map((file, index) => (
-					<Grid item xs={6} key={file.name}>
+					<Grid item xs={4} key={file.name}>
 						<Cis2BatchItemMetadataPrepare
 							file={file}
-							tokenId={(index + 1).toString(16).padStart(8, '0')}
+							tokenId={toTokenId(index + 1)}
 							pinataJwtKey={props.pinataJwt}
 							onDone={(data) =>
 								onMetadataPrepared(file.name, data.tokenId, data.metadataUrl)
@@ -88,4 +88,4 @@ function Cis2MetadataPrepare(props: {
 	);
 }
 
-export default Cis2MetadataPrepare;
+export default Cis2BatchMetadataPrepare;

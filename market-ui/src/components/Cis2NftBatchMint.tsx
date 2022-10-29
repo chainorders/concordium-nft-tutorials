@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Grid } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
@@ -76,11 +76,16 @@ function Cis2NftBatchMint(props: {
 
 	return (
 		<>
-			<h3>Mint NFT</h3>
-			<br />
+			<Typography variant="h3">Mint NFT</Typography>
+			<Typography variant="h4">
+				<>
+					Contract : {props.nftContractAddress.index.toString()}/
+					{props.nftContractAddress.subindex.toString()}
+				</>
+			</Typography>
 			<Grid container spacing={2}>
 				{Object.keys(state.tokens).map((tokenId) => (
-					<Grid item xs={6} key={tokenId}>
+					<Grid item xs={4} key={tokenId}>
 						<Cis2NftBatchItemMint
 							error={state.tokens[tokenId].error}
 							key={tokenId}

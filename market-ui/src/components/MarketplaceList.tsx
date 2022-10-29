@@ -22,8 +22,8 @@ function MarketplaceList(props: {
 	}, [props.account]);
 
 	return (
-		<Container maxWidth={"sm"}>
-			<ImageList key="nft-image-list">
+		<Container maxWidth={"md"}>
+			<ImageList key="nft-image-list" cols={3}>
 				{state.tokens.map((t) => (
 					<MarketplaceTransfer
 						provider={props.provider}

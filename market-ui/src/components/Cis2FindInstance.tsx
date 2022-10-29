@@ -52,8 +52,8 @@ function Cis2FindInstance(props: {
 	}
 
 	return (
-		<Paper>
-			<h3>Please Speficy your NFT Collection Contract</h3>
+		<Paper sx={{padding: "10px"}} variant="outlined">
+			<Typography variant="h3" gutterBottom>Specify NFT Collection</Typography>
 			<form>
 				<div>
 					<TextField

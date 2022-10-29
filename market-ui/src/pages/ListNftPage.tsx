@@ -1,5 +1,6 @@
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
+import { Typography } from "@mui/material";
 
 import MarketplaceList from "../components/MarketplaceList";
 
@@ -10,7 +11,7 @@ function ListNftPage(props: {
 }) {
 	return (
 		<>
-			<h2>NFT's</h2>
+			<Typography variant="h2" gutterBottom>NFT's</Typography>
 			<div>
 				<MarketplaceList
 					provider={props.provider as WalletApi}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stepper, Step, StepLabel } from "@mui/material";
+import { Stepper, Step, StepLabel, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
@@ -141,7 +141,7 @@ function AddNftPage(props: {
 
 	return (
 		<>
-			<h1>Add NFT</h1>
+			<Typography variant="h2" gutterBottom>Add NFT to Marketplace</Typography>
 			<Box sx={{ width: "100%" }}>
 				<Stepper activeStep={state.activeStep} alternativeLabel>
 					{steps.map((step) => (
