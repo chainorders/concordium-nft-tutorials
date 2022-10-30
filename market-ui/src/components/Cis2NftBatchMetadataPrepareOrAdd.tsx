@@ -2,10 +2,11 @@ import { useState } from "react";
 
 import { MetadataUrl } from "../models/Cis2Types";
 import Cis2BatchMetadataAdd from "./Cis2BatchMetadataAdd";
-import Cis2BatchMetadataPrepare from "./Cis2BatchMetadataPrepare";
+import Cis2NftBatchMetadataPrepare from "./Cis2NftBatchMetadataPrepare";
 import { Container } from "@mui/system";
+import { Typography } from "@mui/material";
 
-function Cis2BatchMetadataPrepareOrAdd(props: {
+function Cis2NftBatchMetadataPrepareOrAdd(props: {
 	files?: File[];
 	pinataJwt?: string;
 	onDone: (tokens: { [tokenId: string]: MetadataUrl }) => void;
@@ -45,14 +46,15 @@ function Cis2BatchMetadataPrepareOrAdd(props: {
 
 	return (
 		<Container maxWidth="xl" sx={{ mt: "10px" }}>
+			<Typography variant="h3" component="div">Prepare Metadata</Typography>
 			{props.files && props.files.length && props.pinataJwt ? (
-				<Cis2BatchMetadataPrepare
+				<Cis2NftBatchMetadataPrepare
 					files={props.files}
 					pinataJwt={props.pinataJwt}
 					onDone={onPrepDone}
 				/>
 			) : (
-				<></>
+				<Typography variant="body1" component="div">No uploaded Files</Typography>
 			)}
 
 			<Cis2BatchMetadataAdd
@@ -63,4 +65,4 @@ function Cis2BatchMetadataPrepareOrAdd(props: {
 	);
 }
 
-export default Cis2BatchMetadataPrepareOrAdd;
+export default Cis2NftBatchMetadataPrepareOrAdd;

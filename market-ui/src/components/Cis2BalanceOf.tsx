@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { TextField, Typography, Button } from "@mui/material";
+import {
+	TextField,
+	Typography,
+	Button,
+	Stack,
+	ButtonGroup,
+} from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import {
 	ContractAddress,
@@ -22,7 +28,7 @@ function Cis2BalanceOf(props: {
 	});
 
 	function checkBalance() {
-		setState({ ...state, checking: true });
+		setState({ ...state, checking: true, error: "" });
 		balanceOf(
 			props.provider,
 			props.account,
@@ -76,32 +82,40 @@ function Cis2BalanceOf(props: {
 
 	return (
 		<>
-			<h3>Check Token Balance</h3>
-			<form>
-				<div>
-					<TextField
-						id="token-id"
-						label="Token Id"
-						variant="standard"
-						value={state.tokenId}
-						onChange={(v) => setState({ ...state, tokenId: v.target.value })}
-						disabled={state.checking}
-					/>
-				</div>
-				<div>
-					{state.error ? <Typography>{state.error}</Typography> : <></>}
-				</div>
-				<div>{state.checking && <Typography>Checking..</Typography>}</div>
-				<div>
+			<Typography variant="h3" component="div">
+				Check Token Balance
+			</Typography>
+			<Stack
+				component={"form"}
+				spacing={2}
+				margin="auto"
+				width={"70%"}
+				maxWidth={"md"}
+			>
+				<TextField
+					id="token-id"
+					label="Token Id"
+					variant="standard"
+					value={state.tokenId}
+					onChange={(v) => setState({ ...state, tokenId: v.target.value })}
+					disabled={state.checking}
+				/>
+				{state.error && (
+					<Typography component="div" color="error" variant="button">
+						{state.error}
+					</Typography>
+				)}
+				{state.checking && <Typography component="div">Checking..</Typography>}
+				<ButtonGroup fullWidth size="large" disabled={state.checking}>
 					<Button
 						variant="contained"
-						disabled={!isValid() || state.checking}
+						disabled={!isValid()}
 						onClick={() => onOkClicked()}
 					>
 						Ok
 					</Button>
-				</div>
-			</form>
+				</ButtonGroup>
+			</Stack>
 		</>
 	);
 }

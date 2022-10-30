@@ -77,7 +77,7 @@ function Cis2NftBatchMint(props: {
 	return (
 		<>
 			<Typography variant="h3">Mint NFT</Typography>
-			<Typography variant="h4">
+			<Typography variant="button" color={"InfoText"}>
 				<>
 					Contract : {props.nftContractAddress.index.toString()}/
 					{props.nftContractAddress.subindex.toString()}

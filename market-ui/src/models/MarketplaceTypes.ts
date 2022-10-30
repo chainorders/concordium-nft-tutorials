@@ -9,3 +9,13 @@ export interface TokenListItem {
 	contract: ContractAddress;
 	price: bigint;
 }
+
+export interface AddParams {
+	nft_contract_address: {
+		index: string;
+		subindex: string;
+	};
+	token_id: string;
+	price: string;
+	royalty: number;
+}

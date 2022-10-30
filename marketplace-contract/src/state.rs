@@ -25,9 +25,10 @@ pub enum TokenListState {
 
 #[derive(SchemaType, Clone, Serialize, Debug, PartialEq, Eq)]
 pub struct TokenState {
-    pub counter: u64,
     pub curr_state: TokenListState,
     pub owner: AccountAddress,
+    pub primary_owner: AccountAddress,
+    pub royalty: u16,
 }
 
 impl TokenState {
@@ -57,7 +58,7 @@ impl TokenState {
 #[derive(Serialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct Commission {
     /// Commission basis points. equals to percent * 100
-    pub(crate) percentage_basis: u8,
+    pub(crate) percentage_basis: u16,
 }
 
 #[derive(Serial, DeserialWithState, StateClone)]
@@ -71,10 +72,10 @@ where
 }
 
 impl<S: HasStateApi> State<S> {
-    pub(crate) fn new(state_builder: &mut StateBuilder<S>) -> Self {
+    pub(crate) fn new(state_builder: &mut StateBuilder<S>, commission: u16) -> Self {
         State {
             commission: Commission {
-                percentage_basis: 250,
+                percentage_basis: commission,
             },
             tokens: state_builder.new_map(),
         }
@@ -86,18 +87,20 @@ impl<S: HasStateApi> State<S> {
         nft_contract_address: ContractAddress,
         owner: AccountAddress,
         price: Amount,
+        royalty: u16,
     ) {
         let info = TokenInfo::new(token_id, nft_contract_address);
-        let counter = match self.token(&info) {
-            Some(r) => (r.counter + 1),
-            None => 0,
+        let existing_info = match self.token(&info) {
+            Some(t) => (t.primary_owner, t.royalty),
+            None => (owner, royalty),
         };
 
         self.tokens.insert(
             info,
             TokenState {
                 owner,
-                counter,
+                primary_owner: existing_info.0,
+                royalty: existing_info.1,
                 curr_state: TokenListState::Listed(price),
             },
         );
@@ -110,16 +113,17 @@ impl<S: HasStateApi> State<S> {
         owner: AccountAddress,
     ) {
         let info = TokenInfo::new(token_id, nft_contract_address);
-        let counter = match self.token(&info) {
-            Some(r) => r.counter,
-            None => 0,
+        let existing_info = match self.token(&info) {
+            Some(t) => (t.primary_owner, t.royalty),
+            None => (owner, 0),
         };
 
         self.tokens.insert(
             info,
             TokenState {
                 owner,
-                counter,
+                primary_owner: existing_info.0,
+                royalty: existing_info.1,
                 curr_state: TokenListState::UnListed,
             },
         );

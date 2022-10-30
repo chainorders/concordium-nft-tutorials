@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Paper, Typography, Button } from "@mui/material";
+import { Paper, Typography, Button, Stack } from "@mui/material";
 
 import { initCis2NftContract } from "../models/Cis2Client";
 
@@ -29,21 +29,24 @@ function Cis2Init(props: {
 	}
 
 	return (
-		<Paper sx={{padding: "10px"}} variant="outlined">
-			<Typography variant="h3">Deploy NFT Collection</Typography>
-			<form>
-				<div>{state.error && <Typography>{state.error}</Typography>}</div>
-				<div>{state.processing && <Typography>Deploying..</Typography>}</div>
-				<div>
-					<Button
-						variant="contained"
-						disabled={state.processing}
-						onClick={() => onOkClicked()}
-					>
-						Deploy
-					</Button>
-				</div>
-			</form>
+		<Paper sx={{ padding: "10px" }} variant="outlined">
+			<Stack component={"form"} spacing={2} margin="auto" width={"70%"} maxWidth={"md"}>
+				{state.error && (
+					<Typography component="div" color="error" variant="body1">
+						{state.error}
+					</Typography>
+				)}
+				{state.processing && (
+					<Typography component="div" variant="body1">Deploying..</Typography>
+				)}
+				<Button
+					variant="contained"
+					disabled={state.processing}
+					onClick={() => onOkClicked()}
+				>
+					Deploy New
+				</Button>
+			</Stack>
 		</Paper>
 	);
 }

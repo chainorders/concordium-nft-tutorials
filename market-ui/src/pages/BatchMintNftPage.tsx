@@ -8,14 +8,14 @@ import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
 import ConnectPinata from "../components/ConnectPinata";
 import UploadFiles from "../components/UploadFiles";
 import Cis2NftBatchMint from "../components/Cis2NftBatchMint";
-import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
+import Cis2NftBatchMetadataPrepareOrAdd from "../components/Cis2NftBatchMetadataPrepareOrAdd";
 
 enum Steps {
 	GetOrInitCis2,
 	ConnectPinata,
 	UploadFiles,
-	PrepareNftMetadata,
-	MintNft,
+	PrepareMetadata,
+	Mint,
 }
 
 function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
@@ -30,10 +30,10 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		},
 		{
 			step: Steps.UploadFiles,
-			title: "Upload Nft Image Files",
+			title: "Upload Image Files",
 		},
-		{ step: Steps.PrepareNftMetadata, title: "Prepare Nft Metadata" },
-		{ step: Steps.MintNft, title: "Mint NFT" },
+		{ step: Steps.PrepareMetadata, title: "Prepare Metadata" },
+		{ step: Steps.Mint, title: "Mint" },
 	];
 
 	let [state, setState] = useState<{
@@ -70,7 +70,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		setState({
 			...state,
 			pinataJwt: "",
-			activeStep: Steps.PrepareNftMetadata,
+			activeStep: Steps.PrepareMetadata,
 		});
 	}
 
@@ -78,7 +78,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		setState({
 			...state,
 			files,
-			activeStep: Steps.PrepareNftMetadata,
+			activeStep: Steps.PrepareMetadata,
 		});
 	}
 
@@ -87,7 +87,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 	}) {
 		setState({
 			...state,
-			activeStep: Steps.MintNft,
+			activeStep: Steps.Mint,
 			tokenMetadataMap,
 		});
 	}
@@ -112,15 +112,15 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 				return (
 					<ConnectPinata onDone={onPinataConnected} onSkip={onPinataSkipped} />
 				);
-			case Steps.PrepareNftMetadata:
+			case Steps.PrepareMetadata:
 				return (
-					<Cis2BatchMetadataPrepareOrAdd
+					<Cis2NftBatchMetadataPrepareOrAdd
 						pinataJwt={state.pinataJwt}
 						files={state.files}
 						onDone={onMetadataPrepared}
 					/>
 				);
-			case Steps.MintNft:
+			case Steps.Mint:
 				return (
 					<Cis2NftBatchMint
 						provider={props.provider}

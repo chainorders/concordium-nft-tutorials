@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, ButtonGroup, Grid, Typography } from "@mui/material";
 import { useState } from "react";
 import { MetadataUrl } from "../models/Cis2Types";
 import Cis2BatchItemMetadataAdd from "./Cis2BatchItemMetadataAdd";
@@ -71,8 +71,12 @@ function Cis2BatchMetadataAdd(props: {
 					<Typography>{state.error}</Typography>
 				</div>
 			)}
-			{/* <Typography>Total no of files : {state.preparedFilesCount}</Typography> */}
-			<Grid container spacing={2}>
+			<ButtonGroup fullWidth>
+				<Button onClick={() => onAdd()} variant="contained" size="large">
+					Add Using Metadata Url
+				</Button>
+			</ButtonGroup>
+			<Grid container spacing={2} padding="10px">
 				{state.tokens.map((token, index) => (
 					<Grid item xs={4} key={index.toString()}>
 						<Cis2BatchItemMetadataAdd
@@ -85,12 +89,10 @@ function Cis2BatchMetadataAdd(props: {
 						/>
 					</Grid>
 				))}
-				<Grid item xs={12} key="-1">
-					<Button onClick={() => onAdd()}>Add</Button>
-				</Grid>
 			</Grid>
-			<br />
-			<Button onClick={() => onDone()}>Done</Button>
+			<ButtonGroup fullWidth>
+				<Button onClick={() => onDone()} size="large">Done</Button>
+			</ButtonGroup>
 		</>
 	);
 }

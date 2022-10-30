@@ -21,7 +21,7 @@ function MintNftPage(props: { provider: WalletApi; account: string }) {
 			step: Steps.GetOrInitCis2,
 			title: "Deploy Or Find NFT Collection",
 		},
-		{ step: Steps.PrepareNftMetadata, title: "Prepare Nft Metadata" },
+		{ step: Steps.PrepareNftMetadata, title: "Prepare Metadata" },
 		{ step: Steps.MintNft, title: "Mint NFT" },
 	];
 

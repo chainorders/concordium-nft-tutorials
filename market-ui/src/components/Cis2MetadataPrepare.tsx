@@ -36,7 +36,7 @@ function Cis2MetadataPrepare(props: {
 
 	return (
 		<>
-			<h3>Prepare NFT Metadata</h3>
+			<h3>Prepare Metadata</h3>
 			<h4>
 				Contract Index: {props.nftContractAddress.index.toString()}, Sub Index:{" "}
 				{props.nftContractAddress.subindex.toString()}

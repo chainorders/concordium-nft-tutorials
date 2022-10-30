@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Paper, TextField, Typography, Button } from "@mui/material";
+import { Paper, TextField, Typography, Button, Stack } from "@mui/material";
 
 import { ensureSupportsCis2 } from "../models/Cis2Client";
 import { getInstanceInfo } from "../models/ConcordiumContractClient";
@@ -52,40 +52,37 @@ function Cis2FindInstance(props: {
 	}
 
 	return (
-		<Paper sx={{padding: "10px"}} variant="outlined">
-			<Typography variant="h3" gutterBottom>Specify NFT Collection</Typography>
-			<form>
-				<div>
-					<TextField
-						id="contract-index"
-						label="Contract Index"
-						variant="standard"
-						value={state.index}
-						onChange={(v) => setState({ ...state, index: v.target.value })}
-						disabled={state.checking}
-					/>
-					<br />
-					<TextField
-						id="contract-subindex"
-						label="Contract Sub Index"
-						variant="standard"
-						value={state.subIndex}
-						onChange={(v) => setState({ ...state, subIndex: v.target.value })}
-						disabled={state.checking}
-					/>
-				</div>
-				<div>{state.error && <Typography>{state.error}</Typography>}</div>
-				<div>{state.checking && <Typography>Checking..</Typography>}</div>
-				<div>
-					<Button
-						variant="contained"
-						disabled={!isValid() || state.checking}
-						onClick={() => onOkClicked()}
-					>
-						Ok
-					</Button>
-				</div>
-			</form>
+		<Paper sx={{ padding: "10px" }} variant="outlined">
+			<Typography variant="h4" gutterBottom>
+				Specify NFT Collection
+			</Typography>
+			<Stack component={"form"} spacing={2} margin="auto" width={"70%"} maxWidth={"md"}>
+				<TextField
+					id="contract-index"
+					label="Contract Index"
+					variant="standard"
+					value={state.index}
+					onChange={(v) => setState({ ...state, index: v.target.value })}
+					disabled={state.checking}
+				/>
+				<TextField
+					id="contract-subindex"
+					label="Contract Sub Index"
+					variant="standard"
+					value={state.subIndex}
+					onChange={(v) => setState({ ...state, subIndex: v.target.value })}
+					disabled={state.checking}
+				/>
+				{state.error && <Typography component="div" color="error">{state.error}</Typography>}
+				{state.checking && <Typography component="div">Checking..</Typography>}
+				<Button
+					variant="contained"
+					disabled={!isValid() || state.checking}
+					onClick={() => onOkClicked()}
+				>
+					Find
+				</Button>
+			</Stack>
 		</Paper>
 	);
 }

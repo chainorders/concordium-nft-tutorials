@@ -10,7 +10,8 @@ pub enum MarketplaceError {
     InvalidAmountPaid,
     InvokeTransferError,
     NoBalance,
-    NotOperator
+    NotOperator,
+    InvalidCommission,
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq, Reject)]

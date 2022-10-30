@@ -1,4 +1,4 @@
-import { Divider, Stack } from "@mui/material";
+import { Divider, Stack, Typography } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
@@ -12,8 +12,9 @@ function Cis2FindInstanceOrInit(props: {
 }) {
 	return (
 		<Stack spacing={2}>
-			<Cis2Init {...props} />
 			<Cis2FindInstance provider={props.provider} onDone={props.onDone} />
+			<Typography variant="overline">Or</Typography>
+			<Cis2Init {...props} />
 		</Stack>
 	);
 }

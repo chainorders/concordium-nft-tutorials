@@ -4,7 +4,7 @@ import { Typography, Grid } from "@mui/material";
 import { MetadataUrl } from "../models/Cis2Types";
 import Cis2BatchItemMetadataPrepare from "./Cis2BatchItemMetadataPrepare";
 
-function Cis2BatchMetadataPrepare(props: {
+function Cis2NftBatchMetadataPrepare(props: {
 	files: File[];
 	pinataJwt: string;
 	onDone: (tokens: { [tokenId: string]: MetadataUrl }) => void;
@@ -61,7 +61,6 @@ function Cis2BatchMetadataPrepare(props: {
 
 	return (
 		<>
-			<h3>Prepare NFT Metadata</h3>
 			{state.error && (
 				<div>
 					<Typography>{state.error}</Typography>
@@ -70,7 +69,7 @@ function Cis2BatchMetadataPrepare(props: {
 			<Typography>
 				Total no of files : {state.preparedFilesCount} / {props.files.length}
 			</Typography>
-			<Grid container spacing={2}>
+			<Grid container spacing={2} padding="10px">
 				{props.files.map((file, index) => (
 					<Grid item xs={4} key={file.name}>
 						<Cis2BatchItemMetadataPrepare
@@ -88,4 +87,4 @@ function Cis2BatchMetadataPrepare(props: {
 	);
 }
 
-export default Cis2BatchMetadataPrepare;
+export default Cis2NftBatchMetadataPrepare;

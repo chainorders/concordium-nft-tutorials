@@ -9,7 +9,7 @@
         ```
     - Now lets set the imported account name to an ENV variable so that its easier to use in subsequent steps
         ```bash
-        export SENDER=<ACCOUNT-NAME>
+        export ACCOUNT=<ACCOUNT-NAME>
         ```
     - Lets set the Node Endpoints as Env Variables. The values assume that the Node service of [`docker-compose.yml`](./docker-compose.yml) is running. `Port` is configured using the [.env](./.env) file
         ```bash
@@ -27,18 +27,18 @@
     - Name the module
         ##### Command
         ```bash
-        concordium-client module name <MODULE-REFERENCE> --name marketmodule
+        concordium-client module name <MODULE-REFERENCE> --name market
         ```
 * ## Initialize Smart Contract
     ### Command
     ```bash
-    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract init marketmodule --contract Market-NFT --sender $ACCOUNT --energy 3000
+    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract init market --contract Market-NFT --parameter-json ./nft-artifacts/init-marketplace.json --sender $ACCOUNT --energy 3000 --schema ./dist/marketplace-contract/schema.bin
     ```
 
     - Name the contract instance. So thats it's easier to work with
         ##### Command
         ```
-        concordium-client contract name <INDEX> --name marketplace
+        export MARKETPLACE_CONTRACT=1587
         ```
 
 * ## Update NFT Operator
@@ -49,19 +49,19 @@
 * ## Add NFT
     ### Command
     ```bash
-    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update 984 --entrypoint add --parameter-json ./nft-artifacts/add-marketplace.json --schema ./dist/marketplace-contract/schema.bin --sender $ACCOUNT --energy 10000
+    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update $MARKETPLACE_CONTRACT --entrypoint add --parameter-json ./nft-artifacts/add-marketplace.json --schema ./dist/marketplace-contract/schema.bin --sender $ACCOUNT --energy 10000
     ```
 
 * ## List NFT
     ### Command
     ```
-    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract invoke 984 --entrypoint list --schema ./dist/marketplace-contract/schema.bin
+    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract invoke $MARKETPLACE_CONTRACT --entrypoint list --schema ./dist/marketplace-contract/schema.bin
     ```
 
 * ## Transfer NFT
     ### Command
     ```bash
-    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update 984 --entrypoint transfer --parameter-json ./nft-artifacts/transfer-marketplace.json --schema ./dist/marketplace-contract/schema.bin --sender $ACCOUNT --energy 6000
+    concordium-client --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT contract update $MARKETPLACE_CONTRACT --entrypoint transfer --parameter-json ./nft-artifacts/transfer-marketplace.json --schema ./dist/marketplace-contract/schema.bin --sender $ACCOUNT --energy 6000
     ```
     
 * ## [Check updated State](#list-nft)

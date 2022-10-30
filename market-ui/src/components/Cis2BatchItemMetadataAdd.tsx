@@ -30,7 +30,7 @@ enum Steps {
 	MintNft,
 }
 
-function NftImage(props: {
+function TokenImage(props: {
 	metadataUrl?: MetadataUrl;
 	onMetadataLoaded?: (metadata: Metadata) => void;
 }) {
@@ -112,7 +112,7 @@ function GetMetadataUrlCardStep(props: {
 
 	return (
 		<Card variant="outlined">
-			<NftImage
+			<TokenImage
 				metadataUrl={state.metadataUrl}
 				onMetadataLoaded={onMetadataLoaded}
 			/>

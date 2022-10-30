@@ -4,6 +4,7 @@ import {
 	Button,
 	TextField,
 	ButtonGroup,
+	Stack,
 } from "@mui/material";
 import { useState } from "react";
 import { PinataClient } from "../models/PinataClient";
@@ -37,11 +38,17 @@ function ConnectPinata(props: {
 	}
 
 	return (
-		<Paper>
+		<Paper variant="outlined">
 			<Typography variant="h3" gutterBottom>
 				Connect Pinata
 			</Typography>
-			<form>
+			<Stack
+				component={"form"}
+				spacing={2}
+				margin="auto"
+				width={"70%"}
+				maxWidth={"md"}
+			>
 				<TextField
 					name="pinataJwt"
 					id="pinata-jwt"
@@ -50,26 +57,19 @@ function ConnectPinata(props: {
 					error={!!state.error}
 					onChange={(e) => setState({ ...state, pinataJwt: e.target.value })}
 				/>
-				<div>{state.error && <Typography>{state.error}</Typography>}</div>
-				<div>{state.processing && <Typography>Connecting..</Typography>}</div>
-				<ButtonGroup sx={{padding: "10px"}}>
-					<Button
-						variant="contained"
-						disabled={state.processing}
-						onClick={() => onOkClicked()}
-					>
+				{state.error && <Typography component="div">{state.error}</Typography>}
+				{state.processing && (
+					<Typography component="div">Connecting..</Typography>
+				)}
+				<ButtonGroup fullWidth disabled={state.processing}>
+					<Button variant="contained" onClick={() => onOkClicked()}>
 						Connect
 					</Button>
-
-					<Button
-						variant="contained"
-						disabled={state.processing}
-						onClick={() => props.onSkip()}
-					>
+					<Button variant="outlined" onClick={() => props.onSkip()}>
 						Skip
 					</Button>
 				</ButtonGroup>
-			</form>
+			</Stack>
 		</Paper>
 	);
 }

@@ -3,7 +3,7 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress, TransactionSummary } from "@concordium/web-sdk";
 
 import { MarketplaceDeserializer } from "./MarketplaceDeserializer";
-import { TokenList } from "./MarketplaceTypes";
+import { AddParams, TokenList } from "./MarketplaceTypes";
 import { MARKET_CONTRACT_SCHEMA } from "../Constants";
 import { invokeContract, updateContract } from "./ConcordiumContractClient";
 
@@ -39,30 +39,18 @@ export async function list(
  * Adds a token to buyable list of tokens in marketplace.
  * @param provider Wallet Provider.
  * @param account Account address.
- * @param tokenId Token id.
  * @param marketContractAddress Market place contract Address.
- * @param nftContractAddress CIS2-NFT contract address.
- * @param price Selling Price of the Token.
+ * @param paramJson Marketplace Add Method Params.
  * @param maxContractExecutionEnergy Max energy allowed for the transaction.
  * @returns Transaction outcomes.
  */
 export async function add(
 	provider: WalletApi,
 	account: string,
-	tokenId: string,
 	marketContractAddress: ContractAddress,
-	nftContractAddress: ContractAddress,
-	price: bigint,
+	paramJson: AddParams,
 	maxContractExecutionEnergy = BigInt(9999)
 ): Promise<Record<string, TransactionSummary>> {
-	const paramJson = {
-		nft_contract_address: {
-			index: nftContractAddress.index.toString(),
-			subindex: nftContractAddress.subindex.toString(),
-		},
-		token_id: tokenId,
-		price: price.toString(),
-	};
 	return updateContract(
 		provider,
 		CONTRACT_NAME,

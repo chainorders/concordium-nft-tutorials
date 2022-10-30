@@ -124,15 +124,8 @@ function App() {
 			),
 		},
 		{
-			path: "/mint",
-			name: "Mint",
-			component: (
-				<MintNftPage provider={state.provider!} account={state.account!} />
-			),
-		},
-		{
 			path: "/mint-batch",
-			name: "Mint Batch",
+			name: "Mint",
 			component: (
 				<BatchMintNftPage provider={state.provider!} account={state.account!} />
 			),
