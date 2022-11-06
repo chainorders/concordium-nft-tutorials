@@ -38,39 +38,28 @@ function ConnectPinata(props: {
 	}
 
 	return (
-		<Paper variant="outlined">
-			<Typography variant="h3" gutterBottom>
-				Connect Pinata
-			</Typography>
-			<Stack
-				component={"form"}
-				spacing={2}
-				margin="auto"
-				width={"70%"}
-				maxWidth={"md"}
-			>
-				<TextField
-					name="pinataJwt"
-					id="pinata-jwt"
-					label="Pinata JWT"
-					required={true}
-					error={!!state.error}
-					onChange={(e) => setState({ ...state, pinataJwt: e.target.value })}
-				/>
-				{state.error && <Typography component="div">{state.error}</Typography>}
-				{state.processing && (
-					<Typography component="div">Connecting..</Typography>
-				)}
-				<ButtonGroup fullWidth disabled={state.processing}>
-					<Button variant="contained" onClick={() => onOkClicked()}>
-						Connect
-					</Button>
-					<Button variant="outlined" onClick={() => props.onSkip()}>
-						Skip
-					</Button>
-				</ButtonGroup>
-			</Stack>
-		</Paper>
+		<Stack component={"form"} spacing={2}>
+			<TextField
+				name="pinataJwt"
+				id="pinata-jwt"
+				label="Pinata JWT"
+				required={true}
+				error={!!state.error}
+				onChange={(e) => setState({ ...state, pinataJwt: e.target.value })}
+			/>
+			{state.error && <Typography component="div">{state.error}</Typography>}
+			{state.processing && (
+				<Typography component="div">Connecting..</Typography>
+			)}
+			<ButtonGroup fullWidth disabled={state.processing}>
+				<Button variant="contained" onClick={() => onOkClicked()}>
+					Connect
+				</Button>
+				<Button variant="outlined" onClick={() => props.onSkip()}>
+					Skip
+				</Button>
+			</ButtonGroup>
+		</Stack>
 	);
 }
 

@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Box, Stepper, Step, StepLabel, Typography } from "@mui/material";
+import {
+	Stepper,
+	Step,
+	StepLabel,
+	Typography,
+	Paper,
+} from "@mui/material";
+import { Container } from "@mui/system";
 
 import { MetadataUrl } from "../models/Cis2Types";
 import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
@@ -18,8 +25,10 @@ enum Steps {
 	Mint,
 }
 
+type StepType = { step: Steps; title: string };
+
 function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
-	const steps = [
+	const steps: StepType[] = [
 		{
 			step: Steps.GetOrInitCis2,
 			title: "Deploy Or Find NFT Collection",
@@ -32,12 +41,15 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 			step: Steps.UploadFiles,
 			title: "Upload Image Files",
 		},
-		{ step: Steps.PrepareMetadata, title: "Prepare Metadata" },
+		{
+			step: Steps.PrepareMetadata,
+			title: "Prepare Metadata",
+		},
 		{ step: Steps.Mint, title: "Mint" },
 	];
 
 	let [state, setState] = useState<{
-		activeStep: Steps;
+		activeStep: StepType;
 		nftContract?: ContractAddress;
 		tokenMetadataMap?: {
 			[tokenId: string]: MetadataUrl;
@@ -45,7 +57,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		pinataJwt: string;
 		files: File[];
 	}>({
-		activeStep: Steps.GetOrInitCis2,
+		activeStep: steps[0],
 		pinataJwt: "",
 		files: [],
 	});
@@ -53,7 +65,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 	function onGetCollectionAddress(address: ContractAddress) {
 		setState({
 			...state,
-			activeStep: Steps.ConnectPinata,
+			activeStep: steps[1],
 			nftContract: address,
 		});
 	}
@@ -62,7 +74,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		setState({
 			...state,
 			pinataJwt,
-			activeStep: Steps.UploadFiles,
+			activeStep: steps[2],
 		});
 	}
 
@@ -70,7 +82,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		setState({
 			...state,
 			pinataJwt: "",
-			activeStep: Steps.PrepareMetadata,
+			activeStep: steps[3],
 		});
 	}
 
@@ -78,7 +90,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		setState({
 			...state,
 			files,
-			activeStep: Steps.PrepareMetadata,
+			activeStep: steps[3],
 		});
 	}
 
@@ -87,7 +99,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 	}) {
 		setState({
 			...state,
-			activeStep: Steps.Mint,
+			activeStep: steps[4],
 			tokenMetadataMap,
 		});
 	}
@@ -97,7 +109,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 	}
 
 	function StepContent() {
-		switch (state.activeStep) {
+		switch (state.activeStep.step) {
 			case Steps.GetOrInitCis2:
 				return (
 					<Cis2FindInstanceOrInit
@@ -106,12 +118,12 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 						onDone={(address) => onGetCollectionAddress(address)}
 					/>
 				);
-			case Steps.UploadFiles:
-				return <UploadFiles onDone={onFilesUploaded} />;
 			case Steps.ConnectPinata:
 				return (
 					<ConnectPinata onDone={onPinataConnected} onSkip={onPinataSkipped} />
 				);
+			case Steps.UploadFiles:
+				return <UploadFiles onDone={onFilesUploaded} />;
 			case Steps.PrepareMetadata:
 				return (
 					<Cis2NftBatchMetadataPrepareOrAdd
@@ -136,19 +148,30 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 	}
 
 	return (
-		<>
-			<Typography variant="h2">Mint NFTs</Typography>
-			<Box>
-				<Stepper activeStep={state.activeStep} alternativeLabel>
-					{steps.map((step) => (
-						<Step key={step.step}>
-							<StepLabel>{step.title}</StepLabel>
-						</Step>
-					))}
-				</Stepper>
+		<Container sx={{ maxWidth: "xl", pt: "10px" }}>
+			<Stepper
+				activeStep={state.activeStep.step}
+				alternativeLabel
+				sx={{ padding: "20px" }}
+			>
+				{steps.map((step) => (
+					<Step key={step.step}>
+						<StepLabel>{step.title}</StepLabel>
+					</Step>
+				))}
+			</Stepper>
+			<Paper sx={{ padding: "20px" }} variant="outlined">
+				<Typography
+					variant="h4"
+					gutterBottom
+					sx={{ pt: "20px" }}
+					textAlign="left"
+				>
+					{state.activeStep.title}
+				</Typography>
 				<StepContent />
-			</Box>
-		</>
+			</Paper>
+		</Container>
 	);
 }
 

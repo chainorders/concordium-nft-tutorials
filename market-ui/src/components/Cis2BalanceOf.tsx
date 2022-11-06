@@ -81,42 +81,31 @@ function Cis2BalanceOf(props: {
 	}
 
 	return (
-		<>
-			<Typography variant="h3" component="div">
-				Check Token Balance
-			</Typography>
-			<Stack
-				component={"form"}
-				spacing={2}
-				margin="auto"
-				width={"70%"}
-				maxWidth={"md"}
-			>
-				<TextField
-					id="token-id"
-					label="Token Id"
-					variant="standard"
-					value={state.tokenId}
-					onChange={(v) => setState({ ...state, tokenId: v.target.value })}
-					disabled={state.checking}
-				/>
-				{state.error && (
-					<Typography component="div" color="error" variant="button">
-						{state.error}
-					</Typography>
-				)}
-				{state.checking && <Typography component="div">Checking..</Typography>}
-				<ButtonGroup fullWidth size="large" disabled={state.checking}>
-					<Button
-						variant="contained"
-						disabled={!isValid()}
-						onClick={() => onOkClicked()}
-					>
-						Ok
-					</Button>
-				</ButtonGroup>
-			</Stack>
-		</>
+		<Stack component={"form"} spacing={2}>
+			<TextField
+				id="token-id"
+				label="Token Id"
+				variant="standard"
+				value={state.tokenId}
+				onChange={(v) => setState({ ...state, tokenId: v.target.value })}
+				disabled={state.checking}
+			/>
+			{state.error && (
+				<Typography component="div" color="error" variant="button">
+					{state.error}
+				</Typography>
+			)}
+			{state.checking && <Typography component="div">Checking..</Typography>}
+			<ButtonGroup fullWidth size="large" disabled={state.checking}>
+				<Button
+					variant="contained"
+					disabled={!isValid()}
+					onClick={() => onOkClicked()}
+				>
+					Ok
+				</Button>
+			</ButtonGroup>
+		</Stack>
 	);
 }
 

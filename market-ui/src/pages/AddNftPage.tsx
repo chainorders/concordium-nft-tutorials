@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Stepper, Step, StepLabel, Typography } from "@mui/material";
+import {
+	Stepper,
+	Step,
+	StepLabel,
+	Typography,
+	Paper,
+	Divider,
+	Stack,
+	Container,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
@@ -18,6 +27,7 @@ enum Steps {
 	CheckTokenBalance,
 	AddToken,
 }
+type StepType = { step: Steps; title: string };
 
 function AddNftPage(props: {
 	provider: WalletApi;
@@ -36,17 +46,17 @@ function AddNftPage(props: {
 	];
 
 	let [state, setState] = useState<{
-		activeStep: Steps;
+		activeStep: StepType;
 		nftContract?: ContractAddress;
 		tokenId?: string;
 	}>({
-		activeStep: Steps.FindCollection,
+		activeStep: steps[0],
 	});
 
 	function onGetCollectionAddress(address: ContractAddress) {
 		setState({
 			...state,
-			activeStep: Steps.CheckOperator,
+			activeStep: steps[1],
 			nftContract: address,
 		});
 	}
@@ -55,12 +65,12 @@ function AddNftPage(props: {
 		if (hasOwnership) {
 			setState({
 				...state,
-				activeStep: Steps.CheckTokenBalance,
+				activeStep: steps[3],
 			});
 		} else {
 			setState({
 				...state,
-				activeStep: Steps.UpdateOperator,
+				activeStep: steps[2],
 			});
 		}
 	}
@@ -68,14 +78,14 @@ function AddNftPage(props: {
 	function onUpdateOperator() {
 		setState({
 			...state,
-			activeStep: Steps.CheckTokenBalance,
+			activeStep: steps[3],
 		});
 	}
 
 	function onTokenBalance(tokenId: string, _balance: number) {
 		setState({
 			...state,
-			activeStep: Steps.AddToken,
+			activeStep: steps[4],
 			tokenId: tokenId,
 		});
 	}
@@ -86,7 +96,7 @@ function AddNftPage(props: {
 	}
 
 	function StepContent() {
-		switch (state.activeStep) {
+		switch (state.activeStep.step) {
 			case Steps.FindCollection:
 				return (
 					<Cis2FindInstance
@@ -140,19 +150,30 @@ function AddNftPage(props: {
 	}
 
 	return (
-		<>
-			<Typography variant="h2" gutterBottom>Add NFT to Marketplace</Typography>
-			<Box sx={{ width: "100%" }}>
-				<Stepper activeStep={state.activeStep} alternativeLabel>
-					{steps.map((step) => (
-						<Step key={step.step}>
-							<StepLabel>{step.title}</StepLabel>
-						</Step>
-					))}
-				</Stepper>
-			</Box>
-			<StepContent />
-		</>
+		<Container sx={{ maxWidth: "xl", pt: "10px" }}>
+			<Stepper
+				activeStep={state.activeStep.step}
+				alternativeLabel
+				sx={{ padding: "20px" }}
+			>
+				{steps.map((step) => (
+					<Step key={step.step}>
+						<StepLabel>{step.title}</StepLabel>
+					</Step>
+				))}
+			</Stepper>
+			<Paper sx={{ padding: "20px" }} variant="outlined">
+				<Typography
+					variant="h4"
+					gutterBottom
+					sx={{ pt: "20px" }}
+					textAlign="left"
+				>
+					{state.activeStep.title}
+				</Typography>
+				<StepContent />
+			</Paper>
+		</Container>
 	);
 }
 

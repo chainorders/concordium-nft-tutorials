@@ -100,9 +100,13 @@ function GetMetadataUrlCardStep(props: {
 	}
 
 	function onMetadataLoaded(metadata: Metadata) {
+		// const metadataUrl = {
+		// 	url: state.metadataUrl?.url!,
+		// 	hash: sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex"),
+		// };
 		const metadataUrl = {
 			url: state.metadataUrl?.url!,
-			hash: sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex"),
+			hash: "-",
 		};
 
 		setState({ ...state, metadata, metadataUrl });

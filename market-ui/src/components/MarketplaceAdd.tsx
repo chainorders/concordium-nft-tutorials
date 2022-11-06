@@ -66,60 +66,55 @@ function MarkerplaceAdd(props: {
 	}
 
 	return (
-		<>
-			<Typography variant="h3">Add Token</Typography>
-			<Container>
-				<Stack component={"form"} onSubmit={submit}>
-					<TextField
-						id="token-id"
-						label="Token Id"
-						variant="standard"
-						value={props.tokenId}
-						disabled
-						fullWidth
-					/>
-					<TextField
-						name="price"
-						id="price"
-						type="number"
-						label="Token Price in CCD"
-						variant="standard"
-						fullWidth
-						disabled={state.adding}
-						required
-					/>
-					<TextField
-						name="royalty"
-						id="royalty"
-						type="number"
-						label="Primary Seller Royalty %"
-						variant="standard"
-						fullWidth
-						disabled={state.adding}
-						required
-						defaultValue="0"
-					/>
-					{state.error && (
-						<Typography
-							color={"error"}
-							variant={"body1"}
-							component="div"
-							gutterBottom
-						>
-							{state.error}
-						</Typography>
-					)}
-					{state.adding && (
-						<Typography variant={"body1"} component="div" gutterBottom>
-							Adding..
-						</Typography>
-					)}
-					<Button variant="contained" disabled={state.adding} type="submit">
-						Add
-					</Button>
-				</Stack>
-			</Container>
-		</>
+		<Stack component={"form"} onSubmit={submit} spacing={2}>
+			<TextField
+				id="token-id"
+				label="Token Id"
+				variant="standard"
+				value={props.tokenId}
+				disabled
+				fullWidth
+			/>
+			<TextField
+				name="price"
+				id="price"
+				type="number"
+				label="Token Price in CCD"
+				variant="standard"
+				fullWidth
+				disabled={state.adding}
+				required
+			/>
+			<TextField
+				name="royalty"
+				id="royalty"
+				type="number"
+				label="Primary Seller Royalty %"
+				variant="standard"
+				fullWidth
+				disabled={state.adding}
+				required
+				defaultValue="0"
+			/>
+			{state.error && (
+				<Typography
+					color={"error"}
+					variant={"body1"}
+					component="div"
+					gutterBottom
+				>
+					{state.error}
+				</Typography>
+			)}
+			{state.adding && (
+				<Typography variant={"body1"} component="div" gutterBottom>
+					Adding..
+				</Typography>
+			)}
+			<Button variant="contained" disabled={state.adding} type="submit">
+				Add
+			</Button>
+		</Stack>
 	);
 }
 

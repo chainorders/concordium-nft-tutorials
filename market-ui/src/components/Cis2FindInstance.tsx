@@ -52,38 +52,40 @@ function Cis2FindInstance(props: {
 	}
 
 	return (
-		<Paper sx={{ padding: "10px" }} variant="outlined">
-			<Typography variant="h4" gutterBottom>
-				Specify NFT Collection
-			</Typography>
-			<Stack component={"form"} spacing={2} margin="auto" width={"70%"} maxWidth={"md"}>
-				<TextField
-					id="contract-index"
-					label="Contract Index"
-					variant="standard"
-					value={state.index}
-					onChange={(v) => setState({ ...state, index: v.target.value })}
-					disabled={state.checking}
-				/>
-				<TextField
-					id="contract-subindex"
-					label="Contract Sub Index"
-					variant="standard"
-					value={state.subIndex}
-					onChange={(v) => setState({ ...state, subIndex: v.target.value })}
-					disabled={state.checking}
-				/>
-				{state.error && <Typography component="div" color="error">{state.error}</Typography>}
-				{state.checking && <Typography component="div">Checking..</Typography>}
-				<Button
-					variant="contained"
-					disabled={!isValid() || state.checking}
-					onClick={() => onOkClicked()}
-				>
-					Find
-				</Button>
-			</Stack>
-		</Paper>
+		<Stack component={"form"} spacing={2}>
+			<TextField
+				id="contract-index"
+				label="Contract Index"
+				variant="standard"
+				value={state.index}
+				onChange={(v) => setState({ ...state, index: v.target.value })}
+				disabled={state.checking}
+			/>
+			<TextField
+				id="contract-subindex"
+				label="Contract Sub Index"
+				variant="standard"
+				value={state.subIndex}
+				onChange={(v) => setState({ ...state, subIndex: v.target.value })}
+				disabled={state.checking}
+			/>
+			{state.error && (
+				<Typography component="div" color="error">
+					{state.error}
+				</Typography>
+			)}
+			{state.checking && <Typography component="div">Checking..</Typography>}
+			<Button
+				variant="contained"
+				disabled={!isValid() || state.checking}
+				onClick={() => onOkClicked()}
+				fullWidth
+				size="large"
+				sx={{ maxWidth: "100px" }}
+			>
+				Find
+			</Button>
+		</Stack>
 	);
 }
 

@@ -29,25 +29,25 @@ function Cis2Init(props: {
 	}
 
 	return (
-		<Paper sx={{ padding: "10px" }} variant="outlined">
-			<Stack component={"form"} spacing={2} margin="auto" width={"70%"} maxWidth={"md"}>
-				{state.error && (
-					<Typography component="div" color="error" variant="body1">
-						{state.error}
-					</Typography>
-				)}
-				{state.processing && (
-					<Typography component="div" variant="body1">Deploying..</Typography>
-				)}
-				<Button
-					variant="contained"
-					disabled={state.processing}
-					onClick={() => onOkClicked()}
-				>
-					Deploy New
-				</Button>
-			</Stack>
-		</Paper>
+		<Stack component={"form"} spacing={2}>
+			{state.error && (
+				<Typography component="div" color="error" variant="body1">
+					{state.error}
+				</Typography>
+			)}
+			{state.processing && (
+				<Typography component="div" variant="body1">
+					Deploying..
+				</Typography>
+			)}
+			<Button
+				variant="contained"
+				disabled={state.processing}
+				onClick={() => onOkClicked()}
+			>
+				Deploy New
+			</Button>
+		</Stack>
 	);
 }
 
