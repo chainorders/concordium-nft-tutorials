@@ -4,12 +4,14 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
 import { updateOperator } from "../models/Cis2NftClient";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function Cis2UpdateOperator(props: {
 	provider: WalletApi;
 	account: string;
 	marketContractAddress: ContractAddress;
 	nftContractAddress: ContractAddress;
+	contractInfo: Cis2ContractInfo;
 	onDone: () => void;
 }) {
 	const [state, setState] = useState({ updating: false, error: "" });
@@ -20,7 +22,8 @@ function Cis2UpdateOperator(props: {
 			props.provider,
 			props.account,
 			props.marketContractAddress,
-			props.nftContractAddress
+			props.nftContractAddress,
+			props.contractInfo
 		)
 			.then((_) => {
 				props.onDone();

@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Paper, Typography, Button, Stack } from "@mui/material";
+import { Typography, Button, Stack } from "@mui/material";
 
 import { initCis2NftContract } from "../models/Cis2NftClient";
+import { ContractInfo } from "../models/ConcordiumContractClient";
 
 function Cis2Init(props: {
 	provider: WalletApi;
 	account: string;
+	contractInfo: ContractInfo;
 	onDone: (address: ContractAddress) => void;
 }) {
 	let [state, setState] = useState({
@@ -18,7 +20,7 @@ function Cis2Init(props: {
 	function onOkClicked() {
 		setState({ ...state, processing: true });
 
-		initCis2NftContract(props.provider, props.account)
+		initCis2NftContract(props.provider, props.contractInfo, props.account)
 			.then((address) => {
 				setState({ ...state, processing: false });
 				props.onDone(address);

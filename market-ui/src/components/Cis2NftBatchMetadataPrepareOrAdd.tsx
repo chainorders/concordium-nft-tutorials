@@ -1,14 +1,16 @@
 import { useState } from "react";
 
-import { MetadataUrl } from "../models/Cis2Types";
+import { TokenInfo } from "../models/Cis2Types";
 import Cis2BatchMetadataAdd from "./Cis2BatchMetadataAdd";
 import Cis2NftBatchMetadataPrepare from "./Cis2NftBatchMetadataPrepare";
 import { Stack, Typography } from "@mui/material";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function Cis2NftBatchMetadataPrepareOrAdd(props: {
+	contractInfo: Cis2ContractInfo;
 	files?: File[];
 	pinataJwt?: string;
-	onDone: (tokens: { [tokenId: string]: MetadataUrl }) => void;
+	onDone: (tokens: { [tokenId: string]: TokenInfo }) => void;
 }) {
 	const [state, setState] = useState({
 		isPrepDone: props.files && props.files.length ? false : true,
@@ -16,7 +18,7 @@ function Cis2NftBatchMetadataPrepareOrAdd(props: {
 		tokens: {},
 	});
 
-	function onPrepDone(tokens: { [tokenId: string]: MetadataUrl }) {
+	function onPrepDone(tokens: { [tokenId: string]: TokenInfo }) {
 		const tokensCombined = { ...state.tokens, ...tokens };
 
 		setState({
@@ -30,7 +32,7 @@ function Cis2NftBatchMetadataPrepareOrAdd(props: {
 		}
 	}
 
-	function onAddDone(tokens: { [tokenId: string]: MetadataUrl }) {
+	function onAddDone(tokens: { [tokenId: string]: TokenInfo }) {
 		const tokensCombined = { ...state.tokens, ...tokens };
 		setState({
 			...state,
@@ -47,6 +49,7 @@ function Cis2NftBatchMetadataPrepareOrAdd(props: {
 		<Stack>
 			{props.files && props.files.length && props.pinataJwt ? (
 				<Cis2NftBatchMetadataPrepare
+					contractInfo={props.contractInfo}
 					files={props.files}
 					pinataJwt={props.pinataJwt}
 					onDone={onPrepDone}
@@ -58,6 +61,7 @@ function Cis2NftBatchMetadataPrepareOrAdd(props: {
 			)}
 
 			<Cis2BatchMetadataAdd
+				contractInfo={props.contractInfo}
 				onDone={onAddDone}
 				startingTokenId={props.files?.length || 0}
 			/>

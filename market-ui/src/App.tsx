@@ -11,7 +11,11 @@ import { Route, Routes } from "react-router-dom";
 import ListNftPage from "./pages/ListNftPage";
 import AddNftPage from "./pages/AddNftPage";
 
-import { MARKET_CONTRACT_ADDRESS } from "./Constants";
+import {
+	CIS2_MULTI_CONTRACT_INFO,
+	CIS2_NFT_CONTRACT_INFO,
+	MARKET_CONTRACT_ADDRESS,
+} from "./Constants";
 import BatchMintNftPage from "./pages/BatchMintNftPage";
 import ConnectWallet from "./components/ConnectWallet";
 import Header from "./components/ui/Header";
@@ -76,6 +80,7 @@ function App() {
 					provider={state.provider!}
 					account={state.account!}
 					marketContractAddress={MARKET_CONTRACT_ADDRESS}
+					contractInfo={CIS2_NFT_CONTRACT_INFO}
 				/>
 			),
 		},
@@ -92,9 +97,26 @@ function App() {
 		},
 		{
 			path: "/mint-batch",
-			name: "Mint NFT's",
+			name: "Mint NFTs",
 			component: (
-				<BatchMintNftPage provider={state.provider!} account={state.account!} />
+				<BatchMintNftPage
+					key={CIS2_NFT_CONTRACT_INFO.contractName}
+					contractInfo={CIS2_NFT_CONTRACT_INFO}
+					provider={state.provider!}
+					account={state.account!}
+				/>
+			),
+		},
+		{
+			path: "/mint-multi-batch",
+			name: "Mint SFTs",
+			component: (
+				<BatchMintNftPage
+					key={CIS2_MULTI_CONTRACT_INFO.contractName}
+					contractInfo={CIS2_MULTI_CONTRACT_INFO}
+					provider={state.provider!}
+					account={state.account!}
+				/>
 			),
 		},
 	];

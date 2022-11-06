@@ -1,32 +1,34 @@
 import { useState } from "react";
-import { Button, Grid, Typography, Stack } from '@mui/material';
+import { Button, Grid, Typography, Stack } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
-import { batchMintNft } from "../models/Cis2NftClient";
-import { MetadataUrl } from "../models/Cis2Types";
+import { mint } from "../models/Cis2NftClient";
+import { TokenInfo } from "../models/Cis2Types";
 import Cis2NftBatchItemMint from "./Cis2NftBatchItemMint";
+import { ContractInfo } from "../models/ConcordiumContractClient";
 
 interface TokenState {
-	metadataUrl: MetadataUrl;
+	tokenInfo: TokenInfo;
 	minting: boolean;
 	minted: boolean;
 	error: string;
 }
 
 function Cis2NftBatchMint(props: {
+	contractInfo: ContractInfo;
 	provider: WalletApi;
 	account: string;
 	nftContractAddress: ContractAddress;
-	tokenMetadataMap: { [tokenId: string]: MetadataUrl };
-	onDone: (data: { [tokenId: string]: MetadataUrl }) => void;
+	tokenMetadataMap: { [tokenId: string]: TokenInfo };
+	onDone: (data: { [tokenId: string]: TokenInfo }) => void;
 }) {
 	var tokens: { [tokenId: string]: TokenState } = {};
 
 	Object.keys(props.tokenMetadataMap).forEach(
 		(tokenId) =>
 			(tokens[tokenId] = {
-				metadataUrl: props.tokenMetadataMap[tokenId],
+				tokenInfo: props.tokenMetadataMap[tokenId],
 				minting: false,
 				minted: false,
 				error: "",
@@ -47,11 +49,12 @@ function Cis2NftBatchMint(props: {
 			tokens,
 			mintingCount: state.mintingCount + mintingCount,
 		});
-		batchMintNft(
+		mint(
 			props.provider,
 			props.account,
 			props.tokenMetadataMap,
-			props.nftContractAddress
+			props.nftContractAddress,
+			props.contractInfo
 		)
 			.then((_) => {
 				setTokensState(tokens, false, true);
@@ -79,16 +82,17 @@ function Cis2NftBatchMint(props: {
 			<Typography variant="button" color={"InfoText"}>
 				<>
 					Contract : {props.nftContractAddress.index.toString()}/
-					{props.nftContractAddress.subindex.toString()}
+					{props.nftContractAddress.subindex.toString()} ({props.contractInfo.contractName})
 				</>
 			</Typography>
 			<Grid container spacing={2}>
 				{Object.keys(state.tokens).map((tokenId) => (
 					<Grid item xs={4} key={tokenId}>
 						<Cis2NftBatchItemMint
+							contractInfo={props.contractInfo}
 							error={state.tokens[tokenId].error}
 							key={tokenId}
-							metadataUrl={state.tokens[tokenId].metadataUrl}
+							tokenInfo={state.tokens[tokenId].tokenInfo}
 							minted={state.tokens[tokenId].minted}
 							minting={state.tokens[tokenId].minting}
 							tokenId={tokenId}
@@ -96,7 +100,7 @@ function Cis2NftBatchMint(props: {
 					</Grid>
 				))}
 			</Grid>
-			<br/>
+			<br />
 			<Button
 				variant="contained"
 				disabled={state.mintingCount > 0}

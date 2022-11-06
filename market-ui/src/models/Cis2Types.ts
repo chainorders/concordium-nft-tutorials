@@ -8,6 +8,7 @@ export interface MetadataUrl {
 	url: string;
 	hash: string;
 }
+export type TokenInfo = MetadataUrl | [MetadataUrl, string];
 export interface SupportResult {
 	type: "NoSupport" | "Support" | "SupportBy";
 	supportBy?: ContractAddress[];
@@ -31,11 +32,9 @@ export interface UpdateOperator {
 export type OperatorOfQueryParams = OperatorOfQuery[];
 export type UpdateOperatorParams = UpdateOperator[];
 export type TokenAmountU8 = number;
-export type ContractTokenAmount = TokenAmountU8;
+export type TokenAmountU64 = bigint;
 export interface IsTokenAmount {}
 export type BalanceOfQueryResponse<T extends IsTokenAmount> = T[];
-export type ContractBalanceOfQueryResponse =
-	BalanceOfQueryResponse<ContractTokenAmount>;
 export interface IsTokenId {}
 export interface BalanceOfQuery<T extends IsTokenId> {
 	token_id: T;

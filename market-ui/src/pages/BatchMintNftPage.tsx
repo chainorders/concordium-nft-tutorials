@@ -1,21 +1,17 @@
 import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import {
-	Stepper,
-	Step,
-	StepLabel,
-	Typography,
-	Paper,
-} from "@mui/material";
+import { Stepper, Step, StepLabel, Typography, Paper } from "@mui/material";
 import { Container } from "@mui/system";
 
-import { MetadataUrl } from "../models/Cis2Types";
+import { MetadataUrl, TokenInfo } from "../models/Cis2Types";
 import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
 import ConnectPinata from "../components/ConnectPinata";
 import UploadFiles from "../components/UploadFiles";
 import Cis2NftBatchMint from "../components/Cis2NftBatchMint";
 import Cis2NftBatchMetadataPrepareOrAdd from "../components/Cis2NftBatchMetadataPrepareOrAdd";
+import { CIS2_NFT_CONTRACT_INFO } from "../Constants";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 enum Steps {
 	GetOrInitCis2,
@@ -27,7 +23,11 @@ enum Steps {
 
 type StepType = { step: Steps; title: string };
 
-function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
+function BatchMintNftPage(props: {
+	provider: WalletApi;
+	account: string;
+	contractInfo: Cis2ContractInfo;
+}) {
 	const steps: StepType[] = [
 		{
 			step: Steps.GetOrInitCis2,
@@ -52,7 +52,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 		activeStep: StepType;
 		nftContract?: ContractAddress;
 		tokenMetadataMap?: {
-			[tokenId: string]: MetadataUrl;
+			[tokenId: string]: TokenInfo;
 		};
 		pinataJwt: string;
 		files: File[];
@@ -95,7 +95,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 	}
 
 	function onMetadataPrepared(tokenMetadataMap: {
-		[tokenId: string]: MetadataUrl;
+		[tokenId: string]: TokenInfo;
 	}) {
 		setState({
 			...state,
@@ -115,6 +115,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 					<Cis2FindInstanceOrInit
 						provider={props.provider}
 						account={props.account}
+						contractInfo={props.contractInfo}
 						onDone={(address) => onGetCollectionAddress(address)}
 					/>
 				);
@@ -127,6 +128,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 			case Steps.PrepareMetadata:
 				return (
 					<Cis2NftBatchMetadataPrepareOrAdd
+						contractInfo={props.contractInfo}
 						pinataJwt={state.pinataJwt}
 						files={state.files}
 						onDone={onMetadataPrepared}
@@ -135,6 +137,7 @@ function BatchMintNftPage(props: { provider: WalletApi; account: string }) {
 			case Steps.Mint:
 				return (
 					<Cis2NftBatchMint
+						contractInfo={props.contractInfo}
 						provider={props.provider}
 						account={props.account}
 						nftContractAddress={state.nftContract as ContractAddress}

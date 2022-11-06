@@ -1,14 +1,11 @@
-import { Buffer } from "buffer/";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress, TransactionSummary } from "@concordium/web-sdk";
 
 import { MarketplaceDeserializer } from "./MarketplaceDeserializer";
 import { AddParams, TokenList } from "./MarketplaceTypes";
-import { MARKET_CONTRACT_SCHEMA } from "../Constants";
+import { MARKETPLACE_CONTRACT_INFO } from "../Constants";
 import { invokeContract, updateContract } from "./ConcordiumContractClient";
 
-const CONTRACT_NAME = "Market-NFT";
-const SCHEMA_BUFFER = Buffer.from(MARKET_CONTRACT_SCHEMA, "hex");
 const enum MethodNames {
 	add = "add",
 	transfer = "transfer",
@@ -27,8 +24,7 @@ export async function list(
 ): Promise<TokenList> {
 	const retValue = await invokeContract(
 		provider,
-		SCHEMA_BUFFER,
-		CONTRACT_NAME,
+		MARKETPLACE_CONTRACT_INFO,
 		marketContractAddress,
 		MethodNames.list
 	);
@@ -53,8 +49,7 @@ export async function add(
 ): Promise<Record<string, TransactionSummary>> {
 	return updateContract(
 		provider,
-		CONTRACT_NAME,
-		SCHEMA_BUFFER,
+		MARKETPLACE_CONTRACT_INFO,
 		paramJson,
 		account,
 		marketContractAddress,
@@ -94,8 +89,7 @@ export async function transfer(
 
 	return updateContract(
 		provider,
-		CONTRACT_NAME,
-		SCHEMA_BUFFER,
+		MARKETPLACE_CONTRACT_INFO,
 		paramJson,
 		account,
 		marketContractAddress,

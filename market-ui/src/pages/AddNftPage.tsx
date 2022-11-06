@@ -19,6 +19,7 @@ import Cis2OperatorOf from "../components/Cis2OperatorOf";
 import Cis2UpdateOperator from "../components/Cis2UpdateOperator";
 import Cis2FindInstance from "../components/Cis2FindInstance";
 import MarkerplaceAdd from "../components/MarketplaceAdd";
+import { CIS2_NFT_CONTRACT_INFO } from "../Constants";
 
 enum Steps {
 	FindCollection,
@@ -102,6 +103,7 @@ function AddNftPage(props: {
 					<Cis2FindInstance
 						provider={props.provider}
 						onDone={(address) => onGetCollectionAddress(address)}
+						contractInfo={CIS2_NFT_CONTRACT_INFO}
 					/>
 				);
 			case Steps.CheckOperator:
@@ -111,6 +113,7 @@ function AddNftPage(props: {
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
 						nftContractAddress={state.nftContract as ContractAddress}
+						contractInfo={CIS2_NFT_CONTRACT_INFO}
 						onDone={(isOperator) => onCheckOperator(isOperator)}
 					/>
 				);
@@ -121,6 +124,7 @@ function AddNftPage(props: {
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
 						nftContractAddress={state.nftContract as ContractAddress}
+						contractInfo={CIS2_NFT_CONTRACT_INFO}
 						onDone={() => onUpdateOperator()}
 					/>
 				);
@@ -129,7 +133,8 @@ function AddNftPage(props: {
 					<Cis2BalanceOf
 						provider={props.provider}
 						account={props.account}
-						nftContractAddress={state.nftContract as ContractAddress}
+						cis2ContractAddress={state.nftContract as ContractAddress}
+						contractInfo={CIS2_NFT_CONTRACT_INFO}
 						onDone={(id, balance) => onTokenBalance(id, balance)}
 					/>
 				);

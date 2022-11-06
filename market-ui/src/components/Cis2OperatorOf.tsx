@@ -4,12 +4,14 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
 import { isOperator } from "../models/Cis2NftClient";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function Cis2OperatorOf(props: {
 	account: string;
 	provider: WalletApi;
 	marketContractAddress: ContractAddress;
 	nftContractAddress: ContractAddress;
+	contractInfo: Cis2ContractInfo;
 	onDone: (hasOwnership: boolean) => void;
 }) {
 	const [state, setState] = useState({ checking: false, error: "" });
@@ -20,7 +22,8 @@ function Cis2OperatorOf(props: {
 			props.provider,
 			props.account,
 			props.marketContractAddress,
-			props.nftContractAddress
+			props.nftContractAddress,
+			props.contractInfo
 		)
 			.then((isOperator) => props.onDone(isOperator))
 			.catch((err: Error) => {

@@ -16,7 +16,7 @@ import { FormEvent, useState } from "react";
 import { sha256 } from "@concordium/web-sdk";
 import { Buffer } from "buffer/";
 import { PinataClient } from "../models/PinataClient";
-import { Metadata, MetadataUrl } from "../models/Cis2Types";
+import { Metadata, MetadataUrl, TokenInfo } from "../models/Cis2Types";
 import {
 	tokenIdToNftImageFileName,
 	tokenIdToNftMetadataFileName,
@@ -25,6 +25,8 @@ import { Theme } from "@mui/system";
 import DisplayError from "./DisplayError";
 import GetTokenIdCardStep from "./GetTokenIdCardStep";
 import GetNftMintCardStep from "./GetNftMintCardStep";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
+import GetQuantityCardStep from "./GetQuantityCardStep";
 
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };
 
@@ -32,6 +34,7 @@ enum Steps {
 	GetTokenId,
 	UploadImage,
 	CreateMetadata,
+	GetQuantity,
 	Mint,
 }
 
@@ -220,10 +223,11 @@ function UploadMetadataIpfsCardStep(props: {
 }
 
 function Cis2BatchItemMetadataPrepare(props: {
+	contractInfo: Cis2ContractInfo;
 	file: File;
 	pinataJwtKey: string;
 	tokenId: string;
-	onDone: (data: { tokenId: string; metadataUrl: MetadataUrl }) => void;
+	onDone: (data: { tokenId: string; tokenInfo: TokenInfo }) => void;
 }) {
 	const pinata = new PinataClient(props.pinataJwtKey);
 	const [state, setState] = useState({
@@ -232,6 +236,7 @@ function Cis2BatchItemMetadataPrepare(props: {
 		tokenId: props.tokenId,
 		imageIpfsUrl: "",
 		metadataUrl: { url: "", hash: "" } as MetadataUrl,
+		quantity: "",
 	});
 
 	function tokenIdUpdated(tokenId: string) {
@@ -243,14 +248,24 @@ function Cis2BatchItemMetadataPrepare(props: {
 	}
 
 	function metadataUploaded(tokenId: string, metadataUrl: MetadataUrl) {
-		setState({ ...state, tokenId, step: Steps.Mint, metadataUrl });
-		props.onDone({ tokenId, metadataUrl });
+		if (props.contractInfo.contractName === "CIS2-NFT") {
+			setState({ ...state, tokenId, step: Steps.Mint, metadataUrl });
+			props.onDone({ tokenId, tokenInfo: metadataUrl });
+		} else if (props.contractInfo.contractName === "CIS2-Multi") {
+			setState({ ...state, tokenId, step: Steps.GetQuantity, metadataUrl });
+		}
+	}
+
+	function quantityUpdated(tokenId: string, quantity: string) {
+		setState({ ...state, step: Steps.Mint, tokenId, quantity });
+		props.onDone({ tokenId, tokenInfo: [state.metadataUrl, quantity] });
 	}
 
 	switch (state.step) {
 		case Steps.GetTokenId:
 			return (
 				<GetTokenIdCardStep
+					contractInfo={props.contractInfo}
 					imageUrl={state.imageDisplayUrl}
 					tokenId={state.tokenId}
 					key={state.tokenId}
@@ -279,6 +294,16 @@ function Cis2BatchItemMetadataPrepare(props: {
 					onDone={(data) => metadataUploaded(data.tokenId, data.metadataUrl)}
 				/>
 			);
+		case Steps.GetQuantity:
+			return (
+				<GetQuantityCardStep
+					contractInfo={props.contractInfo}
+					imageUrl={state.imageDisplayUrl}
+					tokenId={state.tokenId}
+					key={state.tokenId}
+					onDone={(data) => quantityUpdated(data.tokenId, data.quantity)}
+				/>
+			);
 		case Steps.Mint:
 			return (
 				<GetNftMintCardStep
@@ -286,6 +311,7 @@ function Cis2BatchItemMetadataPrepare(props: {
 					imageIpfsUrl={state.imageIpfsUrl}
 					tokenId={state.tokenId}
 					metadataUrl={state.metadataUrl}
+					quantity={state.quantity}
 				/>
 			);
 		default:

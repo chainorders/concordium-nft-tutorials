@@ -1,7 +1,6 @@
 import { ConcordiumDeserializer } from "./ConcordiumDeserializer";
+import { BalanceOfQueryResponse } from "./Cis2Types";
 import {
-	ContractBalanceOfQueryResponse,
-	ContractTokenAmount,
 	OperatorOfQueryResponse,
 	SupportResult,
 	SupportsQueryResponse,
@@ -57,11 +56,16 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 		return this.readVector(this.readBool, 2);
 	}
 
-	readBalanceOfQueryResponse(): ContractBalanceOfQueryResponse {
-		return this.readVector(this.readTokenAmount, 2);
-	}
-
-	readTokenAmount(): ContractTokenAmount {
-		return this.readUInt8();
+	readBalanceOfQueryResponse(
+		byteSize: number
+	): BalanceOfQueryResponse<number | bigint> {
+		switch (byteSize) {
+			case 1:
+				return this.readVector(this.readUInt8, 2);
+			case 8:
+				return this.readVector(this.readUBigInt, 2);
+			default:
+				throw new Error("Invalid Byte Size for token amount");
+		}
 	}
 }

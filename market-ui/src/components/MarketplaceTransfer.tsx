@@ -13,14 +13,18 @@ import { getTokenMetadata } from "../models/Cis2NftClient";
 import { transfer } from "../models/MarketplaceClient";
 import { Metadata } from "../models/Cis2Types";
 import Nft from "./Nft";
+import { Typography } from "@mui/material";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function MarketplaceTransfer(props: {
 	item: TokenListItem;
 	provider: WalletApi;
 	account: string;
 	marketContractAddress: ContractAddress;
+	contractInfo: Cis2ContractInfo;
 }) {
-	const { item, provider, account, marketContractAddress } = props;
+	const { item, provider, account, marketContractAddress, contractInfo: cis2ContractInfo } =
+		props;
 
 	let [state, setState] = useState({
 		isLoading: true,
@@ -68,7 +72,13 @@ function MarketplaceTransfer(props: {
 		if (nftJson) {
 			setStateMetdata(JSON.parse(nftJson));
 		} else {
-			getTokenMetadata(provider, account, item.contract, item.tokenId)
+			getTokenMetadata(
+				provider,
+				account,
+				cis2ContractInfo,
+				item.contract,
+				item.tokenId
+			)
 				.then((m) => fetchJson<Metadata>(m.url))
 				.then((metadata) => {
 					// localStorage.setItem(
@@ -88,13 +98,24 @@ function MarketplaceTransfer(props: {
 			<Nft
 				provider={props.provider}
 				account={props.account}
+				contractInfo={props.contractInfo}
 				contractAddress={item.contract}
 				tokenId={item.tokenId}
 			/>
 			<ImageListItemBar
 				title={`Cost: ${state.price} CCD`}
 				position="below"
-				subtitle={state.desc}
+				subtitle={
+					<>
+						<Typography variant="caption" component={"div"}>
+							{state.desc}
+						</Typography>
+						<Typography variant="caption" component={"div"}>
+							{item.contract.index.toString()} /{" "}
+							{item.contract.subindex.toString()}
+						</Typography>
+					</>
+				}
 				actionIcon={
 					<IconButton
 						sx={{ height: "100%" }}

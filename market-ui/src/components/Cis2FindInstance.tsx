@@ -4,10 +4,11 @@ import { ContractAddress } from "@concordium/web-sdk";
 import { TextField, Typography, Button, Stack } from "@mui/material";
 
 import { ensureSupportsCis2 } from "../models/Cis2NftClient";
-import { getInstanceInfo } from "../models/ConcordiumContractClient";
+import { Cis2ContractInfo, getInstanceInfo } from "../models/ConcordiumContractClient";
 
 function Cis2FindInstance(props: {
 	provider: WalletApi;
+	contractInfo: Cis2ContractInfo;
 	onDone: (address: ContractAddress) => void;
 }) {
 	let [state, setState] = useState({
@@ -39,7 +40,7 @@ function Cis2FindInstance(props: {
 		s.checking = true;
 		setState(s);
 		getInstanceInfo(props.provider, address)
-			.then((_) => ensureSupportsCis2(props.provider, address))
+			.then((_) => ensureSupportsCis2(props.provider, props.contractInfo, address))
 			.then(() => props.onDone(address))
 			.catch((e: Error) => {
 				s.error = e.message;

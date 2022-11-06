@@ -6,6 +6,8 @@ import {
 	CardActions,
 	CardContent,
 	CardMedia,
+	Checkbox,
+	FormControlLabel,
 	Skeleton,
 	SxProps,
 	TextField,
@@ -14,20 +16,23 @@ import {
 import { FormEvent, useState } from "react";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
-import { Metadata, MetadataUrl } from "../models/Cis2Types";
+import { Metadata, MetadataUrl, TokenInfo } from "../models/Cis2Types";
 import DisplayError from "./DisplayError";
 import GetNftMintCardStep from "./GetNftMintCardStep";
 import GetTokenIdCardStep from "./GetTokenIdCardStep";
 import LazyNftMetadata from "./LazyNftMetadata";
 import { sha256 } from "@concordium/web-sdk";
 import { Stack } from "@mui/material";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
+import GetQuantityCardStep from "./GetQuantityCardStep";
 
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };
 
 enum Steps {
 	GetMetadataUrl,
 	GetTokenId,
-	MintNft,
+	GetQuantity,
+	Mint,
 }
 
 function TokenImage(props: {
@@ -83,12 +88,14 @@ function GetMetadataUrlCardStep(props: {
 		error?: string;
 		metadataUrl?: MetadataUrl;
 		metadata?: Metadata;
+		includeHash?: boolean;
 	}>({});
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
 		const url = formData.get("url")?.toString() || "";
+		const includeHash = formData.get("includeHash")?.toString();
 
 		if (!url) {
 			setState({ ...state, error: "Invalid Metadata Url" });
@@ -96,19 +103,16 @@ function GetMetadataUrlCardStep(props: {
 		}
 
 		const metadataUrl = { url, hash: "" };
-		setState({ ...state, metadataUrl, error: "" });
+		setState({ ...state, metadataUrl, error: "", includeHash: !!includeHash });
 	}
 
 	function onMetadataLoaded(metadata: Metadata) {
-		// const metadataUrl = {
-		// 	url: state.metadataUrl?.url!,
-		// 	hash: sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex"),
-		// };
 		const metadataUrl = {
 			url: state.metadataUrl?.url!,
-			hash: "-",
+			hash: state.includeHash
+				? sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex")
+				: "",
 		};
-
 		setState({ ...state, metadata, metadataUrl });
 
 		props.onDone(metadataUrl, metadata);
@@ -134,6 +138,12 @@ function GetMetadataUrlCardStep(props: {
 						fullWidth={true}
 						required={true}
 					/>
+					<FormControlLabel
+						control={
+							<Checkbox defaultChecked name="includeHash" id="include-hash" />
+						}
+						label="Include Hash?"
+					/>
 					<DisplayError error={state.error} />
 				</CardContent>
 				<CardActions>
@@ -155,9 +165,10 @@ function GetMetadataUrlCardStep(props: {
 }
 
 function Cis2BatchItemMetadataAdd(props: {
+	contractInfo: Cis2ContractInfo;
 	index: number;
 	tokenId: string;
-	onDone: (data: { tokenId: string; metadataUrl: MetadataUrl }) => void;
+	onDone: (data: { tokenId: string; tokenInfo: TokenInfo }) => void;
 	onCancel: (index: number) => void;
 }) {
 	const [state, setState] = useState<{
@@ -165,18 +176,33 @@ function Cis2BatchItemMetadataAdd(props: {
 		tokenId: string;
 		metadata?: Metadata;
 		metadataUrl?: MetadataUrl;
+		quantity?: string;
 	}>({ step: Steps.GetMetadataUrl, tokenId: props.tokenId });
 
 	function metadataUrlUpdated(metadataUrl: MetadataUrl, metadata: Metadata) {
-		setState({ ...state, metadataUrl, metadata, step: Steps.GetTokenId });
+		setState({
+			...state,
+			metadataUrl: metadataUrl,
+			metadata,
+			step: Steps.GetTokenId,
+		});
 	}
 
 	function tokenIdUpdated(tokenId: string) {
-		setState({ ...state, tokenId, step: Steps.MintNft });
-		props.onDone({
-			tokenId,
-			metadataUrl: state.metadataUrl!,
-		});
+		if (props.contractInfo.contractName === "CIS2-NFT") {
+			setState({ ...state, tokenId, step: Steps.Mint });
+			props.onDone({
+				tokenId,
+				tokenInfo: state.metadataUrl!,
+			});
+		} else if (props.contractInfo.contractName === "CIS2-Multi") {
+			setState({ ...state, tokenId, step: Steps.GetQuantity });
+		}
+	}
+
+	function quantityUpdated(tokenId: string, quantity: string) {
+		setState({ ...state, step: Steps.Mint, tokenId, quantity });
+		props.onDone({ tokenId, tokenInfo: [state.metadataUrl!, quantity] });
 	}
 
 	switch (state.step) {
@@ -191,19 +217,31 @@ function Cis2BatchItemMetadataAdd(props: {
 		case Steps.GetTokenId:
 			return (
 				<GetTokenIdCardStep
-					imageUrl={state.metadata?.display.url!}
 					tokenId={props.tokenId}
 					key={props.index}
+					contractInfo={props.contractInfo}
+					imageUrl={state.metadata?.display.url!}
 					onDone={(data) => tokenIdUpdated(data.tokenId)}
 				/>
 			);
-		case Steps.MintNft:
+		case Steps.GetQuantity:
+			return (
+				<GetQuantityCardStep
+					contractInfo={props.contractInfo}
+					imageUrl={state.metadata?.display.url!}
+					tokenId={state.tokenId}
+					key={state.tokenId}
+					onDone={(data) => quantityUpdated(data.tokenId, data.quantity)}
+				/>
+			);
+		case Steps.Mint:
 			return (
 				<GetNftMintCardStep
 					imageUrl={state.metadata?.display.url!}
 					imageIpfsUrl={state.metadata?.display.url!}
 					tokenId={state.tokenId}
 					metadataUrl={state.metadataUrl!}
+					quantity={state.quantity}
 				/>
 			);
 		default:

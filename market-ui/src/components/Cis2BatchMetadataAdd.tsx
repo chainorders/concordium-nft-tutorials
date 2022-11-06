@@ -1,17 +1,19 @@
 import { Button, ButtonGroup, Grid, Typography } from "@mui/material";
 import { useState } from "react";
-import { MetadataUrl } from "../models/Cis2Types";
+
+import { toTokenId } from "../models/Cis2NftClient";
+import { TokenInfo } from "../models/Cis2Types";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import Cis2BatchItemMetadataAdd from "./Cis2BatchItemMetadataAdd";
 
-const toTokenId = (integer: number) => integer.toString(16).padStart(8, "0");
-
 function Cis2BatchMetadataAdd(props: {
-	onDone: (tokens: { [tokenId: string]: MetadataUrl }) => void;
+	contractInfo: Cis2ContractInfo;
+	onDone: (tokens: { [tokenId: string]: TokenInfo }) => void;
 	startingTokenId: number;
 }) {
 	const [state, setState] = useState<{
 		error: string;
-		tokens: { tokenId: string; metadataUrl: MetadataUrl }[];
+		tokens: { tokenId: string; tokenInfo?: TokenInfo }[];
 	}>({
 		error: "",
 		tokens: [],
@@ -20,21 +22,20 @@ function Cis2BatchMetadataAdd(props: {
 	function onMetadataPrepared(
 		index: number,
 		tokenId: string,
-		metadataUrl: MetadataUrl
+		tokenInfo: TokenInfo
 	) {
 		let tokens = [...state.tokens];
-		tokens[index] = { tokenId, metadataUrl };
+		tokens[index] = { tokenId, tokenInfo };
 		setState({ ...state, tokens });
 	}
 
 	function onAdd() {
 		let tokens = [...state.tokens];
 		tokens.push({
-			tokenId: toTokenId(tokens.length + 1 + props.startingTokenId),
-			metadataUrl: {
-				url: "",
-				hash: "",
-			},
+			tokenId: toTokenId(
+				tokens.length + 1 + props.startingTokenId,
+				props.contractInfo
+			),
 		});
 
 		setState({ ...state, tokens });
@@ -50,7 +51,7 @@ function Cis2BatchMetadataAdd(props: {
 	function onDone() {
 		setState({ ...state, error: "" });
 		const anyInValidForm = state.tokens.findIndex(
-			(t) => !t.metadataUrl.url || !t.tokenId
+			(t) => !t.tokenInfo || !t.tokenId
 		);
 
 		if (anyInValidForm > -1) {
@@ -58,8 +59,10 @@ function Cis2BatchMetadataAdd(props: {
 			return;
 		}
 
-		var ret: { [tokenId: string]: MetadataUrl } = {};
-		state.tokens.forEach((t) => (ret[t.tokenId] = t.metadataUrl));
+		var ret: { [tokenId: string]: TokenInfo } = {};
+		state.tokens
+			.filter((t) => t.tokenInfo)
+			.forEach((t) => (ret[t.tokenId] = t.tokenInfo!));
 
 		props.onDone(ret);
 	}
@@ -80,10 +83,11 @@ function Cis2BatchMetadataAdd(props: {
 				{state.tokens.map((token, index) => (
 					<Grid item xs={4} key={index.toString()}>
 						<Cis2BatchItemMetadataAdd
+							contractInfo={props.contractInfo}
 							index={index}
 							tokenId={token.tokenId}
 							onDone={(data) =>
-								onMetadataPrepared(index, data.tokenId, data.metadataUrl)
+								onMetadataPrepared(index, data.tokenId, data.tokenInfo)
 							}
 							onCancel={(index: number) => onRemove(index)}
 						/>
@@ -91,7 +95,9 @@ function Cis2BatchMetadataAdd(props: {
 				))}
 			</Grid>
 			<ButtonGroup fullWidth>
-				<Button onClick={() => onDone()} size="large">Done</Button>
+				<Button onClick={() => onDone()} size="large">
+					Done
+				</Button>
 			</ButtonGroup>
 		</>
 	);

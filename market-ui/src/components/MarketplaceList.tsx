@@ -7,10 +7,12 @@ import { ContractAddress } from "@concordium/web-sdk";
 import MarketplaceTransfer from "./MarketplaceTransfer";
 import { TokenListItem } from "../models/MarketplaceTypes";
 import { list } from "../models/MarketplaceClient";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function MarketplaceList(props: {
 	marketContractAddress: ContractAddress;
 	provider: WalletApi;
+	contractInfo: Cis2ContractInfo;
 	account: string;
 }) {
 	let [state, setState] = useState<{ tokens: TokenListItem[] }>({ tokens: [] });
@@ -28,6 +30,7 @@ function MarketplaceList(props: {
 					<MarketplaceTransfer
 						provider={props.provider}
 						account={props.account}
+						contractInfo={props.contractInfo}
 						marketContractAddress={props.marketContractAddress}
 						item={t}
 						key={t.tokenId + t.contract.index + t.contract.subindex}
