@@ -4,6 +4,8 @@ import {
 	CardActions,
 	CardContent,
 	CardMedia,
+	Checkbox,
+	FormControlLabel,
 	Link,
 	Stack,
 	SxProps,
@@ -124,13 +126,16 @@ function UploadMetadataIpfsCardStep(props: {
 			},
 			attributes: [],
 		};
+		let includeHash = formData.get("includeHash")?.toString();
 		setState({ ...state, isUploadingMetadata: true });
 		props.pinata
 			.uploadJson(metadata, tokenIdToNftMetadataFileName(props.tokenId))
 			.then((metadataIpfsUrl) => {
 				const metadataUrl = {
 					url: metadataIpfsUrl,
-					hash: sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex"),
+					hash: includeHash
+						? sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex")
+						: "",
 				};
 				setState({
 					...state,
@@ -184,6 +189,16 @@ function UploadMetadataIpfsCardStep(props: {
 								fullWidth={true}
 								required={true}
 								defaultValue={`Image for token: ${props.tokenId}`}
+							/>
+							<FormControlLabel
+								control={
+									<Checkbox
+										defaultChecked
+										name="includeHash"
+										id="include-hash"
+									/>
+								}
+								label="Include Hash?"
 							/>
 						</Stack>
 						<DisplayError error={state.error} />

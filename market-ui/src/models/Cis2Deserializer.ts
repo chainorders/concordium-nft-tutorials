@@ -21,8 +21,8 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 
 	readTokenMetadata(): MetadataUrl {
 		this.readBytes(2);
-		let url = this.readString();
-		let hash = this.readString();
+		let url = this.readString(2);
+		let hash = this.readString(1);
 
 		return { url, hash };
 	}

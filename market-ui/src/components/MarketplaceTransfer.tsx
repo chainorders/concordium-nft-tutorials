@@ -71,10 +71,10 @@ function MarketplaceTransfer(props: {
 			getTokenMetadata(provider, account, item.contract, item.tokenId)
 				.then((m) => fetchJson<Metadata>(m.url))
 				.then((metadata) => {
-					localStorage.setItem(
-						toLocalstorageKey(item),
-						JSON.stringify(metadata)
-					);
+					// localStorage.setItem(
+					// 	toLocalstorageKey(item),
+					// 	JSON.stringify(metadata)
+					// );
 					setStateMetdata(metadata);
 				});
 		}
@@ -85,7 +85,6 @@ function MarketplaceTransfer(props: {
 			sx={{ display: state.isBought ? "none" : "" }}
 			key={item.tokenId + item.contract.index + item.contract.subindex}
 		>
-			{/* <img src={state.url} srcSet={state.url} alt={state.name} loading="lazy" /> */}
 			<Nft
 				provider={props.provider}
 				account={props.account}

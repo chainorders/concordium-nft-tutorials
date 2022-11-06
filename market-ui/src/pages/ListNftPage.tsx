@@ -1,6 +1,6 @@
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Typography, Paper } from "@mui/material";
+import { Paper } from "@mui/material";
 
 import MarketplaceList from "../components/MarketplaceList";
 

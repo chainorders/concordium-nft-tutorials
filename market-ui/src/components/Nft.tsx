@@ -45,7 +45,7 @@ function Nft(props: {
 			)
 				.then((m) => fetchJson<Metadata>(m.url))
 				.then((metadata) => {
-					localStorage.setItem(localStorageKey, JSON.stringify(metadata));
+					// localStorage.setItem(localStorageKey, JSON.stringify(metadata));
 					setState({ ...state, loading: false, metadata });
 				});
 		}
