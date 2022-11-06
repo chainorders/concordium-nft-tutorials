@@ -3,7 +3,7 @@ import { Button, Grid, Typography, Stack } from '@mui/material';
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
-import { batchMintNft } from "../models/Cis2Client";
+import { batchMintNft } from "../models/Cis2NftClient";
 import { MetadataUrl } from "../models/Cis2Types";
 import Cis2NftBatchItemMint from "./Cis2NftBatchItemMint";
 

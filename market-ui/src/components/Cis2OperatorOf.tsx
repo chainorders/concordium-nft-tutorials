@@ -3,7 +3,7 @@ import { Paper, Typography, Button } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
-import { isOperator } from "../models/Cis2Client";
+import { isOperator } from "../models/Cis2NftClient";
 
 function Cis2OperatorOf(props: {
 	account: string;

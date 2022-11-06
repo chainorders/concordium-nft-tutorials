@@ -3,7 +3,7 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Paper, Typography, Button, Stack } from "@mui/material";
 
-import { initCis2NftContract } from "../models/Cis2Client";
+import { initCis2NftContract } from "../models/Cis2NftClient";
 
 function Cis2Init(props: {
 	provider: WalletApi;

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Paper, TextField, Typography, Button, Stack } from "@mui/material";
+import { TextField, Typography, Button, Stack } from "@mui/material";
 
-import { ensureSupportsCis2 } from "../models/Cis2Client";
+import { ensureSupportsCis2 } from "../models/Cis2NftClient";
 import { getInstanceInfo } from "../models/ConcordiumContractClient";
 
 function Cis2FindInstance(props: {

@@ -11,7 +11,7 @@ import {
 	Theme,
 } from "@mui/material";
 
-import { isValidTokenId } from "../models/Cis2Client";
+import { isValidTokenId } from "../models/Cis2NftClient";
 import DisplayError from "./DisplayError";
 
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };

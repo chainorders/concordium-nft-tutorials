@@ -9,7 +9,7 @@ import { ContractAddress } from "@concordium/web-sdk";
 
 import { fetchJson, toLocalstorageKey } from "../models/Utils";
 import { TokenListItem } from "../models/MarketplaceTypes";
-import { getTokenMetadata } from "../models/Cis2Client";
+import { getTokenMetadata } from "../models/Cis2NftClient";
 import { transfer } from "../models/MarketplaceClient";
 import { Metadata } from "../models/Cis2Types";
 import Nft from "./Nft";

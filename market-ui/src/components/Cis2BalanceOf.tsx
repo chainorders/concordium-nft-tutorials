@@ -13,7 +13,7 @@ import {
 	RejectReasonTag,
 } from "@concordium/web-sdk";
 
-import { balanceOf, isValidTokenId } from "../models/Cis2Client";
+import { balanceOf, isValidTokenId } from "../models/Cis2NftClient";
 
 function Cis2BalanceOf(props: {
 	provider: WalletApi;
