@@ -45,7 +45,6 @@ function Header(props: {
 		<StyledAppBar position="static">
 			<Container maxWidth="xl" sx={{ height: "100%" }}>
 				<Toolbar disableGutters>
-					<AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
 					<Typography
 						variant="h6"
 						noWrap
