@@ -1,3 +1,6 @@
+//@ts-ignore
+import * as leb from "leb128";
+import { Buffer } from "buffer/";
 import { ConcordiumDeserializer } from "./ConcordiumDeserializer";
 import { BalanceOfQueryResponse } from "./Cis2Types";
 import {
@@ -6,6 +9,7 @@ import {
 	SupportsQueryResponse,
 	MetadataUrl,
 } from "./Cis2Types";
+const MAX_LEB_BYTE_VALUE = Math.pow(2, 7);
 
 /**
  * Handles Deserialization of CIS2 types from underlying Buffer.
@@ -56,16 +60,22 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 		return this.readVector(this.readBool, 2);
 	}
 
-	readBalanceOfQueryResponse(
-		byteSize: number
-	): BalanceOfQueryResponse<number | bigint> {
-		switch (byteSize) {
-			case 1:
-				return this.readVector(this.readUInt8, 2);
-			case 8:
-				return this.readVector(this.readUBigInt, 2);
-			default:
-				throw new Error("Invalid Byte Size for token amount");
+	readBalanceOfQueryResponse(): BalanceOfQueryResponse<number | bigint> {
+		return this.readVector(this.readTokenAmount, 2);
+	}
+
+	readTokenAmount(): bigint {
+		let buff = new Buffer(37);
+
+		for (let index = 0; index <= 37; index++) {
+			let byte = this.readUInt8();
+			buff[index] = byte;
+
+			if (byte <= MAX_LEB_BYTE_VALUE) {
+				break;
+			}
 		}
+
+		return BigInt(leb.unsigned.decode(buff));
 	}
 }

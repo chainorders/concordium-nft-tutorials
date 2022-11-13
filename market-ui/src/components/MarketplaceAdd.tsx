@@ -1,17 +1,9 @@
 import { FormEvent, useState } from "react";
-import {
-	TextField,
-	Typography,
-	Button,
-	Stack,
-	Paper,
-	Container,
-} from "@mui/material";
+import { TextField, Typography, Button, Stack } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
 import { add } from "../models/MarketplaceClient";
-import { Box } from "@mui/system";
 import { AddParams } from "../models/MarketplaceTypes";
 
 function MarkerplaceAdd(props: {
@@ -20,6 +12,7 @@ function MarkerplaceAdd(props: {
 	marketContractAddress: ContractAddress;
 	nftContractAddress: ContractAddress;
 	tokenId: string;
+	maxQuantity: bigint;
 	onDone: () => void;
 }) {
 	const [state, setState] = useState({
@@ -32,6 +25,7 @@ function MarkerplaceAdd(props: {
 		const formData = new FormData(event.currentTarget);
 		const price = formData.get("price")?.toString() || "";
 		const royalty = formData.get("royalty")?.toString() || "0";
+		const quantity = formData.get("quantity")?.toString() || "0";
 
 		if (!price || BigInt(price) <= 0) {
 			setState({ ...state, error: "Invalid Price" });
@@ -40,6 +34,18 @@ function MarkerplaceAdd(props: {
 
 		if (!royalty || parseInt(royalty) < 0) {
 			setState({ ...state, error: "Invalid Royalty" });
+			return;
+		}
+
+		if (
+			!quantity ||
+			BigInt(quantity) <= 0 ||
+			BigInt(quantity) > props.maxQuantity
+		) {
+			setState({
+				...state,
+				error: `Invalid Quantity: ${quantity.toString()}, Should be less than Or equal to ${props.maxQuantity.toString()}`,
+			});
 			return;
 		}
 
@@ -53,6 +59,7 @@ function MarkerplaceAdd(props: {
 				subindex: props.nftContractAddress.subindex.toString(),
 			},
 			token_id: props.tokenId,
+			quantity,
 		};
 
 		add(props.provider, props.account, props.marketContractAddress, paramJson)
@@ -95,6 +102,17 @@ function MarkerplaceAdd(props: {
 				disabled={state.adding}
 				required
 				defaultValue="0"
+			/>
+			<TextField
+				name="quantity"
+				id="quantity"
+				type="number"
+				label="Quantity"
+				variant="standard"
+				fullWidth
+				disabled={state.adding}
+				required
+				defaultValue="1"
 			/>
 			{state.error && (
 				<Typography

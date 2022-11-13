@@ -1,4 +1,4 @@
-import { ContractAddress } from "@concordium/web-sdk";
+import { ContractAddress, AccountAddress } from '@concordium/web-sdk';
 
 export type TokenList = TokenListItem[];
 export interface TokenListItem {
@@ -8,6 +8,10 @@ export interface TokenListItem {
 	tokenId: string;
 	contract: ContractAddress;
 	price: bigint;
+	owner: string;
+	royalty: number;
+	primaryOwner: string;
+	quantity: bigint;
 }
 
 export interface AddParams {
@@ -18,4 +22,5 @@ export interface AddParams {
 	token_id: string;
 	price: string;
 	royalty: number;
+	quantity: string;
 }

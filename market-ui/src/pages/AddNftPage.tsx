@@ -5,11 +5,8 @@ import {
 	StepLabel,
 	Typography,
 	Paper,
-	Divider,
-	Stack,
 	Container,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/common-sdk";
@@ -19,7 +16,7 @@ import Cis2OperatorOf from "../components/Cis2OperatorOf";
 import Cis2UpdateOperator from "../components/Cis2UpdateOperator";
 import Cis2FindInstance from "../components/Cis2FindInstance";
 import MarkerplaceAdd from "../components/MarketplaceAdd";
-import { CIS2_NFT_CONTRACT_INFO } from "../Constants";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 enum Steps {
 	FindCollection,
@@ -49,16 +46,22 @@ function AddNftPage(props: {
 	let [state, setState] = useState<{
 		activeStep: StepType;
 		nftContract?: ContractAddress;
+		contractInfo?: Cis2ContractInfo;
 		tokenId?: string;
+		totalBalance?: bigint
 	}>({
 		activeStep: steps[0],
 	});
 
-	function onGetCollectionAddress(address: ContractAddress) {
+	function onGetCollectionAddress(
+		address: ContractAddress,
+		contractInfo: Cis2ContractInfo
+	) {
 		setState({
 			...state,
 			activeStep: steps[1],
 			nftContract: address,
+			contractInfo,
 		});
 	}
 
@@ -83,11 +86,12 @@ function AddNftPage(props: {
 		});
 	}
 
-	function onTokenBalance(tokenId: string, _balance: number) {
+	function onTokenBalance(tokenId: string, totalBalance: bigint) {
 		setState({
 			...state,
 			activeStep: steps[4],
 			tokenId: tokenId,
+			totalBalance
 		});
 	}
 
@@ -102,8 +106,9 @@ function AddNftPage(props: {
 				return (
 					<Cis2FindInstance
 						provider={props.provider}
-						onDone={(address) => onGetCollectionAddress(address)}
-						contractInfo={CIS2_NFT_CONTRACT_INFO}
+						onDone={(address, contractInfo) =>
+							onGetCollectionAddress(address, contractInfo)
+						}
 					/>
 				);
 			case Steps.CheckOperator:
@@ -113,7 +118,7 @@ function AddNftPage(props: {
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
 						nftContractAddress={state.nftContract as ContractAddress}
-						contractInfo={CIS2_NFT_CONTRACT_INFO}
+						contractInfo={state.contractInfo!}
 						onDone={(isOperator) => onCheckOperator(isOperator)}
 					/>
 				);
@@ -124,7 +129,7 @@ function AddNftPage(props: {
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
 						nftContractAddress={state.nftContract as ContractAddress}
-						contractInfo={CIS2_NFT_CONTRACT_INFO}
+						contractInfo={state.contractInfo!}
 						onDone={() => onUpdateOperator()}
 					/>
 				);
@@ -134,7 +139,7 @@ function AddNftPage(props: {
 						provider={props.provider}
 						account={props.account}
 						cis2ContractAddress={state.nftContract as ContractAddress}
-						contractInfo={CIS2_NFT_CONTRACT_INFO}
+						contractInfo={state.contractInfo!}
 						onDone={(id, balance) => onTokenBalance(id, balance)}
 					/>
 				);
@@ -144,8 +149,9 @@ function AddNftPage(props: {
 						provider={props.provider}
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
-						nftContractAddress={state.nftContract as ContractAddress}
-						tokenId={state.tokenId as string}
+						nftContractAddress={state.nftContract!}
+						tokenId={state.tokenId!}
+						maxQuantity={state.totalBalance!}
 						onDone={() => onTokenListed()}
 					/>
 				);

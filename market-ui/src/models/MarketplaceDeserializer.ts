@@ -13,7 +13,11 @@ export class MarketplaceDeserializer extends Cis2Deserializer {
 		let tokenId = this.readTokenId();
 		let contract = this.readContractAddress();
 		let price = this.readUBigInt();
+		let owner = this.readAccountAddress();
+		let royalty = this.readUInt16();
+		let primaryOwner = this.readAccountAddress();
+		let quantity = this.readTokenAmount();
 
-		return { tokenId, contract, price };
+		return { tokenId, contract, price, owner, royalty, primaryOwner, quantity };
 	}
 }

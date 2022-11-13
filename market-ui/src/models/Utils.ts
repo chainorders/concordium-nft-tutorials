@@ -5,7 +5,6 @@ export function toLocalstorageKey(item: TokenListItem): string {
 }
 
 export async function fetchJson<T>(metadataUrl: string): Promise<T> {
-	console.info("metadataUrl", metadataUrl);
 	let res = await fetch(metadataUrl);
 
 	if (!res.ok) {

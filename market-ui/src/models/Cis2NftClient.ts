@@ -126,7 +126,7 @@ export async function balanceOf(
 	nftAddress: ContractAddress,
 	contractInfo: Cis2ContractInfo,
 	tokenId: string
-): Promise<number> {
+): Promise<bigint> {
 	const paramsJson = [
 		{
 			token_id: tokenId,
@@ -142,11 +142,11 @@ export async function balanceOf(
 		contractInfo
 	);
 
-	let parsedResult = new Cis2Deserializer(retValue).readBalanceOfQueryResponse(
-		contractInfo.tokenAmountByteSize
-	);
+	let parsedResult = new Cis2Deserializer(
+		retValue
+	).readBalanceOfQueryResponse();
 
-	return parsedResult[0] as number;
+	return parsedResult[0] as bigint;
 }
 
 /**

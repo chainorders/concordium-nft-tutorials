@@ -110,6 +110,7 @@ function UploadMetadataIpfsCardStep(props: {
 	imageUrl: string;
 	pinata: PinataClient;
 	imageIpfsUrl: string;
+	contractName: string;
 	onDone: (data: { tokenId: string; metadataUrl: MetadataUrl }) => void;
 }) {
 	const [state, setState] = useState({
@@ -127,7 +128,13 @@ function UploadMetadataIpfsCardStep(props: {
 			display: {
 				url: props.imageIpfsUrl,
 			},
-			attributes: [],
+			attributes: [
+				{
+					name: "ContractName",
+					type: "string",
+					value: props.contractName,
+				},
+			],
 		};
 		let includeHash = formData.get("includeHash")?.toString();
 		setState({ ...state, isUploadingMetadata: true });
@@ -291,6 +298,7 @@ function Cis2BatchItemMetadataPrepare(props: {
 					imageUrl={state.imageDisplayUrl}
 					imageIpfsUrl={state.imageIpfsUrl}
 					key={state.tokenId}
+					contractName={props.contractInfo.contractName}
 					onDone={(data) => metadataUploaded(data.tokenId, data.metadataUrl)}
 				/>
 			);

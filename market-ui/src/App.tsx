@@ -80,7 +80,7 @@ function App() {
 					provider={state.provider!}
 					account={state.account!}
 					marketContractAddress={MARKET_CONTRACT_ADDRESS}
-					contractInfo={CIS2_NFT_CONTRACT_INFO}
+					contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				/>
 			),
 		},

@@ -28,6 +28,7 @@ export async function list(
 		marketContractAddress,
 		MethodNames.list
 	);
+	
 	return new MarketplaceDeserializer(retValue).readTokenList();
 }
 
@@ -76,6 +77,8 @@ export async function transfer(
 	nftContractAddress: ContractAddress,
 	tokenId: string,
 	priceCcd: bigint,
+	owner: string,
+	quantity: bigint,
 	maxContractExecutionEnergy = BigInt(6000)
 ): Promise<Record<string, TransactionSummary>> {
 	const paramJson = {
@@ -85,6 +88,8 @@ export async function transfer(
 		},
 		token_id: tokenId,
 		to: account,
+		owner,
+		quantity: quantity.toString()
 	};
 
 	return updateContract(

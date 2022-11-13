@@ -23,8 +23,13 @@ function MarketplaceTransfer(props: {
 	marketContractAddress: ContractAddress;
 	contractInfo: Cis2ContractInfo;
 }) {
-	const { item, provider, account, marketContractAddress, contractInfo: cis2ContractInfo } =
-		props;
+	const {
+		item,
+		provider,
+		account,
+		marketContractAddress,
+		contractInfo: cis2ContractInfo,
+	} = props;
 
 	let [state, setState] = useState({
 		isLoading: true,
@@ -42,7 +47,9 @@ function MarketplaceTransfer(props: {
 			marketContractAddress,
 			item.contract,
 			item.tokenId,
-			item.price
+			item.price,
+			item.owner,
+			BigInt(1)
 		)
 			.then((_) => {
 				setState({
@@ -119,7 +126,7 @@ function MarketplaceTransfer(props: {
 				actionIcon={
 					<IconButton
 						sx={{ height: "100%" }}
-						aria-label={`info about ${item.tokenId}`}
+						aria-label={`buy ${item.tokenId}`}
 						onClick={() => buy(item)}
 					>
 						{state.isBought ? <CheckIcon /> : <ShoppingCartIcon />}
