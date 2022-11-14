@@ -100,6 +100,6 @@ export async function transfer(
 		marketContractAddress,
 		MethodNames.transfer,
 		maxContractExecutionEnergy,
-		priceCcd
+		priceCcd * quantity
 	);
 }

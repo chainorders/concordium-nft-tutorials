@@ -6,14 +6,13 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import CheckIcon from "@mui/icons-material/Check";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
+import { Typography } from "@mui/material";
 
 import { fetchJson, toLocalstorageKey } from "../models/Utils";
 import { TokenListItem } from "../models/MarketplaceTypes";
 import { getTokenMetadata } from "../models/Cis2NftClient";
-import { transfer } from "../models/MarketplaceClient";
 import { Metadata } from "../models/Cis2Types";
 import Nft from "./Nft";
-import { Typography } from "@mui/material";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function MarketplaceTransfer(props: {
@@ -22,14 +21,9 @@ function MarketplaceTransfer(props: {
 	account: string;
 	marketContractAddress: ContractAddress;
 	contractInfo: Cis2ContractInfo;
+	onBuyClicked: (token: TokenListItem) => void;
 }) {
-	const {
-		item,
-		provider,
-		account,
-		marketContractAddress,
-		contractInfo: cis2ContractInfo,
-	} = props;
+	const { item, provider, account, contractInfo: cis2ContractInfo } = props;
 
 	let [state, setState] = useState({
 		isLoading: true,
@@ -39,30 +33,6 @@ function MarketplaceTransfer(props: {
 		price: item.price,
 		isBought: false,
 	});
-
-	const buy = (item: TokenListItem) => {
-		transfer(
-			provider,
-			account,
-			marketContractAddress,
-			item.contract,
-			item.tokenId,
-			item.price,
-			item.owner,
-			BigInt(1)
-		)
-			.then((_) => {
-				setState({
-					...state,
-					isBought: true,
-				});
-
-				console.info("bought nft : " + item.tokenId.toString());
-			})
-			.catch((err) => {
-				console.error(err);
-			});
-	};
 
 	useEffect(() => {
 		let setStateMetdata = (metadata: Metadata) =>
@@ -121,15 +91,24 @@ function MarketplaceTransfer(props: {
 							{item.contract.index.toString()} /{" "}
 							{item.contract.subindex.toString()}
 						</Typography>
+						{item.owner === props.account && (
+							<Typography>Owned by you</Typography>
+						)}
 					</>
 				}
 				actionIcon={
 					<IconButton
 						sx={{ height: "100%" }}
 						aria-label={`buy ${item.tokenId}`}
-						onClick={() => buy(item)}
+						onClick={() =>
+							item.owner !== props.account && props.onBuyClicked(item)
+						}
 					>
-						{state.isBought ? <CheckIcon /> : <ShoppingCartIcon />}
+						{state.isBought || item.owner === props.account ? (
+							<CheckIcon />
+						) : (
+							<ShoppingCartIcon />
+						)}
 					</IconButton>
 				}
 			/>

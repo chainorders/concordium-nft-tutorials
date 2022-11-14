@@ -112,7 +112,7 @@ function MarkerplaceAdd(props: {
 				fullWidth
 				disabled={state.adding}
 				required
-				defaultValue="1"
+				defaultValue={props.maxQuantity.toString()}
 			/>
 			{state.error && (
 				<Typography

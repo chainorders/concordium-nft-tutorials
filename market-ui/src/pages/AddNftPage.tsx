@@ -31,6 +31,7 @@ function AddNftPage(props: {
 	provider: WalletApi;
 	account: string;
 	marketContractAddress: ContractAddress;
+	contractInfo?: Cis2ContractInfo;
 }) {
 	const steps = [
 		{
@@ -48,7 +49,7 @@ function AddNftPage(props: {
 		nftContract?: ContractAddress;
 		contractInfo?: Cis2ContractInfo;
 		tokenId?: string;
-		totalBalance?: bigint
+		totalBalance?: bigint;
 	}>({
 		activeStep: steps[0],
 	});
@@ -91,7 +92,7 @@ function AddNftPage(props: {
 			...state,
 			activeStep: steps[4],
 			tokenId: tokenId,
-			totalBalance
+			totalBalance,
 		});
 	}
 
@@ -106,6 +107,7 @@ function AddNftPage(props: {
 				return (
 					<Cis2FindInstance
 						provider={props.provider}
+						contractInfo={props.contractInfo}
 						onDone={(address, contractInfo) =>
 							onGetCollectionAddress(address, contractInfo)
 						}

@@ -74,7 +74,7 @@ function App() {
 	const pages = [
 		{
 			path: "/",
-			name: "Marketplace",
+			name: "Buy",
 			component: (
 				<ListNftPage
 					provider={state.provider!}
@@ -86,30 +86,19 @@ function App() {
 		},
 		{
 			path: "/add",
-			name: "Sell NFT",
+			name: "Sell",
 			component: (
 				<AddNftPage
 					provider={state.provider!}
 					account={state.account!}
 					marketContractAddress={MARKET_CONTRACT_ADDRESS}
-				/>
-			),
-		},
-		{
-			path: "/mint-batch",
-			name: "Mint NFTs",
-			component: (
-				<BatchMintNftPage
-					key={CIS2_NFT_CONTRACT_INFO.contractName}
-					contractInfo={CIS2_NFT_CONTRACT_INFO}
-					provider={state.provider!}
-					account={state.account!}
+					contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				/>
 			),
 		},
 		{
 			path: "/mint-multi-batch",
-			name: "Mint SFTs",
+			name: "Mint",
 			component: (
 				<BatchMintNftPage
 					key={CIS2_MULTI_CONTRACT_INFO.contractName}
