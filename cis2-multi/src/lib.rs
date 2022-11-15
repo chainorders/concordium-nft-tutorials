@@ -149,6 +149,7 @@ enum CustomContractError {
     ContractOnly,
     /// Failed to invoke a contract.
     InvokeContractError,
+    TokenAlreadyMinted,
 }
 
 type ContractError = Cis2Error<CustomContractError>;
@@ -443,6 +444,11 @@ fn contract_mint<S: HasStateApi>(
 
     let (state, builder) = host.state_and_builder();
     for (token_id, token_info) in params.tokens {
+        ensure!(
+            state.contains_token(&token_id).eq(&false),
+            ContractError::Custom(CustomContractError::TokenAlreadyMinted)
+        );
+
         // Mint the token in the state.
         state.mint(
             &token_id,
