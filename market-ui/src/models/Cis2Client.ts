@@ -261,6 +261,44 @@ export async function mintNft(
 }
 
 /**
+ * Mints multiple NFT in Contract: {@link nftContractAddress}
+ * represented by {@link tokenMetadataMap}
+ * @param provider Wallet Provider.
+ * @param account Account address.
+ * @param tokenMetadataMap Map of Token Id and Metadata Url.
+ * @param nftContractAddress CIS-NFT contract address.
+ * @param maxContractExecutionEnergy Max allowed energy ot Minting.
+ * @returns Transaction outcomes {@link Record<string, TransactionSummary>}
+ */
+export async function batchMintNft(
+	provider: WalletApi,
+	account: string,
+	tokenMetadataMap: { [tokenId: string]: MetadataUrl },
+	nftContractAddress: ContractAddress,
+	maxContractExecutionEnergy = BigInt(9999)
+): Promise<Record<string, TransactionSummary>> {
+	const paramJson = {
+		owner: {
+			Account: [account],
+		},
+		tokens: Object.keys(tokenMetadataMap).map((tokenId) => [
+			tokenId,
+			tokenMetadataMap[tokenId],
+		]),
+	};
+
+	return updateCis2NftContract(
+		provider,
+		paramJson,
+		account,
+		nftContractAddress,
+		MethodName.mint,
+		maxContractExecutionEnergy,
+		BigInt(0)
+	);
+}
+
+/**
  * Invokes a CIS2 Smart Contract.
  */
 async function invokeCis2NftContract<T>(

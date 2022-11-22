@@ -73,6 +73,7 @@ export class GenericDeserializer {
 	}
 
 	readUBigInt(): bigint {
+		//@ts-ignore
 		return this.readBytes(8).readBigUInt64LE(0) as bigint;
 	}
 

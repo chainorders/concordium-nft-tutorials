@@ -27,6 +27,7 @@ import MintNftPage from "./pages/MintNftPage";
 
 import { ContractAddress } from "@concordium/web-sdk";
 import { MARKET_CONTRACT_ADDRESS } from "./Constants";
+import BatchMintNftPage from "./pages/BatchMintNftPage";
 
 function ConnectedContent(props: {
 	marketContractAddress: ContractAddress;
@@ -61,6 +62,12 @@ function ConnectedContent(props: {
 						path="/mint"
 						element={
 							<MintNftPage provider={props.provider} account={props.account} />
+						}
+					/>
+					<Route
+						path="/mint-batch"
+						element={
+							<BatchMintNftPage provider={props.provider} account={props.account} />
 						}
 					/>
 				</Routes>
@@ -169,6 +176,12 @@ function App() {
 							icon={<AddAPhotoIcon />}
 							title="Mints An NFT"
 							href="/mint"
+						/>
+						<BottomNavigationAction
+							label="Mint Batch"
+							icon={<AddAPhotoIcon />}
+							title="Mints An NFT Collection"
+							href="/mint-batch"
 						/>
 						<BottomNavigationAction
 							label="Marketplace"
