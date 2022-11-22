@@ -9,9 +9,12 @@
   },
   "dependencies": {
     "@concordium/node-sdk": "^4.0.0",
+    "@pinata/sdk": "^1.1.26",
     "@types/fs-extra": "^9.0.13",
+    "@types/prompts": "^2.4.1",
     "commander": "^9.4.0",
     "fs-extra": "^10.1.0",
+    "prompts": "^2.4.2",
     "leb128": "^0.0.5"
   },
   "scripts": {

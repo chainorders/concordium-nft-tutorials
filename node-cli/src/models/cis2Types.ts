@@ -1,4 +1,5 @@
 import { ContractAddress } from "@concordium/node-sdk";
+import { Tuple } from "./cis2MultiTypes";
 
 export type TokenIdU32 = number;
 export type Address = string | ContractAddress;
@@ -27,4 +28,16 @@ export interface ViewState {
   state: StateItem[];
   allTokens: ContractTokenId[];
   metadata: Metadata[];
+}
+
+export interface MetadataUrl {
+  url: string;
+  hash: string;
+}
+
+export interface MintParams {
+  owner: {
+    Account: string[];
+  };
+  tokens: Tuple<string, MetadataUrl>[];
 }

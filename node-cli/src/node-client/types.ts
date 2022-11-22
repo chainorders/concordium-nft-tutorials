@@ -33,6 +33,7 @@ export interface UpdateContractArgs extends ClientCreateArgs, SenderAccountArgs,
   function: string;
   index: bigint;
   subIndex: bigint;
+  batchSize: number;
 }
 
 export interface ViewContractArgs extends ClientCreateArgs {
@@ -42,4 +43,12 @@ export interface ViewContractArgs extends ClientCreateArgs {
   index: bigint;
   subIndex: bigint;
   sender: string;
+}
+
+export interface PinataUploadArgs {
+  pinataSecret: string;
+  pinataKey: string;
+  dir: string; 
+  gatewayPrefix: string;
+  mintParamsFile: string;
 }
