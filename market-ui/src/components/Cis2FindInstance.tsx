@@ -1,92 +1,114 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import { Paper, TextField, Typography, Button } from "@mui/material";
+import { TextField, Typography, Button, Stack } from "@mui/material";
 
-import { ensureSupportsCis2 } from "../models/Cis2Client";
-import { getInstanceInfo } from "../models/ConcordiumContractClient";
+import { ensureSupportsCis2 } from "../models/Cis2NftClient";
+import { CIS2_NFT_CONTRACT_INFO, CIS2_MULTI_CONTRACT_INFO } from "../Constants";
+import {
+	Cis2ContractInfo,
+	getInstanceInfo,
+} from "../models/ConcordiumContractClient";
+import ContractSelect from "./ContractSelect";
 
 function Cis2FindInstance(props: {
 	provider: WalletApi;
-	onDone: (address: ContractAddress) => void;
+	contractInfo?: Cis2ContractInfo;
+	onDone: (address: ContractAddress, contractInfo: Cis2ContractInfo) => void;
 }) {
-	let [state, setState] = useState({
+	const contractInfos = [CIS2_NFT_CONTRACT_INFO, CIS2_MULTI_CONTRACT_INFO];
+
+	const [state, setState] = useState({
 		error: "",
-		index: "",
-		subIndex: "0",
 		checking: false,
 	});
 
-	function isValid() {
-		try {
-			return (
-				state.index &&
-				state.subIndex &&
-				BigInt(state.index) >= 0 &&
-				BigInt(state.subIndex) >= 0
-			);
-		} catch (e) {
-			return false;
-		}
-	}
+	function submit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		setState({ ...state, error: "", checking: true });
+		const formData = new FormData(event.currentTarget);
 
-	function onOkClicked() {
-		const address = {
-			index: BigInt(state.index),
-			subindex: BigInt(state.subIndex),
-		};
-		let s = { ...state };
-		s.checking = true;
-		setState(s);
+		const index = BigInt(formData.get("contractIndex")?.toString() || "-1");
+		const subindex = BigInt(
+			formData.get("contractSubindex")?.toString() || "-1"
+		);
+
+		if (!(index >= 0)) {
+			setState({ ...state, error: "Invalid Contract Index" });
+			return;
+		}
+
+		if (!(subindex >= 0)) {
+			setState({ ...state, error: "Invalid Contract Subindex" });
+			return;
+		}
+
+		const contractName =
+			props.contractInfo?.contractName ||
+			formData.get("contractName")?.toString() ||
+			"";
+		const contractInfo =
+			props.contractInfo ||
+			contractInfos.find((i) => i.contractName === contractName);
+		if (!contractInfo) {
+			setState({ ...state, error: "Invalid Contract Name" });
+			return;
+		}
+
+		const address = { index, subindex };
 		getInstanceInfo(props.provider, address)
-			.then((_) => ensureSupportsCis2(props.provider, address))
-			.then(() => props.onDone(address))
-			.catch((e: Error) => {
-				s.error = e.message;
-				setState(s);
+			.then((_) => ensureSupportsCis2(props.provider, contractInfo, address))
+			.then(() => {
+				setState({ ...state, checking: false, error: "" });
+				props.onDone(address, contractInfo);
 			})
-			.finally(() => {
-				s.checking = false;
-				setState(s);
+			.catch((e: Error) => {
+				setState({ ...state, checking: false, error: e.message });
 			});
 	}
 
 	return (
-		<Paper>
-			<h3>Please Speficy your NFT Collection Contract</h3>
-			<form>
-				<div>
-					<TextField
-						id="contract-index"
-						label="Contract Index"
-						variant="standard"
-						value={state.index}
-						onChange={(v) => setState({ ...state, index: v.target.value })}
-						disabled={state.checking}
-					/>
-					<br />
-					<TextField
-						id="contract-subindex"
-						label="Contract Sub Index"
-						variant="standard"
-						value={state.subIndex}
-						onChange={(v) => setState({ ...state, subIndex: v.target.value })}
-						disabled={state.checking}
-					/>
-				</div>
-				<div>{state.error && <Typography>{state.error}</Typography>}</div>
-				<div>{state.checking && <Typography>Checking..</Typography>}</div>
-				<div>
-					<Button
-						variant="contained"
-						disabled={!isValid() || state.checking}
-						onClick={() => onOkClicked()}
-					>
-						Ok
-					</Button>
-				</div>
-			</form>
-		</Paper>
+		<Stack
+			component={"form"}
+			spacing={2}
+			onSubmit={submit}
+			autoComplete={"true"}
+		>
+			<ContractSelect contractName={props.contractInfo?.contractName}/>
+			<TextField
+				id="contract-index"
+				name="contractIndex"
+				label="Contract Index"
+				variant="standard"
+				type={"number"}
+				disabled={state.checking}
+			/>
+			<TextField
+				id="contract-subindex"
+				name="contractSubindex"
+				label="Contract Sub Index"
+				variant="standard"
+				type={"number"}
+				disabled={state.checking}
+				value={0}
+			/>
+			{state.error && (
+				<Typography component="div" color="error">
+					{state.error}
+				</Typography>
+			)}
+			{state.checking && <Typography component="div">Checking..</Typography>}
+			<Button
+				type="submit"
+				variant="contained"
+				disabled={state.checking}
+				fullWidth
+				size="large"
+				sx={{ maxWidth: "100px" }}
+			>
+				Find
+			</Button>
+		</Stack>
 	);
 }
 

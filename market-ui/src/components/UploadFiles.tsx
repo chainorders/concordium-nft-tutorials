@@ -6,7 +6,7 @@ function UploadFiles(props: { onDone: (files: File[]) => void }) {
 			value={[]}
 			onChange={props.onDone}
 			multiple={true}
-			title={"Upload NFT images"}
+			title={""}
 			accept={[".jpg"]}
 		/>
 	);

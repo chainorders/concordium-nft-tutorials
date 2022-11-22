@@ -1,19 +1,30 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
+import { createTheme, ThemeProvider } from "@mui/material";
+import { BrowserRouter } from "react-router-dom";
+
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { BrowserRouter } from "react-router-dom";
-import { Container } from "@mui/system";
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement
 );
+
+const customTheme = createTheme({
+	palette: {
+		mode: "light",
+		primary: {
+			main: "#181817",
+			contrastText: "#FBFBF9",
+		},
+	},
+});
+
 root.render(
 	<BrowserRouter>
-		<Container>
+		<ThemeProvider theme={customTheme}>
 			<App />
-		</Container>
+		</ThemeProvider>
 	</BrowserRouter>
 );
 

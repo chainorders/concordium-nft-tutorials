@@ -3,26 +3,22 @@ use std::vec;
 use concordium_cis2::*;
 use concordium_std::*;
 
-use crate::{
-    errors::Cis2ClientError,
-    state::{ContractTokenId, State},
-};
+use crate::{errors::Cis2ClientError, state::State};
 
 pub const SUPPORTS_ENTRYPOINT_NAME: &str = "supports";
 pub const OPERATOR_OF_ENTRYPOINT_NAME: &str = "operatorOf";
 pub const BALANCE_OF_ENTRYPOINT_NAME: &str = "balanceOf";
 pub const TRANSFER_ENTRYPOINT_NAME: &str = "transfer";
 
-pub type ContractTokenAmount = TokenAmountU8;
-type ContractBalanceOfQueryParams = BalanceOfQueryParams<ContractTokenId>;
-type ContractBalanceOfQueryResponse = BalanceOfQueryResponse<ContractTokenAmount>;
-type TransferParameter = TransferParams<ContractTokenId, ContractTokenAmount>;
-
 pub struct Cis2Client;
 
 impl Cis2Client {
-    pub(crate) fn supports_cis2<S: HasStateApi>(
-        host: &mut impl HasHost<State<S>, StateApiType = S>,
+    pub(crate) fn supports_cis2<
+        S: HasStateApi,
+        T: IsTokenId + Clone + Copy,
+        A: IsTokenAmount + Clone + Copy + ops::Sub<Output = A>,
+    >(
+        host: &mut impl HasHost<State<S, T, A>, StateApiType = S>,
         nft_contract_address: &ContractAddress,
     ) -> Result<bool, Cis2ClientError> {
         let params = SupportsQueryParams {
@@ -49,8 +45,12 @@ impl Cis2Client {
         Ok(supports_cis2)
     }
 
-    pub(crate) fn is_operator_of<S: HasStateApi>(
-        host: &mut impl HasHost<State<S>, StateApiType = S>,
+    pub(crate) fn is_operator_of<
+        S: HasStateApi,
+        T: IsTokenId + Clone + Copy,
+        A: IsTokenAmount + Clone + Copy + ops::Sub<Output = A>,
+    >(
+        host: &mut impl HasHost<State<S, T, A>, StateApiType = S>,
         owner: Address,
         current_contract_address: ContractAddress,
         nft_contract_address: &ContractAddress,
@@ -78,44 +78,55 @@ impl Cis2Client {
         Ok(is_operator)
     }
 
-    pub(crate) fn has_balance<S: HasStateApi>(
-        host: &mut impl HasHost<State<S>, StateApiType = S>,
-        token_id: ContractTokenId,
+    pub(crate) fn get_balance<
+        S,
+        T: IsTokenId + Clone + Copy,
+        A: std::default::Default + IsTokenAmount + Clone + Copy + ops::Sub<Output = A>,
+    >(
+        host: &mut impl HasHost<State<S, T, A>, StateApiType = S>,
+        token_id: T,
         nft_contract_address: &ContractAddress,
         owner: Address,
-    ) -> Result<bool, Cis2ClientError> {
-        let params = ContractBalanceOfQueryParams {
+    ) -> Result<A, Cis2ClientError>
+    where
+        S: HasStateApi,
+    {
+        let params = BalanceOfQueryParams {
             queries: vec![BalanceOfQuery {
                 token_id,
                 address: owner,
             }],
         };
 
-        let parsed_res: ContractBalanceOfQueryResponse = Cis2Client::invoke_contract_read_only(
+        let parsed_res: BalanceOfQueryResponse<A> = Cis2Client::invoke_contract_read_only(
             host,
             nft_contract_address,
             BALANCE_OF_ENTRYPOINT_NAME,
             &params,
         )?;
 
-        let is_operator = parsed_res
-            .0
-            .first()
-            .ok_or(Cis2ClientError::InvokeContractError)?
-            .to_owned();
+        let ret = parsed_res.0.first().map_or(A::default(), |f| *f);
 
-        Result::Ok(is_operator.cmp(&TokenAmountU8(1)).is_ge())
+        Result::Ok(ret)
     }
 
-    pub(crate) fn transfer<S: HasStateApi>(
-        host: &mut impl HasHost<State<S>, StateApiType = S>,
-        token_id: TokenIdU32,
+    pub(crate) fn transfer<
+        S,
+        T: IsTokenId + Clone + Copy,
+        A: IsTokenAmount + Clone + Copy + ops::Sub<Output = A>,
+    >(
+        host: &mut impl HasHost<State<S, T, A>, StateApiType = S>,
+        token_id: T,
         nft_contract_address: ContractAddress,
-        amount: ContractTokenAmount,
+        amount: A,
         from: AccountAddress,
         to: Receiver,
-    ) -> Result<bool, Cis2ClientError> {
-        let params: TransferParameter = TransferParams(vec![Transfer {
+    ) -> Result<bool, Cis2ClientError>
+    where
+        S: HasStateApi,
+        A: IsTokenAmount,
+    {
+        let params = TransferParams(vec![Transfer {
             token_id,
             amount,
             from: concordium_std::Address::Account(from),
@@ -133,8 +144,14 @@ impl Cis2Client {
         Result::Ok(true)
     }
 
-    fn invoke_contract_read_only<S: HasStateApi, R: Deserial, P: Serial>(
-        host: &mut impl HasHost<State<S>, StateApiType = S>,
+    fn invoke_contract_read_only<
+        S: HasStateApi,
+        R: Deserial,
+        P: Serial,
+        T: IsTokenId + Clone + Copy,
+        A: IsTokenAmount + Clone + Copy + ops::Sub<Output = A>,
+    >(
+        host: &mut impl HasHost<State<S, T, A>, StateApiType = S>,
         contract_address: &ContractAddress,
         entrypoint_name: &str,
         params: &P,

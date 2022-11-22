@@ -5,76 +5,20 @@ import {
 	detectConcordiumProvider,
 	WalletApi,
 } from "@concordium/browser-wallet-api-helpers";
-import {
-	AppBar,
-	BottomNavigation,
-	BottomNavigationAction,
-	Box,
-	Button,
-	Paper,
-	Toolbar,
-	Typography,
-} from "@mui/material";
-import { Container } from "@mui/system";
+import { Box } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
-import AddIcon from "@mui/icons-material/Add";
-import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
-import StoreIcon from '@mui/icons-material/Store';
 
 import ListNftPage from "./pages/ListNftPage";
 import AddNftPage from "./pages/AddNftPage";
-import MintNftPage from "./pages/MintNftPage";
 
-import { ContractAddress } from "@concordium/web-sdk";
-import { MARKET_CONTRACT_ADDRESS } from "./Constants";
+import {
+	CIS2_MULTI_CONTRACT_INFO,
+	CIS2_NFT_CONTRACT_INFO,
+	MARKET_CONTRACT_ADDRESS,
+} from "./Constants";
 import BatchMintNftPage from "./pages/BatchMintNftPage";
-
-function ConnectedContent(props: {
-	marketContractAddress: ContractAddress;
-	provider: WalletApi;
-	account: string;
-}) {
-	return (
-		<>
-			<div className="App">
-				<Routes>
-					<Route
-						path="/"
-						element={
-							<ListNftPage
-								provider={props.provider}
-								account={props.account}
-								marketContractAddress={props.marketContractAddress}
-							/>
-						}
-					/>
-					<Route
-						path="/add"
-						element={
-							<AddNftPage
-								provider={props.provider}
-								account={props.account}
-								marketContractAddress={props.marketContractAddress}
-							/>
-						}
-					/>
-					<Route
-						path="/mint"
-						element={
-							<MintNftPage provider={props.provider} account={props.account} />
-						}
-					/>
-					<Route
-						path="/mint-batch"
-						element={
-							<BatchMintNftPage provider={props.provider} account={props.account} />
-						}
-					/>
-				</Routes>
-			</div>
-		</>
-	);
-}
+import ConnectWallet from "./components/ConnectWallet";
+import Header from "./components/ui/Header";
 
 function App() {
 	const [state, setState] = useState<{
@@ -127,72 +71,60 @@ function App() {
 		return !!state.provider && !!state.account;
 	}
 
-	return (
-		<Container>
-			<AppBar position="static">
-				<Toolbar>
-					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-						Concordium Nft Marketplace
-					</Typography>
-					<Typography>Account : {state.account}</Typography>
-				</Toolbar>
-			</AppBar>
+	const pages = [
+		{
+			path: "/",
+			name: "Buy",
+			component: (
+				<ListNftPage
+					provider={state.provider!}
+					account={state.account!}
+					marketContractAddress={MARKET_CONTRACT_ADDRESS}
+					contractInfo={CIS2_MULTI_CONTRACT_INFO}
+				/>
+			),
+		},
+		{
+			path: "/add",
+			name: "Sell",
+			component: (
+				<AddNftPage
+					provider={state.provider!}
+					account={state.account!}
+					marketContractAddress={MARKET_CONTRACT_ADDRESS}
+					contractInfo={CIS2_MULTI_CONTRACT_INFO}
+				/>
+			),
+		},
+		{
+			path: "/mint-multi-batch",
+			name: "Mint",
+			component: (
+				<BatchMintNftPage
+					key={CIS2_MULTI_CONTRACT_INFO.contractName}
+					contractInfo={CIS2_MULTI_CONTRACT_INFO}
+					provider={state.provider!}
+					account={state.account!}
+				/>
+			),
+		},
+	];
 
-			<Box>
+	return (
+		<>
+			<Header pages={pages} />
+			<Box className="App">
 				{isConnected() ? (
-					<ConnectedContent
-						provider={state.provider as WalletApi}
-						account={state.account as string}
-						marketContractAddress={MARKET_CONTRACT_ADDRESS}
-					/>
+					<Routes>
+						{pages.map((p) => (
+							<Route path={p.path} element={p.component} key={p.name} />
+						))}
+					</Routes>
 				) : (
-					<Box
-						sx={{
-							display: "flex",
-							flexDirection: { xs: "column", md: "row" },
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Button onClick={() => connect()} sx={{ display: "flex" }}>
-							<Typography>Connect Wallet</Typography>
-						</Button>
-					</Box>
+					<ConnectWallet connect={connect} />
 				)}
-				<div style={{ height: "4em" }}></div>
-				<Paper
-					sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
-					elevation={3}
-				>
-					<BottomNavigation showLabels>
-						<BottomNavigationAction
-							label="Add"
-							icon={<AddIcon />}
-							title="Adds a NFT to Marketplace Listing"
-							href="/add"
-						/>
-						<BottomNavigationAction
-							label="Mint"
-							icon={<AddAPhotoIcon />}
-							title="Mints An NFT"
-							href="/mint"
-						/>
-						<BottomNavigationAction
-							label="Mint Batch"
-							icon={<AddAPhotoIcon />}
-							title="Mints An NFT Collection"
-							href="/mint-batch"
-						/>
-						<BottomNavigationAction
-							label="Marketplace"
-							icon={<StoreIcon />}
-							title="NFT's List"
-							href="/"
-						/>
-					</BottomNavigation>
-				</Paper>
 			</Box>
-		</Container>
+		</>
 	);
 }
 

@@ -4,19 +4,17 @@ import {
 	ContractAddress,
 	TransactionSummary,
 	AccountAddress,
-	ModuleReference,
 } from "@concordium/web-sdk";
 
 import { Cis2Deserializer } from "./Cis2Deserializer";
 import { MetadataUrl, OperatorOfQueryParams } from "./Cis2Types";
-import { NFT_CONTRACT_MODULE_REF, NFT_CONTRACT_SCHEMA } from "../Constants";
+import { ContractInfo, Cis2ContractInfo } from "./ConcordiumContractClient";
 import {
 	initContract,
 	invokeContract,
 	updateContract,
 } from "./ConcordiumContractClient";
 
-export const CONTRACT_NAME = "CIS2-NFT";
 export const enum MethodName {
 	operatorOf = "operatorOf",
 	supports = "supports",
@@ -25,8 +23,6 @@ export const enum MethodName {
 	mint = "mint",
 	tokenMetadata = "tokenMetadata",
 }
-const SCHEMA_BUFFER = Buffer.from(NFT_CONTRACT_SCHEMA, "hex");
-const MODULE_REF = new ModuleReference(NFT_CONTRACT_MODULE_REF);
 
 /**
  * Initilizes CIS2-NFT contract.
@@ -37,14 +33,13 @@ const MODULE_REF = new ModuleReference(NFT_CONTRACT_MODULE_REF);
  */
 export async function initCis2NftContract(
 	provider: WalletApi,
+	contractInfo: ContractInfo,
 	account: string,
 	maxContractExecutionEnergy = BigInt(9999)
 ): Promise<ContractAddress> {
 	return await initContract(
 		provider,
-		MODULE_REF,
-		SCHEMA_BUFFER,
-		CONTRACT_NAME,
+		contractInfo,
 		account,
 		maxContractExecutionEnergy
 	);
@@ -55,14 +50,15 @@ export async function initCis2NftContract(
  * @param provider Wallet Provider.
  * @param account Account address.
  * @param marketAddress Marketplace Contract Address.
- * @param nftAddress CIS2-NFT contract address.
- * @returns true if @see marketAddress is an operator of @see account in @see nftAddress
+ * @param cis2Address CIS2-NFT contract address.
+ * @returns true if @see marketAddress is an operator of @see account in @see cis2Address
  */
 export async function isOperator(
 	provider: WalletApi,
 	account: string,
 	marketAddress: ContractAddress,
-	nftAddress: ContractAddress
+	cis2Address: ContractAddress,
+	contractInfo: Cis2ContractInfo
 ): Promise<boolean> {
 	const params = [
 		{
@@ -77,9 +73,10 @@ export async function isOperator(
 
 	const retValue = await invokeCis2NftContract(
 		provider,
-		nftAddress,
+		cis2Address,
 		MethodName.operatorOf,
-		params
+		params,
+		contractInfo
 	);
 
 	let parsedResult = new Cis2Deserializer(
@@ -96,6 +93,7 @@ export async function isOperator(
  */
 export async function ensureSupportsCis2(
 	provider: WalletApi,
+	contractInfo: Cis2ContractInfo,
 	address: ContractAddress
 ): Promise<undefined> {
 	const paramsJson = ["CIS-2"];
@@ -103,7 +101,8 @@ export async function ensureSupportsCis2(
 		provider,
 		address,
 		MethodName.supports,
-		paramsJson
+		paramsJson,
+		contractInfo
 	);
 
 	let parsedResult = new Cis2Deserializer(retValue).readSupportsQueryResponse();
@@ -125,8 +124,9 @@ export async function balanceOf(
 	provider: WalletApi,
 	account: string,
 	nftAddress: ContractAddress,
+	contractInfo: Cis2ContractInfo,
 	tokenId: string
-): Promise<number> {
+): Promise<bigint> {
 	const paramsJson = [
 		{
 			token_id: tokenId,
@@ -138,14 +138,15 @@ export async function balanceOf(
 		provider,
 		nftAddress,
 		MethodName.balanceOf,
-		paramsJson
+		paramsJson,
+		contractInfo
 	);
 
 	let parsedResult = new Cis2Deserializer(
 		retValue
 	).readBalanceOfQueryResponse();
 
-	return parsedResult[0];
+	return parsedResult[0] as bigint;
 }
 
 /**
@@ -159,6 +160,7 @@ export async function balanceOf(
 export async function getTokenMetadata(
 	provider: WalletApi,
 	account: string,
+	contractInfo: Cis2ContractInfo,
 	nftContractAddress: ContractAddress,
 	tokenId: string
 ): Promise<MetadataUrl> {
@@ -168,6 +170,7 @@ export async function getTokenMetadata(
 		nftContractAddress,
 		MethodName.tokenMetadata,
 		params,
+		contractInfo,
 		new AccountAddress(account)
 	);
 	return new Cis2Deserializer(retValue).readTokenMetadata();
@@ -188,6 +191,7 @@ export async function updateOperator(
 	account: string,
 	marketAddress: ContractAddress,
 	nftContractAddress: ContractAddress,
+	contractInfo: ContractInfo,
 	maxContractExecutionEnergy = BigInt(6000)
 ): Promise<Record<string, TransactionSummary> | undefined> {
 	const paramJson = [
@@ -210,51 +214,7 @@ export async function updateOperator(
 		account,
 		nftContractAddress,
 		MethodName.updateOperator,
-		maxContractExecutionEnergy,
-		BigInt(0)
-	);
-}
-
-/**
- * Mints an new NFT in Contract: {@link nftContractAddress}
- * represented by Id: {@link tokenId} and Metadata: {@link tokenMedataUrl}
- * @param provider Wallet Provider.
- * @param account Account address.
- * @param tokenId Token Id
- * @param tokenMedataUrl Token Metadata Url & Hash
- * @param nftContractAddress CIS-NFT contract address.
- * @param maxContractExecutionEnergy Max allowed energy ot Minting.
- * @returns Transaction outcomes {@link Record<string, TransactionSummary>}
- */
-export async function mintNft(
-	provider: WalletApi,
-	account: string,
-	tokenId: string,
-	tokenMedataUrl: MetadataUrl,
-	nftContractAddress: ContractAddress,
-	maxContractExecutionEnergy = BigInt(9999)
-): Promise<Record<string, TransactionSummary>> {
-	const paramJson = {
-		owner: {
-			Account: [account],
-		},
-		tokens: [
-			[
-				tokenId,
-				{
-					url: tokenMedataUrl.url,
-					hash: tokenMedataUrl.hash,
-				},
-			],
-		],
-	};
-
-	return updateCis2NftContract(
-		provider,
-		paramJson,
-		account,
-		nftContractAddress,
-		MethodName.mint,
+		contractInfo,
 		maxContractExecutionEnergy,
 		BigInt(0)
 	);
@@ -262,29 +222,27 @@ export async function mintNft(
 
 /**
  * Mints multiple NFT in Contract: {@link nftContractAddress}
- * represented by {@link tokenMetadataMap}
+ * represented by {@link tokens}
  * @param provider Wallet Provider.
  * @param account Account address.
- * @param tokenMetadataMap Map of Token Id and Metadata Url.
+ * @param tokens Map of Token Id and Metadata Url.
  * @param nftContractAddress CIS-NFT contract address.
  * @param maxContractExecutionEnergy Max allowed energy ot Minting.
  * @returns Transaction outcomes {@link Record<string, TransactionSummary>}
  */
-export async function batchMintNft(
+export async function mint<T>(
 	provider: WalletApi,
 	account: string,
-	tokenMetadataMap: { [tokenId: string]: MetadataUrl },
+	tokens: { [tokenId: string]: T },
 	nftContractAddress: ContractAddress,
+	contractInfo: ContractInfo,
 	maxContractExecutionEnergy = BigInt(9999)
 ): Promise<Record<string, TransactionSummary>> {
 	const paramJson = {
 		owner: {
 			Account: [account],
 		},
-		tokens: Object.keys(tokenMetadataMap).map((tokenId) => [
-			tokenId,
-			tokenMetadataMap[tokenId],
-		]),
+		tokens: Object.keys(tokens).map((tokenId) => [tokenId, tokens[tokenId]]),
 	};
 
 	return updateCis2NftContract(
@@ -293,6 +251,7 @@ export async function batchMintNft(
 		account,
 		nftContractAddress,
 		MethodName.mint,
+		contractInfo,
 		maxContractExecutionEnergy,
 		BigInt(0)
 	);
@@ -306,12 +265,12 @@ async function invokeCis2NftContract<T>(
 	contract: ContractAddress,
 	methodName: MethodName,
 	params: T,
+	contractInfo: ContractInfo,
 	invoker?: ContractAddress | AccountAddress
 ): Promise<Buffer> {
 	return invokeContract(
 		provider,
-		SCHEMA_BUFFER,
-		CONTRACT_NAME,
+		contractInfo,
 		contract,
 		methodName,
 		params,
@@ -328,13 +287,13 @@ async function updateCis2NftContract<T>(
 	account: string,
 	contractAddress: ContractAddress,
 	methodName: MethodName,
+	contractInfo: ContractInfo,
 	maxContractExecutionEnergy: bigint,
 	ccdAmount: bigint
 ): Promise<Record<string, TransactionSummary>> {
 	return updateContract(
 		provider,
-		CONTRACT_NAME,
-		SCHEMA_BUFFER,
+		contractInfo,
 		paramJson,
 		account,
 		contractAddress,
@@ -347,13 +306,18 @@ async function updateCis2NftContract<T>(
 /**
  * Checks if an input hex encoded token id is a valid token id.
  * @param tokenIdHex Hex encoded token id.
- * @param size Size of the token in bytes in the Contract.
+ * @param byteSize Size of the token in bytes in the Contract.
  * @returns true if token is valid.
  */
-export function isValidTokenId(tokenIdHex: string, size = 4): boolean {
+export function isValidCis2NftTokenId(
+	tokenIdHex: string,
+	contractInfo: Cis2ContractInfo
+): boolean {
 	try {
 		let buff = Buffer.from(tokenIdHex, "hex");
-		let parsedTokenIdHex = Buffer.from(buff.subarray(0, size)).toString("hex");
+		let parsedTokenIdHex = Buffer.from(
+			buff.subarray(0, contractInfo.tokenIdByteSize)
+		).toString("hex");
 
 		return parsedTokenIdHex === tokenIdHex;
 	} catch (error) {
@@ -361,3 +325,7 @@ export function isValidTokenId(tokenIdHex: string, size = 4): boolean {
 		return false;
 	}
 }
+
+export const toTokenId = (integer: number, contractInfo: Cis2ContractInfo) => {
+	return integer.toString(16).padStart(contractInfo.tokenIdByteSize * 2, "0");
+};

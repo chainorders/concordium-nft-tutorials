@@ -7,6 +7,7 @@ function LazyNftMetadata(props: {
 	loadingTemplate: () => React.ReactElement;
 	loadedTemplate: (metadata: Metadata) => React.ReactElement;
 	errorLoadingTemplate: (error: string) => React.ReactElement;
+	onMetadataLoaded?: (metadata: Metadata) => void;
 }) {
 	const [state, setState] = useState<{
 		metadata?: Metadata;
@@ -17,9 +18,10 @@ function LazyNftMetadata(props: {
 	useEffect(() => {
 		setState({ ...state, loadingMetdata: true });
 		fetchJson<Metadata>(props.metadataUrl.url)
-			.then((metadata) =>
-				setState({ ...state, metadata, loadingMetdata: false })
-			)
+			.then((metadata) => {
+				setState({ ...state, metadata, loadingMetdata: false });
+				props.onMetadataLoaded && props.onMetadataLoaded(metadata);
+			})
 			.catch((err) => {
 				setState({
 					...state,
@@ -36,8 +38,8 @@ function LazyNftMetadata(props: {
 	} else if (state.metadata) {
 		return props.loadedTemplate(state.metadata);
 	} else {
-        return <></>
-    }
+		return <></>;
+	}
 }
 
 export default LazyNftMetadata;

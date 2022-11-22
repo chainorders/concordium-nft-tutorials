@@ -26,12 +26,10 @@
 //! implementation of a token receive hook.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+use core::convert::TryInto;
+
 use concordium_cis2::*;
 use concordium_std::*;
-
-/// The baseurl for the token metadata, gets appended with the token ID as hex
-/// encoding before emitted in the TokenMetadata event.
-const TOKEN_METADATA_BASE_URL: &str = "https://some.example/token/";
 
 /// List of supported standards by this contract address.
 const SUPPORTS_STANDARDS: [StandardIdentifier<'static>; 2] =
@@ -99,18 +97,19 @@ pub struct TokenMetadata {
 
 impl TokenMetadata {
     fn get_hash_bytes(&self) -> Option<[u8; 32]> {
-        let mut hash_bytes: [u8; 32] = Default::default();
-        let hex_res = hex::decode_to_slice(self.hash.to_owned(), &mut hash_bytes);
-
-        match hex_res {
-            Ok(_) => Some(hash_bytes),
+        match hex::decode(self.hash.to_owned()) {
+            Ok(v) => {
+                let slice = v.as_slice();
+                match slice.try_into() {
+                    Ok(array) => Option::Some(array),
+                    Err(_) => Option::None,
+                }
+            }
             Err(_) => Option::None,
         }
     }
 
     fn to_metadata_url(&self) -> MetadataUrl {
-        let mut hash_bytes: [u8; 32] = Default::default();
-        hex::decode_to_slice(self.hash.to_string(), &mut hash_bytes).unwrap();
         MetadataUrl {
             url: self.url.to_string(),
             hash: self.get_hash_bytes(),
@@ -150,6 +149,7 @@ enum CustomContractError {
     ContractOnly,
     /// Failed to invoke a contract.
     InvokeContractError,
+    TokenAlreadyMinted,
 }
 
 type ContractError = Cis2Error<CustomContractError>;
@@ -341,16 +341,7 @@ impl<S: HasStateApi> State<S> {
     }
 }
 
-/// Build a string from TOKEN_METADATA_BASE_URL appended with the token ID
-/// encoded as hex.
-fn build_token_metadata_url(token_id: &ContractTokenId) -> String {
-    let mut token_metadata_url = String::from(TOKEN_METADATA_BASE_URL);
-    token_metadata_url.push_str(&token_id.to_string());
-    token_metadata_url
-}
-
 // Contract functions
-
 /// Initialize contract instance with a no token types.
 #[init(contract = "CIS2-Multi")]
 fn contract_init<S: HasStateApi>(
@@ -453,6 +444,11 @@ fn contract_mint<S: HasStateApi>(
 
     let (state, builder) = host.state_and_builder();
     for (token_id, token_info) in params.tokens {
+        ensure!(
+            state.contains_token(&token_id).eq(&false),
+            ContractError::Custom(CustomContractError::TokenAlreadyMinted)
+        );
+
         // Mint the token in the state.
         state.mint(
             &token_id,
@@ -696,16 +692,16 @@ fn contract_token_metadata<S: HasStateApi>(
     // Build the response.
     let mut response = Vec::with_capacity(params.queries.len());
     for token_id in params.queries {
-        // Check the token exists.
-        ensure!(
-            host.state().contains_token(&token_id),
-            ContractError::InvalidTokenId
-        );
+        let metadata_url: MetadataUrl = match host
+            .state()
+            .tokens
+            .get(&token_id)
+            .map(|metadata| metadata.to_owned())
+        {
+            Option::Some(m) => Result::Ok(m),
+            Option::None => Result::Err(ContractError::InvalidTokenId),
+        }?;
 
-        let metadata_url = MetadataUrl {
-            url: build_token_metadata_url(&token_id),
-            hash: None,
-        };
         response.push(metadata_url);
     }
     let result = TokenMetadataQueryResponse::from(response);

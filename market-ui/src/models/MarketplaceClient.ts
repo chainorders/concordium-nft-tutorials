@@ -1,14 +1,11 @@
-import { Buffer } from "buffer/";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress, TransactionSummary } from "@concordium/web-sdk";
 
 import { MarketplaceDeserializer } from "./MarketplaceDeserializer";
-import { TokenList } from "./MarketplaceTypes";
-import { MARKET_CONTRACT_SCHEMA } from "../Constants";
+import { AddParams, TokenList } from "./MarketplaceTypes";
+import { MARKETPLACE_CONTRACT_INFO } from "../Constants";
 import { invokeContract, updateContract } from "./ConcordiumContractClient";
 
-const CONTRACT_NAME = "Market-NFT";
-const SCHEMA_BUFFER = Buffer.from(MARKET_CONTRACT_SCHEMA, "hex");
 const enum MethodNames {
 	add = "add",
 	transfer = "transfer",
@@ -27,11 +24,11 @@ export async function list(
 ): Promise<TokenList> {
 	const retValue = await invokeContract(
 		provider,
-		SCHEMA_BUFFER,
-		CONTRACT_NAME,
+		MARKETPLACE_CONTRACT_INFO,
 		marketContractAddress,
 		MethodNames.list
 	);
+	
 	return new MarketplaceDeserializer(retValue).readTokenList();
 }
 
@@ -39,34 +36,21 @@ export async function list(
  * Adds a token to buyable list of tokens in marketplace.
  * @param provider Wallet Provider.
  * @param account Account address.
- * @param tokenId Token id.
  * @param marketContractAddress Market place contract Address.
- * @param nftContractAddress CIS2-NFT contract address.
- * @param price Selling Price of the Token.
+ * @param paramJson Marketplace Add Method Params.
  * @param maxContractExecutionEnergy Max energy allowed for the transaction.
  * @returns Transaction outcomes.
  */
 export async function add(
 	provider: WalletApi,
 	account: string,
-	tokenId: string,
 	marketContractAddress: ContractAddress,
-	nftContractAddress: ContractAddress,
-	price: bigint,
+	paramJson: AddParams,
 	maxContractExecutionEnergy = BigInt(9999)
 ): Promise<Record<string, TransactionSummary>> {
-	const paramJson = {
-		nft_contract_address: {
-			index: nftContractAddress.index.toString(),
-			subindex: nftContractAddress.subindex.toString(),
-		},
-		token_id: tokenId,
-		price: price.toString(),
-	};
 	return updateContract(
 		provider,
-		CONTRACT_NAME,
-		SCHEMA_BUFFER,
+		MARKETPLACE_CONTRACT_INFO,
 		paramJson,
 		account,
 		marketContractAddress,
@@ -93,6 +77,8 @@ export async function transfer(
 	nftContractAddress: ContractAddress,
 	tokenId: string,
 	priceCcd: bigint,
+	owner: string,
+	quantity: bigint,
 	maxContractExecutionEnergy = BigInt(6000)
 ): Promise<Record<string, TransactionSummary>> {
 	const paramJson = {
@@ -102,17 +88,18 @@ export async function transfer(
 		},
 		token_id: tokenId,
 		to: account,
+		owner,
+		quantity: quantity.toString()
 	};
 
 	return updateContract(
 		provider,
-		CONTRACT_NAME,
-		SCHEMA_BUFFER,
+		MARKETPLACE_CONTRACT_INFO,
 		paramJson,
 		account,
 		marketContractAddress,
 		MethodNames.transfer,
 		maxContractExecutionEnergy,
-		priceCcd
+		priceCcd * quantity
 	);
 }

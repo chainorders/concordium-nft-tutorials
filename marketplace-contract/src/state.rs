@@ -1,140 +1,166 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use concordium_cis2::*;
+use concordium_cis2::{IsTokenAmount, IsTokenId};
 use concordium_std::*;
 
-pub type ContractTokenId = TokenIdU32;
-
-#[derive(SchemaType, Clone, Serialize, PartialEq, Eq, Debug)]
-pub struct TokenInfo {
-    pub id: ContractTokenId,
+#[derive(Clone, Serialize, PartialEq, Eq, Debug)]
+pub struct TokenInfo<T: Serial + Deserial + Clone> {
+    pub id: T,
     pub address: ContractAddress,
 }
 
-impl TokenInfo {
-    fn new(id: ContractTokenId, address: ContractAddress) -> Self {
-        TokenInfo { id, address }
-    }
-}
-
-#[derive(SchemaType, Clone, Serialize, Copy, PartialEq, Eq, Debug)]
-pub enum TokenListState {
-    UnListed,
-    Listed(Amount),
-}
-
-#[derive(SchemaType, Clone, Serialize, Debug, PartialEq, Eq)]
-pub struct TokenState {
-    pub counter: u64,
-    pub curr_state: TokenListState,
+#[derive(Clone, Serialize, PartialEq, Eq, Debug)]
+pub struct TokenOwnerInfo<T: Serial + Deserial + Clone> {
+    pub id: T,
+    pub address: ContractAddress,
     pub owner: AccountAddress,
 }
 
-impl TokenState {
-    pub fn get_curr_state(&self) -> TokenListState {
-        self.curr_state
-    }
-
-    pub(crate) fn get_owner(&self) -> AccountAddress {
-        self.owner
-    }
-
-    pub(crate) fn is_listed(&self) -> bool {
-        match self.curr_state {
-            TokenListState::UnListed => false,
-            TokenListState::Listed(_) => true,
+impl<T: Serial + Deserial + Clone + Copy> TokenOwnerInfo<T> {
+    pub fn from(token_info: &TokenInfo<T>, owner: &AccountAddress) -> Self {
+        TokenOwnerInfo {
+            owner: *owner,
+            id: token_info.id,
+            address: token_info.address,
         }
     }
+}
 
-    pub(crate) fn get_price(&self) -> Option<Amount> {
-        match self.get_curr_state() {
-            TokenListState::UnListed => Option::None,
-            TokenListState::Listed(price) => Option::Some(price),
-        }
-    }
+#[derive(Clone, Serialize, Copy, PartialEq, Eq, Debug)]
+pub struct TokenPriceState<A: IsTokenAmount + Clone> {
+    pub quantity: A,
+    pub price: Amount,
+}
+
+#[derive(Clone, Serialize, Copy, PartialEq, Eq, Debug)]
+pub struct TokenRoyaltyState {
+    pub primary_owner: AccountAddress,
+    pub royalty: u16,
 }
 
 #[derive(Serialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct Commission {
     /// Commission basis points. equals to percent * 100
-    pub(crate) percentage_basis: u8,
+    pub(crate) percentage_basis: u16,
+}
+
+#[derive(Debug, Serialize, SchemaType, PartialEq, Eq, Clone)]
+pub struct TokenListItem<T: IsTokenId, A: IsTokenAmount> {
+    pub token_id: T,
+    pub contract: ContractAddress,
+    pub price: Amount,
+    pub owner: AccountAddress,
+    pub royalty: u16,
+    pub primary_owner: AccountAddress,
+    pub quantity: A,
 }
 
 #[derive(Serial, DeserialWithState, StateClone)]
 #[concordium(state_parameter = "S")]
-pub(crate) struct State<S>
+pub(crate) struct State<S, T, A>
 where
     S: HasStateApi,
+    T: IsTokenId + Clone + Copy,
+    A: IsTokenAmount + Clone + ops::Sub<Output = A> + Copy,
 {
     pub(crate) commission: Commission,
-    pub(crate) tokens: StateMap<TokenInfo, TokenState, S>,
+    pub(crate) token_royalties: StateMap<TokenInfo<T>, TokenRoyaltyState, S>,
+    pub(crate) token_prices: StateMap<TokenOwnerInfo<T>, TokenPriceState<A>, S>,
 }
 
-impl<S: HasStateApi> State<S> {
-    pub(crate) fn new(state_builder: &mut StateBuilder<S>) -> Self {
+impl<
+        S: HasStateApi,
+        T: IsTokenId + Clone + Copy,
+        A: IsTokenAmount + Clone + Copy + ops::Sub<Output = A>,
+    > State<S, T, A>
+{
+    pub(crate) fn new(state_builder: &mut StateBuilder<S>, commission: u16) -> Self {
         State {
             commission: Commission {
-                percentage_basis: 250,
+                percentage_basis: commission,
             },
-            tokens: state_builder.new_map(),
+            token_royalties: state_builder.new_map(),
+            token_prices: state_builder.new_map(),
         }
     }
 
     pub(crate) fn list_token(
         &mut self,
-        token_id: ContractTokenId,
-        nft_contract_address: ContractAddress,
-        owner: AccountAddress,
+        token_info: &TokenInfo<T>,
+        owner: &AccountAddress,
         price: Amount,
+        royalty: u16,
+        quantity: A,
     ) {
-        let info = TokenInfo::new(token_id, nft_contract_address);
-        let counter = match self.token(&info) {
-            Some(r) => (r.counter + 1),
-            None => 0,
+        match self.token_royalties.get(token_info) {
+            Some(_) => Option::None,
+            None => self.token_royalties.insert(
+                token_info.clone(),
+                TokenRoyaltyState {
+                    primary_owner: *owner,
+                    royalty,
+                },
+            ),
         };
 
-        self.tokens.insert(
-            info,
-            TokenState {
-                owner,
-                counter,
-                curr_state: TokenListState::Listed(price),
+        self.token_prices.insert(
+            TokenOwnerInfo::from(token_info, owner),
+            TokenPriceState { price, quantity },
+        );
+    }
+
+    pub(crate) fn decrease_listed_quantity(&mut self, token_info: &TokenOwnerInfo<T>, delta: A) {
+        let price = match self.token_prices.get(token_info) {
+            Option::None => return,
+            Option::Some(price) => *price,
+        };
+
+        self.token_prices.insert(
+            token_info.clone(),
+            TokenPriceState {
+                quantity: price.quantity - delta,
+                ..price
             },
         );
     }
 
-    pub(crate) fn delist_token(
-        &mut self,
-        token_id: TokenIdU32,
-        nft_contract_address: ContractAddress,
-        owner: AccountAddress,
-    ) {
-        let info = TokenInfo::new(token_id, nft_contract_address);
-        let counter = match self.token(&info) {
-            Some(r) => r.counter,
-            None => 0,
-        };
-
-        self.tokens.insert(
-            info,
-            TokenState {
-                owner,
-                counter,
-                curr_state: TokenListState::UnListed,
-            },
-        );
-    }
-
-    pub(crate) fn get_token(
+    pub(crate) fn get_listed(
         &self,
-        token_id: TokenIdU32,
-        nft_contract_address: ContractAddress,
-    ) -> Option<StateRef<TokenState>> {
-        let info = TokenInfo::new(token_id, nft_contract_address);
-        self.token(&info)
+        token_info: &TokenInfo<T>,
+        owner: &AccountAddress,
+    ) -> Option<(TokenRoyaltyState, TokenPriceState<A>)> {
+        match self.token_royalties.get(token_info) {
+            Some(r) => self
+                .token_prices
+                .get(&TokenOwnerInfo::from(token_info, owner))
+                .map(|p| (*r, *p)),
+            None => Option::None,
+        }
     }
 
-    fn token(&self, info: &TokenInfo) -> Option<StateRef<TokenState>> {
-        self.tokens.get(info)
+    pub(crate) fn list(&self) -> Vec<TokenListItem<T, A>> {
+        self.token_prices
+            .iter()
+            .map(|p| -> Option<TokenListItem<T, A>> {
+                let token_info = TokenInfo {
+                    id: p.0.id,
+                    address: p.0.address,
+                };
+
+                match self.token_royalties.get(&token_info) {
+                    Option::None => Option::None,
+                    Option::Some(r) => Option::Some(TokenListItem {
+                        token_id: token_info.id,
+                        contract: token_info.address,
+                        price: p.1.price,
+                        owner: p.0.owner,
+                        royalty: r.royalty,
+                        primary_owner: r.primary_owner,
+                        quantity: p.1.quantity,
+                    }),
+                }
+            })
+            .flatten()
+            .collect()
     }
 }

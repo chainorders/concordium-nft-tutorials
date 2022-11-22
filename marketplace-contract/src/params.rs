@@ -1,31 +1,39 @@
-use concordium_cis2::{TokenIdU32};
-use concordium_std::{Serial, Deserial, SchemaType, ContractAddress, Amount, AccountAddress, Serialize};
+use concordium_std::{
+    AccountAddress, Amount, ContractAddress, Deserial, SchemaType, Serial, Serialize,
+};
 
-type ContractTokenId = TokenIdU32;
+use crate::{state::TokenListItem, ContractTokenAmount, ContractTokenId};
 
 #[derive(Serial, Deserial, SchemaType)]
 pub(crate) struct AddParams {
     pub nft_contract_address: ContractAddress,
     pub token_id: ContractTokenId,
 
-    /// Price at this the NFT is to be sold.
+    /// Price per Unit of Token at this the Token is to be sold.
     /// This includes Selling Price + Marketplace Comission
-    pub price: Amount
+    pub price: Amount,
+    pub royalty: u16,
+
+    /// Quantity of the token which can be listed on the marketplace
+    /// In case of an NFT this will always be one
+    pub quantity: ContractTokenAmount,
 }
 
 #[derive(Serial, Deserial, SchemaType)]
 pub(crate) struct TransferParams {
     pub nft_contract_address: ContractAddress,
     pub token_id: ContractTokenId,
-    pub to: AccountAddress
+    pub to: AccountAddress,
+    pub owner: AccountAddress,
+    pub quantity: ContractTokenAmount,
 }
 
 #[derive(Debug, Serialize, SchemaType)]
-pub struct TokenList(#[concordium(size_length = 2)] pub Vec<TokenListItem>);
+pub struct TokenList(
+    #[concordium(size_length = 2)] pub Vec<TokenListItem<ContractTokenId, ContractTokenAmount>>,
+);
 
-#[derive(Debug, Serialize, SchemaType, PartialEq, Eq)]
-pub struct TokenListItem {
-    pub token_id: ContractTokenId,
-    pub contract: ContractAddress,
-    pub price: Amount
+#[derive(Serial, Deserial, SchemaType)]
+pub struct InitParams {
+    pub commission: u16,
 }

@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { Stepper, Step, StepLabel } from "@mui/material";
-import { Box } from "@mui/system";
+import {
+	Stepper,
+	Step,
+	StepLabel,
+	Typography,
+	Paper,
+	Container,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/common-sdk";
@@ -10,6 +16,7 @@ import Cis2OperatorOf from "../components/Cis2OperatorOf";
 import Cis2UpdateOperator from "../components/Cis2UpdateOperator";
 import Cis2FindInstance from "../components/Cis2FindInstance";
 import MarkerplaceAdd from "../components/MarketplaceAdd";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 enum Steps {
 	FindCollection,
@@ -18,11 +25,13 @@ enum Steps {
 	CheckTokenBalance,
 	AddToken,
 }
+type StepType = { step: Steps; title: string };
 
 function AddNftPage(props: {
 	provider: WalletApi;
 	account: string;
 	marketContractAddress: ContractAddress;
+	contractInfo?: Cis2ContractInfo;
 }) {
 	const steps = [
 		{
@@ -36,18 +45,24 @@ function AddNftPage(props: {
 	];
 
 	let [state, setState] = useState<{
-		activeStep: Steps;
+		activeStep: StepType;
 		nftContract?: ContractAddress;
+		contractInfo?: Cis2ContractInfo;
 		tokenId?: string;
+		totalBalance?: bigint;
 	}>({
-		activeStep: Steps.FindCollection,
+		activeStep: steps[0],
 	});
 
-	function onGetCollectionAddress(address: ContractAddress) {
+	function onGetCollectionAddress(
+		address: ContractAddress,
+		contractInfo: Cis2ContractInfo
+	) {
 		setState({
 			...state,
-			activeStep: Steps.CheckOperator,
+			activeStep: steps[1],
 			nftContract: address,
+			contractInfo,
 		});
 	}
 
@@ -55,12 +70,12 @@ function AddNftPage(props: {
 		if (hasOwnership) {
 			setState({
 				...state,
-				activeStep: Steps.CheckTokenBalance,
+				activeStep: steps[3],
 			});
 		} else {
 			setState({
 				...state,
-				activeStep: Steps.UpdateOperator,
+				activeStep: steps[2],
 			});
 		}
 	}
@@ -68,15 +83,16 @@ function AddNftPage(props: {
 	function onUpdateOperator() {
 		setState({
 			...state,
-			activeStep: Steps.CheckTokenBalance,
+			activeStep: steps[3],
 		});
 	}
 
-	function onTokenBalance(tokenId: string, _balance: number) {
+	function onTokenBalance(tokenId: string, totalBalance: bigint) {
 		setState({
 			...state,
-			activeStep: Steps.AddToken,
+			activeStep: steps[4],
 			tokenId: tokenId,
+			totalBalance,
 		});
 	}
 
@@ -86,12 +102,15 @@ function AddNftPage(props: {
 	}
 
 	function StepContent() {
-		switch (state.activeStep) {
+		switch (state.activeStep.step) {
 			case Steps.FindCollection:
 				return (
 					<Cis2FindInstance
 						provider={props.provider}
-						onDone={(address) => onGetCollectionAddress(address)}
+						contractInfo={props.contractInfo}
+						onDone={(address, contractInfo) =>
+							onGetCollectionAddress(address, contractInfo)
+						}
 					/>
 				);
 			case Steps.CheckOperator:
@@ -101,6 +120,7 @@ function AddNftPage(props: {
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
 						nftContractAddress={state.nftContract as ContractAddress}
+						contractInfo={state.contractInfo!}
 						onDone={(isOperator) => onCheckOperator(isOperator)}
 					/>
 				);
@@ -111,6 +131,7 @@ function AddNftPage(props: {
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
 						nftContractAddress={state.nftContract as ContractAddress}
+						contractInfo={state.contractInfo!}
 						onDone={() => onUpdateOperator()}
 					/>
 				);
@@ -119,7 +140,8 @@ function AddNftPage(props: {
 					<Cis2BalanceOf
 						provider={props.provider}
 						account={props.account}
-						nftContractAddress={state.nftContract as ContractAddress}
+						cis2ContractAddress={state.nftContract as ContractAddress}
+						contractInfo={state.contractInfo!}
 						onDone={(id, balance) => onTokenBalance(id, balance)}
 					/>
 				);
@@ -129,8 +151,9 @@ function AddNftPage(props: {
 						provider={props.provider}
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
-						nftContractAddress={state.nftContract as ContractAddress}
-						tokenId={state.tokenId as string}
+						nftContractAddress={state.nftContract!}
+						tokenId={state.tokenId!}
+						maxQuantity={state.totalBalance!}
 						onDone={() => onTokenListed()}
 					/>
 				);
@@ -140,19 +163,30 @@ function AddNftPage(props: {
 	}
 
 	return (
-		<>
-			<h1>Add NFT</h1>
-			<Box sx={{ width: "100%" }}>
-				<Stepper activeStep={state.activeStep} alternativeLabel>
-					{steps.map((step) => (
-						<Step key={step.step}>
-							<StepLabel>{step.title}</StepLabel>
-						</Step>
-					))}
-				</Stepper>
-			</Box>
-			<StepContent />
-		</>
+		<Container sx={{ maxWidth: "xl", pt: "10px" }}>
+			<Stepper
+				activeStep={state.activeStep.step}
+				alternativeLabel
+				sx={{ padding: "20px" }}
+			>
+				{steps.map((step) => (
+					<Step key={step.step}>
+						<StepLabel>{step.title}</StepLabel>
+					</Step>
+				))}
+			</Stepper>
+			<Paper sx={{ padding: "20px" }} variant="outlined">
+				<Typography
+					variant="h4"
+					gutterBottom
+					sx={{ pt: "20px" }}
+					textAlign="left"
+				>
+					{state.activeStep.title}
+				</Typography>
+				<StepContent />
+			</Paper>
+		</Container>
 	);
 }
 

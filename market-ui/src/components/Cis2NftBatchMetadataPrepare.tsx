@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { Typography, Grid } from "@mui/material";
-import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 
-import { MetadataUrl } from "../models/Cis2Types";
+import { TokenInfo } from "../models/Cis2Types";
 import Cis2BatchItemMetadataPrepare from "./Cis2BatchItemMetadataPrepare";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
+import { toTokenId } from "../models/Cis2NftClient";
 
-function Cis2MetadataPrepare(props: {
-	provider: WalletApi;
+function Cis2NftBatchMetadataPrepare(props: {
 	files: File[];
 	pinataJwt: string;
-	onDone: (tokens: { [tokenId: string]: MetadataUrl }) => void;
+	contractInfo: Cis2ContractInfo;
+	onDone: (tokens: { [tokenId: string]: TokenInfo }) => void;
 }) {
 	let filesMap: {
 		[filename: string]: {
 			file: File;
 			tokenId?: string;
-			metadataUrl?: MetadataUrl;
+			tokenInfo?: TokenInfo;
 		};
 	} = {};
 	props.files.forEach((file) => (filesMap[file.name] = { file }));
@@ -30,7 +31,7 @@ function Cis2MetadataPrepare(props: {
 	function onMetadataPrepared(
 		filename: string,
 		tokenId: string,
-		metadataUrl: MetadataUrl
+		tokenInfo: TokenInfo
 	) {
 		const newState = {
 			files: {
@@ -38,21 +39,21 @@ function Cis2MetadataPrepare(props: {
 				[filename]: {
 					...state.files[filename],
 					tokenId,
-					metadataUrl,
+					tokenInfo,
 				},
 			},
 		};
 
 		var preparedFilesCount = Object.values(newState.files).filter(
-			(f) => f.tokenId && f.metadataUrl
+			(f) => f.tokenId && f.tokenInfo
 		).length;
 
 		setState({ ...state, ...newState, preparedFilesCount });
 
 		if (preparedFilesCount === props.files.length) {
-			var ret: { [tokenId: string]: MetadataUrl } = {};
+			var ret: { [tokenId: string]: TokenInfo } = {};
 			Object.values(newState.files).forEach(
-				(f) => (ret[f.tokenId as string] = f.metadataUrl as MetadataUrl)
+				(f) => (ret[f.tokenId as string] = f.tokenInfo as TokenInfo)
 			);
 
 			props.onDone(ret);
@@ -61,7 +62,6 @@ function Cis2MetadataPrepare(props: {
 
 	return (
 		<>
-			<h3>Prepare NFT Metadata</h3>
 			{state.error && (
 				<div>
 					<Typography>{state.error}</Typography>
@@ -70,15 +70,16 @@ function Cis2MetadataPrepare(props: {
 			<Typography>
 				Total no of files : {state.preparedFilesCount} / {props.files.length}
 			</Typography>
-			<Grid container spacing={2}>
+			<Grid container spacing={2} padding="10px">
 				{props.files.map((file, index) => (
-					<Grid item xs={6} key={file.name}>
+					<Grid item xs={4} key={file.name}>
 						<Cis2BatchItemMetadataPrepare
 							file={file}
-							tokenId={(index + 1).toString(16).padStart(8, '0')}
+							tokenId={toTokenId(index + 1, props.contractInfo)}
 							pinataJwtKey={props.pinataJwt}
+							contractInfo={props.contractInfo}
 							onDone={(data) =>
-								onMetadataPrepared(file.name, data.tokenId, data.metadataUrl)
+								onMetadataPrepared(file.name, data.tokenId, data.tokenInfo)
 							}
 						/>
 					</Grid>
@@ -88,4 +89,4 @@ function Cis2MetadataPrepare(props: {
 	);
 }
 
-export default Cis2MetadataPrepare;
+export default Cis2NftBatchMetadataPrepare;

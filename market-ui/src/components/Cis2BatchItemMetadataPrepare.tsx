@@ -1,12 +1,13 @@
 import {
 	Button,
 	Card,
-	CardActionArea,
 	CardActions,
 	CardContent,
 	CardMedia,
-	Chip,
+	Checkbox,
+	FormControlLabel,
 	Link,
+	Stack,
 	SxProps,
 	TextField,
 	Typography,
@@ -15,13 +16,17 @@ import { FormEvent, useState } from "react";
 import { sha256 } from "@concordium/web-sdk";
 import { Buffer } from "buffer/";
 import { PinataClient } from "../models/PinataClient";
-import { Metadata, MetadataUrl } from "../models/Cis2Types";
-import { isValidTokenId, mintNft } from "../models/Cis2Client";
+import { Metadata, MetadataUrl, TokenInfo } from "../models/Cis2Types";
 import {
 	tokenIdToNftImageFileName,
 	tokenIdToNftMetadataFileName,
 } from "../Constants";
 import { Theme } from "@mui/system";
+import DisplayError from "./DisplayError";
+import GetTokenIdCardStep from "./GetTokenIdCardStep";
+import GetNftMintCardStep from "./GetNftMintCardStep";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
+import GetQuantityCardStep from "./GetQuantityCardStep";
 
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };
 
@@ -29,78 +34,11 @@ enum Steps {
 	GetTokenId,
 	UploadImage,
 	CreateMetadata,
-	MintNft,
+	GetQuantity,
+	Mint,
 }
 
-function DisplayError(props: { error: string }) {
-	const { error } = props;
-
-	return error ? <Typography fontSize={10}>{error}</Typography> : <></>;
-}
-
-function GetTokenIdCardStep(props: {
-	imageUrl: string;
-	tokenId: string;
-	onDone: (data: { tokenId: string }) => void;
-}) {
-	const [state, setState] = useState({
-		tokenId: props.tokenId.toString(),
-		error: "",
-		imageUrl: props.imageUrl,
-	});
-
-	function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		const formData = new FormData(event.currentTarget);
-		const tokenId = formData.get("tokenId")?.toString() || "";
-
-		if (!tokenId || !isValidTokenId(tokenId)) {
-			setState({ ...state, error: "Invalid Token Id" });
-			return;
-		}
-
-		setState({ ...state, tokenId, error: "" });
-		props.onDone({ tokenId });
-	}
-
-	return (
-		<Card variant="outlined">
-			<CardActionArea>
-				<CardMedia
-					component="img"
-					image={state.imageUrl}
-					alt="NFT"
-					sx={cardMediaSx}
-				/>
-				<form noValidate autoComplete="off" onSubmit={(e) => submit(e)}>
-					<CardContent>
-						<Typography gutterBottom component="div">
-							Set Token Id
-						</Typography>
-						<TextField
-							defaultValue={props.tokenId}
-							name="tokenId"
-							id="token-id"
-							label="Token Id"
-							variant="outlined"
-							size="small"
-							fullWidth={true}
-							required={true}
-						/>
-						<DisplayError error={state.error} />
-					</CardContent>
-					<CardActions>
-						<Button size="small" color="primary" type="submit">
-							Set Token Id
-						</Button>
-					</CardActions>
-				</form>
-			</CardActionArea>
-		</Card>
-	);
-}
-
-function GetImageIpfsUrlCardStep(props: {
+function UploadImageIpfsCardStep(props: {
 	tokenId: string;
 	file: File;
 	imageUrl: string;
@@ -139,41 +77,40 @@ function GetImageIpfsUrlCardStep(props: {
 
 	return (
 		<Card variant="outlined">
-			<CardActionArea>
-				<CardMedia
-					component="img"
-					image={props.imageUrl}
-					alt="NFT"
-					sx={cardMediaSx}
-				/>
-				<>
-					<CardContent>
-						<Typography>Upload File</Typography>
-						<Typography variant="caption">Token Id: {props.tokenId}</Typography>
-						<DisplayError error={state.error} />
-					</CardContent>
-					<CardActions>
-						<Button
-							size="small"
-							color="primary"
-							onClick={submit}
-							type="button"
-							disabled={state.isUploadingImage}
-						>
-							Upload Image
-						</Button>
-					</CardActions>
-				</>
-			</CardActionArea>
+			<CardMedia
+				component="img"
+				image={props.imageUrl}
+				alt="NFT"
+				sx={cardMediaSx}
+			/>
+			<>
+				<CardContent>
+					<Typography>Upload File</Typography>
+					<Typography variant="caption">Token Id: {props.tokenId}</Typography>
+					<DisplayError error={state.error} />
+				</CardContent>
+				<CardActions>
+					<Button
+						size="small"
+						color="primary"
+						onClick={submit}
+						type="button"
+						disabled={state.isUploadingImage}
+					>
+						Upload Image
+					</Button>
+				</CardActions>
+			</>
 		</Card>
 	);
 }
 
-function GetMetadataIpfsUrlCardStep(props: {
+function UploadMetadataIpfsCardStep(props: {
 	tokenId: string;
 	imageUrl: string;
 	pinata: PinataClient;
 	imageIpfsUrl: string;
+	contractName: string;
 	onDone: (data: { tokenId: string; metadataUrl: MetadataUrl }) => void;
 }) {
 	const [state, setState] = useState({
@@ -191,15 +128,24 @@ function GetMetadataIpfsUrlCardStep(props: {
 			display: {
 				url: props.imageIpfsUrl,
 			},
-			attributes: [],
+			attributes: [
+				{
+					name: "ContractName",
+					type: "string",
+					value: props.contractName,
+				},
+			],
 		};
+		let includeHash = formData.get("includeHash")?.toString();
 		setState({ ...state, isUploadingMetadata: true });
 		props.pinata
 			.uploadJson(metadata, tokenIdToNftMetadataFileName(props.tokenId))
 			.then((metadataIpfsUrl) => {
 				const metadataUrl = {
 					url: metadataIpfsUrl,
-					hash: sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex"),
+					hash: includeHash
+						? sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex")
+						: "",
 				};
 				setState({
 					...state,
@@ -216,27 +162,23 @@ function GetMetadataIpfsUrlCardStep(props: {
 
 	return (
 		<Card variant="outlined">
-			<CardActionArea>
-				<CardMedia
-					component="img"
-					image={props.imageUrl}
-					alt="NFT"
-					sx={cardMediaSx}
-				/>
-				<>
-					<form
-						noValidate
-						autoComplete="off"
-						onSubmit={(e) => uploadMetadataClicked(e)}
-					>
-						<CardContent>
-							<Typography>Create Metadata</Typography>
-							<Typography variant="caption" component="div">
-								Token Id: {props.tokenId}
-							</Typography>
-							<Link href={props.imageIpfsUrl} variant="caption">
-								Image IPFS Url
-							</Link>
+			<CardMedia
+				component="img"
+				image={props.imageUrl}
+				alt="NFT"
+				sx={cardMediaSx}
+			/>
+			<>
+				<form onSubmit={(e) => uploadMetadataClicked(e)}>
+					<CardContent>
+						<Typography>Create Metadata</Typography>
+						<Typography variant="caption" component="div">
+							Token Id: {props.tokenId}
+						</Typography>
+						<Link href={props.imageIpfsUrl} variant="caption">
+							Image IPFS Url
+						</Link>
+						<Stack spacing={2}>
 							<TextField
 								name="name"
 								id="name"
@@ -245,6 +187,7 @@ function GetMetadataIpfsUrlCardStep(props: {
 								size="small"
 								fullWidth={true}
 								required={true}
+								defaultValue={`Token ${props.tokenId}`}
 							/>
 							<TextField
 								multiline={true}
@@ -255,63 +198,43 @@ function GetMetadataIpfsUrlCardStep(props: {
 								size="small"
 								fullWidth={true}
 								required={true}
+								defaultValue={`Image for token: ${props.tokenId}`}
 							/>
-							<DisplayError error={state.error} />
-						</CardContent>
-						<CardActions>
-							<Button
-								size="small"
-								color="primary"
-								disabled={state.isUploadingMetadata}
-								type="submit"
-							>
-								Create
-							</Button>
-						</CardActions>
-					</form>
-				</>
-			</CardActionArea>
-		</Card>
-	);
-}
-
-function GetNftMintCardStep(props: {
-	imageUrl: string;
-	tokenId: string;
-	imageIpfsUrl: string;
-	metadataUrl: MetadataUrl;
-}) {
-	return (
-		<Card variant="outlined">
-			<CardActionArea>
-				<CardMedia
-					component="img"
-					image={props.imageUrl}
-					alt="NFT"
-					sx={cardMediaSx}
-				/>
-				<CardContent>
-					<Typography>Ready to be Minted</Typography>
-					<Typography variant="caption" component="div">
-						Token Id: {props.tokenId}
-					</Typography>
-					<Link href={props.imageIpfsUrl} variant="caption" component="div">
-						Image IPFS Url
-					</Link>
-					<Link href={props.metadataUrl.url} variant="caption" target="_blank">
-						Metadata Url
-					</Link>
-				</CardContent>
-			</CardActionArea>
+							<FormControlLabel
+								control={
+									<Checkbox
+										defaultChecked
+										name="includeHash"
+										id="include-hash"
+									/>
+								}
+								label="Include Hash?"
+							/>
+						</Stack>
+						<DisplayError error={state.error} />
+					</CardContent>
+					<CardActions>
+						<Button
+							size="small"
+							color="primary"
+							disabled={state.isUploadingMetadata}
+							type="submit"
+						>
+							Create
+						</Button>
+					</CardActions>
+				</form>
+			</>
 		</Card>
 	);
 }
 
 function Cis2BatchItemMetadataPrepare(props: {
+	contractInfo: Cis2ContractInfo;
 	file: File;
 	pinataJwtKey: string;
 	tokenId: string;
-	onDone: (data: { tokenId: string; metadataUrl: MetadataUrl }) => void;
+	onDone: (data: { tokenId: string; tokenInfo: TokenInfo }) => void;
 }) {
 	const pinata = new PinataClient(props.pinataJwtKey);
 	const [state, setState] = useState({
@@ -320,6 +243,7 @@ function Cis2BatchItemMetadataPrepare(props: {
 		tokenId: props.tokenId,
 		imageIpfsUrl: "",
 		metadataUrl: { url: "", hash: "" } as MetadataUrl,
+		quantity: "",
 	});
 
 	function tokenIdUpdated(tokenId: string) {
@@ -331,14 +255,24 @@ function Cis2BatchItemMetadataPrepare(props: {
 	}
 
 	function metadataUploaded(tokenId: string, metadataUrl: MetadataUrl) {
-		setState({ ...state, tokenId, step: Steps.MintNft, metadataUrl });
-		props.onDone({ tokenId, metadataUrl });
+		if (props.contractInfo.contractName === "CIS2-NFT") {
+			setState({ ...state, tokenId, step: Steps.Mint, metadataUrl });
+			props.onDone({ tokenId, tokenInfo: metadataUrl });
+		} else if (props.contractInfo.contractName === "CIS2-Multi") {
+			setState({ ...state, tokenId, step: Steps.GetQuantity, metadataUrl });
+		}
+	}
+
+	function quantityUpdated(tokenId: string, quantity: string) {
+		setState({ ...state, step: Steps.Mint, tokenId, quantity });
+		props.onDone({ tokenId, tokenInfo: [state.metadataUrl, quantity] });
 	}
 
 	switch (state.step) {
 		case Steps.GetTokenId:
 			return (
 				<GetTokenIdCardStep
+					contractInfo={props.contractInfo}
 					imageUrl={state.imageDisplayUrl}
 					tokenId={state.tokenId}
 					key={state.tokenId}
@@ -347,7 +281,7 @@ function Cis2BatchItemMetadataPrepare(props: {
 			);
 		case Steps.UploadImage:
 			return (
-				<GetImageIpfsUrlCardStep
+				<UploadImageIpfsCardStep
 					file={props.file}
 					imageUrl={state.imageDisplayUrl}
 					pinata={pinata}
@@ -358,22 +292,34 @@ function Cis2BatchItemMetadataPrepare(props: {
 			);
 		case Steps.CreateMetadata:
 			return (
-				<GetMetadataIpfsUrlCardStep
+				<UploadMetadataIpfsCardStep
 					pinata={pinata}
 					tokenId={state.tokenId}
 					imageUrl={state.imageDisplayUrl}
 					imageIpfsUrl={state.imageIpfsUrl}
 					key={state.tokenId}
+					contractName={props.contractInfo.contractName}
 					onDone={(data) => metadataUploaded(data.tokenId, data.metadataUrl)}
 				/>
 			);
-		case Steps.MintNft:
+		case Steps.GetQuantity:
+			return (
+				<GetQuantityCardStep
+					contractInfo={props.contractInfo}
+					imageUrl={state.imageDisplayUrl}
+					tokenId={state.tokenId}
+					key={state.tokenId}
+					onDone={(data) => quantityUpdated(data.tokenId, data.quantity)}
+				/>
+			);
+		case Steps.Mint:
 			return (
 				<GetNftMintCardStep
 					imageUrl={state.imageDisplayUrl}
-                    imageIpfsUrl={state.imageIpfsUrl}
-                    tokenId={state.tokenId}
+					imageIpfsUrl={state.imageIpfsUrl}
+					tokenId={state.tokenId}
 					metadataUrl={state.metadataUrl}
+					quantity={state.quantity}
 				/>
 			);
 		default:

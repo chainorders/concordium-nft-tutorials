@@ -1,5 +1,5 @@
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
-import { Buffer } from 'buffer/';
+import { Buffer } from "buffer/";
 
 import {
 	ContractAddress,
@@ -16,6 +16,17 @@ import {
 	GtuAmount,
 } from "@concordium/web-sdk";
 
+export interface ContractInfo {
+	schemaBuffer: Buffer;
+	contractName: "CIS2-NFT" | "CIS2-Multi" | "Market-NFT";
+	moduleRef?: ModuleReference;
+}
+
+export interface Cis2ContractInfo extends ContractInfo {
+	tokenAmountByteSize: 1 | 8;
+	tokenIdByteSize: number;
+}
+
 /**
  * Initializes a Smart Contract.
  * @param provider Wallet Provider.
@@ -29,13 +40,16 @@ import {
  */
 export async function initContract(
 	provider: WalletApi,
-	moduleRef: ModuleReference,
-	schemaBuffer: Buffer,
-	contractName: string,
+	contractInfo: ContractInfo,
 	account: string,
 	maxContractExecutionEnergy = BigInt(9999),
 	ccdAmount = BigInt(0)
 ): Promise<ContractAddress> {
+	const { moduleRef, schemaBuffer, contractName } = contractInfo;
+	if (!moduleRef) {
+		throw new Error("Cannot instantiate a Module without Provided Module Ref");
+	}
+
 	let txnHash = await provider.sendTransaction(
 		account,
 		AccountTransactionType.InitializeSmartContractInstance,
@@ -59,8 +73,7 @@ export async function initContract(
 /**
  * Invokes a Smart Contract.
  * @param provider Wallet Provider.
- * @param schema Buffer of Contract Schema.
- * @param contractName Name of the Contract.
+ * @param contractInfo Contract Constant Info.
  * @param contract Contract Address.
  * @param methodName Contract Method name to Call.
  * @param params Parameters to call the Contract Method with.
@@ -69,15 +82,15 @@ export async function initContract(
  */
 export async function invokeContract<T>(
 	provider: WalletApi,
-	schema: Buffer,
-	contractName: string,
+	contractInfo: ContractInfo,
 	contract: ContractAddress,
 	methodName: string,
 	params?: T,
 	invoker?: ContractAddress | AccountAddress
 ): Promise<Buffer> {
+	const { schemaBuffer, contractName } = contractInfo;
 	const parameter = !!params
-		? serializeParams(contractName, schema, methodName, params)
+		? serializeParams(contractName, schemaBuffer, methodName, params)
 		: undefined;
 	let res = await provider.getJsonRpcClient().invokeContract({
 		parameter,
@@ -120,8 +133,7 @@ export async function invokeContract<T>(
  */
 export async function updateContract<T>(
 	provider: WalletApi,
-	contractName: string,
-	schema: Buffer,
+	contractInfo: ContractInfo,
 	paramJson: T,
 	account: string,
 	contractAddress: ContractAddress,
@@ -129,9 +141,10 @@ export async function updateContract<T>(
 	maxContractExecutionEnergy: bigint = BigInt(9999),
 	amount: bigint = BigInt(0)
 ): Promise<Record<string, TransactionSummary>> {
+	const { schemaBuffer, contractName } = contractInfo;
 	const parameter = serializeParams(
 		contractName,
-		schema,
+		schemaBuffer,
 		methodName,
 		paramJson
 	);
@@ -146,7 +159,7 @@ export async function updateContract<T>(
 			receiveName: `${contractName}.${methodName}`,
 		} as UpdateContractPayload,
 		paramJson as any,
-		schema.toString("base64"),
+		schemaBuffer.toString("base64"),
 		2 //Schema Version
 	);
 

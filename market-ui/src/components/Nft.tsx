@@ -2,8 +2,9 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
-import { getTokenMetadata } from "../models/Cis2Client";
+import { getTokenMetadata } from "../models/Cis2NftClient";
 import { Metadata } from "../models/Cis2Types";
+import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import { fetchJson } from "../models/Utils";
 
 function toLocalstorageKey(tokenId: string, contract: ContractAddress): string {
@@ -15,6 +16,7 @@ function Nft(props: {
 	account: string;
 	tokenId: string;
 	contractAddress: ContractAddress;
+	contractInfo: Cis2ContractInfo;
 }) {
 	const [state, setState] = useState<{
 		metadata?: Metadata;
@@ -28,7 +30,7 @@ function Nft(props: {
 	);
 
 	useEffect(() => {
-		if(state.metadata) {
+		if (state.metadata) {
 			return;
 		}
 
@@ -40,12 +42,13 @@ function Nft(props: {
 			getTokenMetadata(
 				props.provider,
 				props.account,
+				props.contractInfo,
 				props.contractAddress,
 				props.tokenId
 			)
 				.then((m) => fetchJson<Metadata>(m.url))
 				.then((metadata) => {
-					localStorage.setItem(localStorageKey, JSON.stringify(metadata));
+					// localStorage.setItem(localStorageKey, JSON.stringify(metadata));
 					setState({ ...state, loading: false, metadata });
 				});
 		}
@@ -56,14 +59,14 @@ function Nft(props: {
 	]);
 
 	return state.loading ? (
-		<Skeleton variant="rectangular" width={"100%"} height={"200px"}/>
+		<Skeleton variant="rectangular" width={"100%"} height={"200px"} />
 	) : (
 		<img
 			src={state.metadata?.display.url}
 			srcSet={state.metadata?.display.url}
 			alt={state.metadata?.name}
 			loading="lazy"
-            width="100%"
+			width="100%"
 		/>
 	);
 }

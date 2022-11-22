@@ -1,12 +1,15 @@
+//@ts-ignore
+import * as leb from "leb128";
+import { Buffer } from "buffer/";
 import { ConcordiumDeserializer } from "./ConcordiumDeserializer";
+import { BalanceOfQueryResponse } from "./Cis2Types";
 import {
-	ContractBalanceOfQueryResponse,
-	ContractTokenAmount,
 	OperatorOfQueryResponse,
 	SupportResult,
 	SupportsQueryResponse,
 	MetadataUrl,
 } from "./Cis2Types";
+const MAX_LEB_BYTE_VALUE = Math.pow(2, 7);
 
 /**
  * Handles Deserialization of CIS2 types from underlying Buffer.
@@ -21,8 +24,8 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 
 	readTokenMetadata(): MetadataUrl {
 		this.readBytes(2);
-		let url = this.readString();
-		let hash = this.readString();
+		let url = this.readString(2);
+		let hash = this.readString(1);
 
 		return { url, hash };
 	}
@@ -57,11 +60,22 @@ export class Cis2Deserializer extends ConcordiumDeserializer {
 		return this.readVector(this.readBool, 2);
 	}
 
-	readBalanceOfQueryResponse(): ContractBalanceOfQueryResponse {
+	readBalanceOfQueryResponse(): BalanceOfQueryResponse<number | bigint> {
 		return this.readVector(this.readTokenAmount, 2);
 	}
 
-	readTokenAmount(): ContractTokenAmount {
-		return this.readUInt8();
+	readTokenAmount(): bigint {
+		let buff = new Buffer(37);
+
+		for (let index = 0; index <= 37; index++) {
+			let byte = this.readUInt8();
+			buff[index] = byte;
+
+			if (byte <= MAX_LEB_BYTE_VALUE) {
+				break;
+			}
+		}
+
+		return BigInt(leb.unsigned.decode(buff));
 	}
 }

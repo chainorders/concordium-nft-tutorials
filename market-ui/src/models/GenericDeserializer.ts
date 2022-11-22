@@ -2,7 +2,7 @@ import { Buffer } from "buffer/";
 import { constants } from "crypto";
 
 /**
- * Handles deserialization from the underlying buffer. 
+ * Handles deserialization from the underlying buffer.
  */
 export class GenericDeserializer {
 	private buffer: Buffer;
@@ -73,8 +73,10 @@ export class GenericDeserializer {
 	}
 
 	readUBigInt(): bigint {
-		//@ts-ignore
-		return this.readBytes(8).readBigUInt64LE(0) as bigint;
+		const ret = this.buffer.readBigUInt64LE(this.counter) as bigint;
+		this.counter += 8;
+
+		return ret;
 	}
 
 	readBool(): boolean {
