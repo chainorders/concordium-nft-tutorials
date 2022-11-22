@@ -12,22 +12,9 @@ export class ConcordiumDeserializer {
     this.counter = 0;
   }
 
-  readVector<T>(itemDesrialFn: () => T, sizeLength: number = 4): T[] {
+  readVector<T>(itemDesrialFn: () => T, sizeLength: number = 2): T[] {
     let ret: T[] = [];
-    let vectorLength: number;
-    switch (sizeLength) {
-      case 1:
-        vectorLength = this.readUInt8();
-        break;
-      case 2:
-        vectorLength = this.readUInt16();
-        break;
-      case 4:
-        vectorLength = this.readUInt32();
-        break;
-      default:
-        throw new Error(`Invalid vector size length: ${sizeLength}`);
-    }
+    let vectorLength: bigint = this.getSizeLengthValue(sizeLength);
 
     for (let i = 0; i < vectorLength; i++) {
       const item = itemDesrialFn.apply(this);
@@ -56,8 +43,8 @@ export class ConcordiumDeserializer {
   }
 
   readContractAddress(): ContractAddress {
-    let index = this.readUBigInt();
-    let subindex = this.readUBigInt();
+    let index = this.readUInt64();
+    let subindex = this.readUInt64();
 
     return { index, subindex };
   }
@@ -68,9 +55,33 @@ export class ConcordiumDeserializer {
     return AccountAddress.fromBytes(ret).address;
   }
 
-  readString(): string {
-    let size = this.readUInt16();
-    return this.readBytes(size).toString("utf8");
+  readString(sizeLength: number): string {
+    let size = this.getSizeLengthValue(sizeLength);
+
+    return this.readBytes(Number(size)).toString("utf8");
+  }
+
+  getSizeLengthValue(sizeLength: number) {
+    let value: bigint;
+
+    switch (sizeLength) {
+      case 0:
+        value = BigInt(this.readUInt8());
+        break;
+      case 1:
+        value = BigInt(this.readUInt16());
+        break;
+      case 2:
+        value = BigInt(this.readUInt32());
+        break;
+      case 3:
+        value = BigInt(this.readUInt64());
+        break;
+      default:
+        throw new Error(`Invalid size length: ${sizeLength}`);
+    }
+
+    return value;
   }
 
   readUInt8() {
@@ -94,7 +105,7 @@ export class ConcordiumDeserializer {
     return ret;
   }
 
-  readUBigInt(): bigint {
+  readUInt64(): bigint {
     return this.readBytes(8).readBigUInt64LE(0) as bigint;
   }
 

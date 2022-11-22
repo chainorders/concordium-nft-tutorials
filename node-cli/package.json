@@ -14,7 +14,8 @@
     "@types/prompts": "^2.4.1",
     "commander": "^9.4.0",
     "fs-extra": "^10.1.0",
-    "prompts": "^2.4.2"
+    "prompts": "^2.4.2",
+    "leb128": "^0.0.5"
   },
   "scripts": {
     "deploy-nft": "ts-node  ./src/cli.ts deploy --sender $ACCOUNT --sign-key $SIGN_KEY --wait --wasm ../dist/smart-contract/module.wasm",
