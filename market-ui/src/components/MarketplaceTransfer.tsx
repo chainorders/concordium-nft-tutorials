@@ -80,10 +80,13 @@ function MarketplaceTransfer(props: {
 				tokenId={item.tokenId}
 			/>
 			<ImageListItemBar
-				title={`Cost: ${state.price} CCD`}
+				title={`Price: ${state.price} CCD`}
 				position="below"
 				subtitle={
 					<>
+						<Typography variant="caption" component={"div"}>
+							{state.name}
+						</Typography>
 						<Typography variant="caption" component={"div"}>
 							{state.desc}
 						</Typography>

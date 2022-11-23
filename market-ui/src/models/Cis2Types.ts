@@ -50,6 +50,7 @@ export interface Metadata {
 	name: string;
 	description: string;
 	display: Display;
+	unique?: boolean;
 	attributes: Attribute[];
 }
 

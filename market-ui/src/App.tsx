@@ -6,25 +6,41 @@ import {
 	WalletApi,
 } from "@concordium/browser-wallet-api-helpers";
 import { Box } from "@mui/material";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useParams, Navigate, useNavigate } from "react-router-dom";
 
 import ListNftPage from "./pages/ListNftPage";
 import AddNftPage from "./pages/AddNftPage";
 
 import {
 	CIS2_MULTI_CONTRACT_INFO,
-	CIS2_NFT_CONTRACT_INFO,
+	MARKETPLACE_CONTRACT_INFO,
 	MARKET_CONTRACT_ADDRESS,
 } from "./Constants";
 import BatchMintNftPage from "./pages/BatchMintNftPage";
 import ConnectWallet from "./components/ConnectWallet";
 import Header from "./components/ui/Header";
+import { ContractAddress } from "@concordium/web-sdk";
+import ContractFindInstanceOrInit from "./components/ContractFindInstanceOrInit";
 
 function App() {
+	let marketplaceContractAddress: ContractAddress | undefined =
+		MARKET_CONTRACT_ADDRESS;
+	const params = useParams();
+	const navigate = useNavigate();
+	if (params.index && params.subindex) {
+		marketplaceContractAddress = {
+			index: BigInt(params.index),
+			subindex: BigInt(params.subindex),
+		};
+	}
+
 	const [state, setState] = useState<{
 		provider?: WalletApi;
 		account?: string;
-	}>({});
+		marketplaceContractAddress?: ContractAddress;
+	}>({
+		marketplaceContractAddress,
+	});
 
 	function connect() {
 		detectConcordiumProvider()
@@ -71,44 +87,75 @@ function App() {
 		return !!state.provider && !!state.account;
 	}
 
-	const pages = [
-		{
-			path: "/",
+	function onMarketplaceContractChanged(
+		marketplaceContractAddress: ContractAddress
+	) {
+		setState({ ...state, marketplaceContractAddress });
+		navigate("/");
+	}
+
+	let pages = new Array<{
+		path: string;
+		href?: string;
+		name: string;
+		component: JSX.Element;
+	}>();
+
+	if (state.marketplaceContractAddress) {
+		pages.push({
+			path: "/buy/:index/:subindex",
+			href: `/buy/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`,
 			name: "Buy",
 			component: (
 				<ListNftPage
 					provider={state.provider!}
 					account={state.account!}
-					marketContractAddress={MARKET_CONTRACT_ADDRESS}
+					marketContractAddress={state.marketplaceContractAddress!}
 					contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				/>
 			),
-		},
-		{
-			path: "/add",
+		});
+
+		pages.push({
+			path: "/sell/:index/:subindex",
+			href: `/sell/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`,
 			name: "Sell",
 			component: (
 				<AddNftPage
 					provider={state.provider!}
 					account={state.account!}
-					marketContractAddress={MARKET_CONTRACT_ADDRESS}
+					marketContractAddress={state.marketplaceContractAddress!}
 					contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				/>
 			),
-		},
-		{
-			path: "/mint-multi-batch",
-			name: "Mint",
-			component: (
-				<BatchMintNftPage
-					key={CIS2_MULTI_CONTRACT_INFO.contractName}
-					contractInfo={CIS2_MULTI_CONTRACT_INFO}
-					provider={state.provider!}
-					account={state.account!}
-				/>
-			),
-		},
-	];
+		});
+	}
+
+	pages.push({
+		path: "/mint-multi-batch",
+		name: "Mint",
+		component: (
+			<BatchMintNftPage
+				key={CIS2_MULTI_CONTRACT_INFO.contractName}
+				contractInfo={CIS2_MULTI_CONTRACT_INFO}
+				provider={state.provider!}
+				account={state.account!}
+			/>
+		),
+	});
+
+	pages.push({
+		path: "/marketplace-init-or-add",
+		name: "Create Marketplace",
+		component: (
+			<ContractFindInstanceOrInit
+				provider={state.provider!}
+				account={state.account!}
+				contractInfo={MARKETPLACE_CONTRACT_INFO}
+				onDone={(address) => onMarketplaceContractChanged(address)}
+			/>
+		),
+	});
 
 	return (
 		<>
@@ -119,6 +166,19 @@ function App() {
 						{pages.map((p) => (
 							<Route path={p.path} element={p.component} key={p.name} />
 						))}
+						<Route
+							path="/"
+							element={
+								state.marketplaceContractAddress ? (
+									<Navigate
+										replace
+										to={`/buy/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`}
+									/>
+								) : (
+									<Navigate replace to={"/marketplace-init-or-add"} />
+								)
+							}
+						/>
 					</Routes>
 				) : (
 					<ConnectWallet connect={connect} />

@@ -14,6 +14,9 @@ const MARKET_CONTRACT_SCHEMA =
 export const MARKETPLACE_CONTRACT_INFO: ContractInfo = {
 	contractName: "Market-NFT",
 	schemaBuffer: Buffer.from(MARKET_CONTRACT_SCHEMA, "hex"),
+	moduleRef: new ModuleReference(
+		"4f5e72a303d57d5502689f56bad19750b5bb11ede1cf662a082ef97e18651f69"
+	),
 };
 const NFT_CONTRACT_MODULE_REF =
 	"3ff8f9804fe1b17564c7e0bd7e506de246d3446408b3753fe619055b6bd8398f";
@@ -24,7 +27,7 @@ export const CIS2_NFT_CONTRACT_INFO: Cis2ContractInfo = {
 	moduleRef: new ModuleReference(NFT_CONTRACT_MODULE_REF),
 	schemaBuffer: Buffer.from(NFT_CONTRACT_SCHEMA, "hex"),
 	tokenIdByteSize: 4,
-	tokenAmountByteSize: 1
+	tokenAmountByteSize: 1,
 };
 const MULTI_CONTRACT_MODULE_REF =
 	"312f99d6406868e647359ea816e450eac0ecc4281c2665a24936e6793535c9f6";
@@ -35,7 +38,7 @@ export const CIS2_MULTI_CONTRACT_INFO: Cis2ContractInfo = {
 	moduleRef: new ModuleReference(MULTI_CONTRACT_MODULE_REF),
 	schemaBuffer: Buffer.from(MULTI_CONTRACT_SCHEMA, "hex"),
 	tokenIdByteSize: 1,
-	tokenAmountByteSize: 8
+	tokenAmountByteSize: 8,
 };
 export const IPFS_GATEWAY_URL = "https://ipfs.io/ipfs";
 export const tokenIdToNftImageFileName = (

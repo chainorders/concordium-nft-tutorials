@@ -28,20 +28,17 @@ export const enum MethodName {
  * Initilizes CIS2-NFT contract.
  * @param provider Wallet Provider.
  * @param account Account to initialize the contract with.
- * @param maxContractExecutionEnergy Max energy to be used to initialize the contract.
  * @returns
  */
 export async function initCis2NftContract(
 	provider: WalletApi,
 	contractInfo: ContractInfo,
 	account: string,
-	maxContractExecutionEnergy = BigInt(9999)
 ): Promise<ContractAddress> {
 	return await initContract(
 		provider,
 		contractInfo,
 		account,
-		maxContractExecutionEnergy
 	);
 }
 

@@ -128,6 +128,7 @@ function UploadMetadataIpfsCardStep(props: {
 			display: {
 				url: props.imageIpfsUrl,
 			},
+			unique: !!formData.get("unique")?.toString(),
 			attributes: [
 				{
 					name: "ContractName",
@@ -209,6 +210,16 @@ function UploadMetadataIpfsCardStep(props: {
 									/>
 								}
 								label="Include Hash?"
+							/>
+							<FormControlLabel
+								control={
+									<Checkbox
+										defaultChecked
+										name="unique"
+										id="unique"
+									/>
+								}
+								label="Unique?"
 							/>
 						</Stack>
 						<DisplayError error={state.error} />

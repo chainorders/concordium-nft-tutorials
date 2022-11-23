@@ -17,7 +17,9 @@ import { styled } from "@mui/system";
 import { useLocation } from "react-router-dom";
 
 function Header(props: {
-	pages: { path: string; name: string; component: JSX.Element }[];
+	pages: {
+		href?: string; path: string; name: string; component: JSX.Element 
+}[];
 }) {
 	const StyledAppBar = styled(AppBar)({
 		backgroundImage:
@@ -95,7 +97,7 @@ function Header(props: {
 							{props.pages.map((page) => (
 								<MenuItem
 									key={page.name}
-									onClick={() => handleCloseNavMenu(page.path)}
+									onClick={() => handleCloseNavMenu(page.href || page.path)}
                                     sx={{border: "1px", borderColor: "white"}}
 								>
 									<Typography textAlign="center">{page.name}</Typography>
@@ -125,7 +127,7 @@ function Header(props: {
 						{props.pages.map((page) => (
 							<Button
 								key={page.name}
-								onClick={() => handleCloseNavMenu(page.path)}
+								onClick={() => handleCloseNavMenu(page.href || page.path)}
 								sx={{ my: 2, color: "white", display: "block" }}
 							>
 								{page.name}

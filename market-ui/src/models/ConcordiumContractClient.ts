@@ -38,10 +38,12 @@ export interface Cis2ContractInfo extends ContractInfo {
  * @param ccdAmount CCD Amount to initialize the contract with.
  * @returns Contract Address.
  */
-export async function initContract(
+export async function initContract<T>(
 	provider: WalletApi,
 	contractInfo: ContractInfo,
 	account: string,
+	params?: T,
+	serializedParams?: Buffer,
 	maxContractExecutionEnergy = BigInt(9999),
 	ccdAmount = BigInt(0)
 ): Promise<ContractAddress> {
@@ -57,10 +59,10 @@ export async function initContract(
 			moduleRef,
 			maxContractExecutionEnergy,
 			contractName,
-			parameter: Buffer.from([]),
+			parameter: serializedParams || Buffer.from([]),
 			amount: toGtu(ccdAmount),
 		} as InitContractPayload,
-		{},
+		params || {},
 		schemaBuffer.toString("base64"),
 		2
 	);
