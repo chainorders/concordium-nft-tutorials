@@ -9,7 +9,7 @@ import { Cis2ContractInfo } from '../models/ConcordiumContractClient';
 function Cis2FindInstanceOrInit(props: {
 	provider: WalletApi;
 	account: string;
-	contractInfo?: Cis2ContractInfo;
+	contractInfo: Cis2ContractInfo;
 	onDone: (address: ContractAddress, contractInfo: Cis2ContractInfo) => void;
 }) {
 	return (

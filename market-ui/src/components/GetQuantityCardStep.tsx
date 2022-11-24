@@ -2,7 +2,7 @@ import { Card, CardMedia, CardContent, Typography, TextField, CardActions, Butto
 import { useState, FormEvent } from "react";
 
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
-import DisplayError from "./DisplayError";
+import DisplayError from "./ui/DisplayError";
 
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };
 

@@ -12,7 +12,7 @@ import { MetadataUrl } from "../models/Cis2Types";
 
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };
 
-function GetNftMintCardStep(props: {
+function GetMintCardStep(props: {
 	imageUrl: string;
 	tokenId: string;
 	imageIpfsUrl: string;
@@ -48,4 +48,4 @@ function GetNftMintCardStep(props: {
 	);
 }
 
-export default GetNftMintCardStep;
+export default GetMintCardStep;

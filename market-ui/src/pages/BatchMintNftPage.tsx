@@ -8,8 +8,8 @@ import { TokenInfo } from "../models/Cis2Types";
 import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
 import ConnectPinata from "../components/ConnectPinata";
 import UploadFiles from "../components/UploadFiles";
-import Cis2NftBatchMint from "../components/Cis2NftBatchMint";
-import Cis2NftBatchMetadataPrepareOrAdd from "../components/Cis2NftBatchMetadataPrepareOrAdd";
+import Cis2BatchMint from "../components/Cis2BatchMint";
+import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 enum Steps {
@@ -25,7 +25,7 @@ type StepType = { step: Steps; title: string };
 function BatchMintNftPage(props: {
 	provider: WalletApi;
 	account: string;
-	contractInfo?: Cis2ContractInfo;
+	contractInfo: Cis2ContractInfo;
 }) {
 	const steps: StepType[] = [
 		{
@@ -50,7 +50,6 @@ function BatchMintNftPage(props: {
 	let [state, setState] = useState<{
 		activeStep: StepType;
 		nftContract?: ContractAddress;
-		contractInfo?: Cis2ContractInfo;
 		tokenMetadataMap?: {
 			[tokenId: string]: TokenInfo;
 		};
@@ -70,7 +69,6 @@ function BatchMintNftPage(props: {
 			...state,
 			activeStep: steps[1],
 			nftContract: address,
-			contractInfo,
 		});
 	}
 
@@ -133,8 +131,8 @@ function BatchMintNftPage(props: {
 				return <UploadFiles onDone={onFilesUploaded} />;
 			case Steps.PrepareMetadata:
 				return (
-					<Cis2NftBatchMetadataPrepareOrAdd
-						contractInfo={props.contractInfo || state.contractInfo!}
+					<Cis2BatchMetadataPrepareOrAdd
+						contractInfo={props.contractInfo}
 						pinataJwt={state.pinataJwt}
 						files={state.files}
 						onDone={onMetadataPrepared}
@@ -142,8 +140,8 @@ function BatchMintNftPage(props: {
 				);
 			case Steps.Mint:
 				return (
-					<Cis2NftBatchMint
-						contractInfo={props.contractInfo || state.contractInfo!}
+					<Cis2BatchMint
+						contractInfo={props.contractInfo}
 						provider={props.provider}
 						account={props.account}
 						nftContractAddress={state.nftContract as ContractAddress}

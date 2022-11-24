@@ -5,7 +5,7 @@ import { ContractAddress } from "@concordium/web-sdk";
 
 import { mint } from "../models/Cis2NftClient";
 import { TokenInfo } from "../models/Cis2Types";
-import Cis2NftBatchItemMint from "./Cis2NftBatchItemMint";
+import Cis2BatchItemMint from "./Cis2BatchItemMint";
 import { ContractInfo } from "../models/ConcordiumContractClient";
 
 interface TokenState {
@@ -15,7 +15,7 @@ interface TokenState {
 	error: string;
 }
 
-function Cis2NftBatchMint(props: {
+function Cis2BatchMint(props: {
 	contractInfo: ContractInfo;
 	provider: WalletApi;
 	account: string;
@@ -88,7 +88,7 @@ function Cis2NftBatchMint(props: {
 			<Grid container spacing={2}>
 				{Object.keys(state.tokens).map((tokenId) => (
 					<Grid item xs={4} key={tokenId}>
-						<Cis2NftBatchItemMint
+						<Cis2BatchItemMint
 							contractInfo={props.contractInfo}
 							error={state.tokens[tokenId].error}
 							key={tokenId}
@@ -130,4 +130,4 @@ function Cis2NftBatchMint(props: {
 	}
 }
 
-export default Cis2NftBatchMint;
+export default Cis2BatchMint;

@@ -18,12 +18,11 @@ import {
 
 export interface ContractInfo {
 	schemaBuffer: Buffer;
-	contractName: "CIS2-NFT" | "CIS2-Multi" | "Market-NFT";
+	contractName: "CIS2-Multi" | "Market-NFT";
 	moduleRef?: ModuleReference;
 }
 
 export interface Cis2ContractInfo extends ContractInfo {
-	tokenAmountByteSize: 1 | 8;
 	tokenIdByteSize: number;
 }
 

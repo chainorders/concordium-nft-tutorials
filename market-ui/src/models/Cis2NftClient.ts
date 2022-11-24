@@ -9,11 +9,7 @@ import {
 import { Cis2Deserializer } from "./Cis2Deserializer";
 import { MetadataUrl, OperatorOfQueryParams } from "./Cis2Types";
 import { ContractInfo, Cis2ContractInfo } from "./ConcordiumContractClient";
-import {
-	initContract,
-	invokeContract,
-	updateContract,
-} from "./ConcordiumContractClient";
+import * as connClient from "./ConcordiumContractClient";
 
 export const enum MethodName {
 	operatorOf = "operatorOf",
@@ -30,16 +26,12 @@ export const enum MethodName {
  * @param account Account to initialize the contract with.
  * @returns
  */
-export async function initCis2NftContract(
+export async function initContract(
 	provider: WalletApi,
 	contractInfo: ContractInfo,
-	account: string,
+	account: string
 ): Promise<ContractAddress> {
-	return await initContract(
-		provider,
-		contractInfo,
-		account,
-	);
+	return await connClient.initContract(provider, contractInfo, account);
 }
 
 /**
@@ -68,7 +60,7 @@ export async function isOperator(
 		},
 	] as OperatorOfQueryParams;
 
-	const retValue = await invokeCis2NftContract(
+	const retValue = await invokeContract(
 		provider,
 		cis2Address,
 		MethodName.operatorOf,
@@ -94,7 +86,7 @@ export async function ensureSupportsCis2(
 	address: ContractAddress
 ): Promise<undefined> {
 	const paramsJson = ["CIS-2"];
-	const retValue = await invokeCis2NftContract(
+	const retValue = await invokeContract(
 		provider,
 		address,
 		MethodName.supports,
@@ -131,7 +123,7 @@ export async function balanceOf(
 		},
 	];
 
-	const retValue = await invokeCis2NftContract(
+	const retValue = await invokeContract(
 		provider,
 		nftAddress,
 		MethodName.balanceOf,
@@ -162,7 +154,7 @@ export async function getTokenMetadata(
 	tokenId: string
 ): Promise<MetadataUrl> {
 	const params = [tokenId];
-	const retValue = await invokeCis2NftContract(
+	const retValue = await invokeContract(
 		provider,
 		nftContractAddress,
 		MethodName.tokenMetadata,
@@ -205,7 +197,7 @@ export async function updateOperator(
 		},
 	];
 
-	return updateCis2NftContract(
+	return updateContract(
 		provider,
 		paramJson,
 		account,
@@ -242,7 +234,7 @@ export async function mint<T>(
 		tokens: Object.keys(tokens).map((tokenId) => [tokenId, tokens[tokenId]]),
 	};
 
-	return updateCis2NftContract(
+	return updateContract(
 		provider,
 		paramJson,
 		account,
@@ -257,7 +249,7 @@ export async function mint<T>(
 /**
  * Invokes a CIS2 Smart Contract.
  */
-async function invokeCis2NftContract<T>(
+async function invokeContract<T>(
 	provider: WalletApi,
 	contract: ContractAddress,
 	methodName: MethodName,
@@ -265,7 +257,7 @@ async function invokeCis2NftContract<T>(
 	contractInfo: ContractInfo,
 	invoker?: ContractAddress | AccountAddress
 ): Promise<Buffer> {
-	return invokeContract(
+	return connClient.invokeContract(
 		provider,
 		contractInfo,
 		contract,
@@ -278,7 +270,7 @@ async function invokeCis2NftContract<T>(
 /**
  * Updates a CIS2 Smart Contract.
  */
-async function updateCis2NftContract<T>(
+async function updateContract<T>(
 	provider: WalletApi,
 	paramJson: T,
 	account: string,
@@ -288,7 +280,7 @@ async function updateCis2NftContract<T>(
 	maxContractExecutionEnergy: bigint,
 	ccdAmount: bigint
 ): Promise<Record<string, TransactionSummary>> {
-	return updateContract(
+	return connClient.updateContract(
 		provider,
 		contractInfo,
 		paramJson,
@@ -306,7 +298,7 @@ async function updateCis2NftContract<T>(
  * @param byteSize Size of the token in bytes in the Contract.
  * @returns true if token is valid.
  */
-export function isValidCis2NftTokenId(
+export function isValidTokenId(
 	tokenIdHex: string,
 	contractInfo: Cis2ContractInfo
 ): boolean {

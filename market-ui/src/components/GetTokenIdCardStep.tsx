@@ -11,8 +11,8 @@ import {
 	Theme,
 } from "@mui/material";
 
-import { isValidCis2NftTokenId } from "../models/Cis2NftClient";
-import DisplayError from "./DisplayError";
+import { isValidTokenId } from "../models/Cis2NftClient";
+import DisplayError from "./ui/DisplayError";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };
@@ -34,7 +34,7 @@ function GetTokenIdCardStep(props: {
 		const formData = new FormData(event.currentTarget);
 		const tokenId = formData.get("tokenId")?.toString() || "";
 
-		if (!tokenId || !isValidCis2NftTokenId(tokenId, props.contractInfo)) {
+		if (!tokenId || !isValidTokenId(tokenId, props.contractInfo)) {
 			setState({ ...state, error: "Invalid Token Id" });
 			return;
 		}

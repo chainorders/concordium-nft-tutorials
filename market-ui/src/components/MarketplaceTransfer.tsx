@@ -12,7 +12,7 @@ import { fetchJson, toLocalstorageKey } from "../models/Utils";
 import { TokenListItem } from "../models/MarketplaceTypes";
 import { getTokenMetadata } from "../models/Cis2NftClient";
 import { Metadata } from "../models/Cis2Types";
-import Nft from "./Nft";
+import LazyCis2MetadataImage from "./LazyCis2MetadataImage";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function MarketplaceTransfer(props: {
@@ -72,7 +72,7 @@ function MarketplaceTransfer(props: {
 			sx={{ display: state.isBought ? "none" : "" }}
 			key={item.tokenId + item.contract.index + item.contract.subindex}
 		>
-			<Nft
+			<LazyCis2MetadataImage
 				provider={props.provider}
 				account={props.account}
 				contractInfo={props.contractInfo}

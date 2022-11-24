@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Metadata, MetadataUrl } from "../models/Cis2Types";
 import { fetchJson } from "../models/Utils";
 
-function LazyNftMetadata(props: {
+function LazyCis2Metadata(props: {
 	metadataUrl: MetadataUrl;
 	loadingTemplate: () => React.ReactElement;
 	loadedTemplate: (metadata: Metadata) => React.ReactElement;
@@ -42,4 +42,4 @@ function LazyNftMetadata(props: {
 	}
 }
 
-export default LazyNftMetadata;
+export default LazyCis2Metadata;

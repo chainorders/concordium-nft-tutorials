@@ -6,8 +6,6 @@ import {
 	Typography,
 	Button,
 	Stack,
-	Container,
-	Paper,
 } from "@mui/material";
 
 import { getInstanceInfo } from "../models/ConcordiumContractClient";

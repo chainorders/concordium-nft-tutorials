@@ -2,11 +2,11 @@ import { useState } from "react";
 
 import { TokenInfo } from "../models/Cis2Types";
 import Cis2BatchMetadataAdd from "./Cis2BatchMetadataAdd";
-import Cis2NftBatchMetadataPrepare from "./Cis2NftBatchMetadataPrepare";
+import Cis2BatchMetadataPrepare from "./Cis2BatchMetadataPrepare";
 import { Stack, Typography } from "@mui/material";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
-function Cis2NftBatchMetadataPrepareOrAdd(props: {
+function Cis2BatchMetadataPrepareOrAdd(props: {
 	contractInfo: Cis2ContractInfo;
 	files?: File[];
 	pinataJwt?: string;
@@ -48,7 +48,7 @@ function Cis2NftBatchMetadataPrepareOrAdd(props: {
 	return (
 		<Stack>
 			{props.files && props.files.length && props.pinataJwt ? (
-				<Cis2NftBatchMetadataPrepare
+				<Cis2BatchMetadataPrepare
 					contractInfo={props.contractInfo}
 					files={props.files}
 					pinataJwt={props.pinataJwt}
@@ -69,4 +69,4 @@ function Cis2NftBatchMetadataPrepareOrAdd(props: {
 	);
 }
 
-export default Cis2NftBatchMetadataPrepareOrAdd;
+export default Cis2BatchMetadataPrepareOrAdd;

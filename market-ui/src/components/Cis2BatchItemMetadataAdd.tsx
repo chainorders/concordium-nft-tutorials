@@ -17,10 +17,10 @@ import { FormEvent, useState } from "react";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { Metadata, MetadataUrl, TokenInfo } from "../models/Cis2Types";
-import DisplayError from "./DisplayError";
-import GetNftMintCardStep from "./GetNftMintCardStep";
+import DisplayError from "./ui/DisplayError";
+import GetMintCardStep from "./GetMintCardStep";
 import GetTokenIdCardStep from "./GetTokenIdCardStep";
-import LazyNftMetadata from "./LazyNftMetadata";
+import LazyCis2Metadata from "./LazyCis2Metadata";
 import { sha256 } from "@concordium/web-sdk";
 import { Stack } from "@mui/material";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
@@ -52,7 +52,7 @@ function TokenImage(props: {
 	}
 
 	return (
-		<LazyNftMetadata
+		<LazyCis2Metadata
 			metadataUrl={props.metadataUrl}
 			loadedTemplate={(metadata) => {
 				return (
@@ -189,15 +189,7 @@ function Cis2BatchItemMetadataAdd(props: {
 	}
 
 	function tokenIdUpdated(tokenId: string) {
-		if (props.contractInfo.contractName === "CIS2-NFT") {
-			setState({ ...state, tokenId, step: Steps.Mint });
-			props.onDone({
-				tokenId,
-				tokenInfo: state.metadataUrl!,
-			});
-		} else if (props.contractInfo.contractName === "CIS2-Multi") {
-			setState({ ...state, tokenId, step: Steps.GetQuantity });
-		}
+		setState({ ...state, tokenId, step: Steps.GetQuantity });
 	}
 
 	function quantityUpdated(tokenId: string, quantity: string) {
@@ -236,7 +228,7 @@ function Cis2BatchItemMetadataAdd(props: {
 			);
 		case Steps.Mint:
 			return (
-				<GetNftMintCardStep
+				<GetMintCardStep
 					imageUrl={state.metadata?.display.url!}
 					imageIpfsUrl={state.metadata?.display.url!}
 					tokenId={state.tokenId}

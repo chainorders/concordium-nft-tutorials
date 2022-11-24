@@ -6,7 +6,7 @@ import Cis2BatchItemMetadataPrepare from "./Cis2BatchItemMetadataPrepare";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import { toTokenId } from "../models/Cis2NftClient";
 
-function Cis2NftBatchMetadataPrepare(props: {
+function Cis2BatchMetadataPrepare(props: {
 	files: File[];
 	pinataJwt: string;
 	contractInfo: Cis2ContractInfo;
@@ -89,4 +89,4 @@ function Cis2NftBatchMetadataPrepare(props: {
 	);
 }
 
-export default Cis2NftBatchMetadataPrepare;
+export default Cis2BatchMetadataPrepare;

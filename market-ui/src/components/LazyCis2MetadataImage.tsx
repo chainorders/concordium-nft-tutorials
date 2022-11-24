@@ -11,7 +11,7 @@ function toLocalstorageKey(tokenId: string, contract: ContractAddress): string {
 	return `NFT_${tokenId}_${contract.index}_${contract.subindex}`;
 }
 
-function Nft(props: {
+function LazyCis2MetadataImage(props: {
 	provider: WalletApi;
 	account: string;
 	tokenId: string;
@@ -71,4 +71,4 @@ function Nft(props: {
 	);
 }
 
-export default Nft;
+export default LazyCis2MetadataImage;

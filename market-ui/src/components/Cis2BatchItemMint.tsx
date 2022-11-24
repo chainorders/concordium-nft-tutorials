@@ -11,10 +11,10 @@ import {
 
 import { MetadataUrl, TokenInfo } from "../models/Cis2Types";
 import { ContractInfo } from "../models/ConcordiumContractClient";
-import LazyNftMetadata from "./LazyNftMetadata";
+import LazyCis2Metadata from "./LazyCis2Metadata";
 const cardMediaSx: SxProps<Theme> = { maxHeight: "200px" };
 
-function Cis2NftBatchItemMint(props: {
+function Cis2BatchItemMint(props: {
 	contractInfo: ContractInfo;
 	tokenId: string;
 	tokenInfo: TokenInfo;
@@ -28,15 +28,10 @@ function Cis2NftBatchItemMint(props: {
 		? "Minted"
 		: "Ready to be Minted";
 
-	const metadataUrl =
-		props.contractInfo.contractName === "CIS2-NFT"
-			? (props.tokenInfo as MetadataUrl)
-			: (props.tokenInfo as [MetadataUrl, string])[0];
+	const metadataUrl = (props.tokenInfo as [MetadataUrl, string])[0];
 
 	const TokenAmount = function () {
-		return props.contractInfo.contractName === "CIS2-NFT" ? (
-			<></>
-		) : (
+		return (
 			<Typography variant="caption" component="div">
 				Quantity: {(props.tokenInfo as [MetadataUrl, string])[1]}
 			</Typography>
@@ -44,7 +39,7 @@ function Cis2NftBatchItemMint(props: {
 	};
 	return (
 		<Card variant="outlined">
-			<LazyNftMetadata
+			<LazyCis2Metadata
 				metadataUrl={metadataUrl}
 				loadedTemplate={(metadata) => (
 					<CardMedia
@@ -78,4 +73,4 @@ function Cis2NftBatchItemMint(props: {
 	);
 }
 
-export default Cis2NftBatchItemMint;
+export default Cis2BatchItemMint;
