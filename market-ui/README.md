@@ -1,143 +1,165 @@
-## Prerequisites
+# Interaction with Concordium Smart Contracts
 
-- A deployed market place contract supporing the [Schema](https://developer.concordium.software/en/mainnet/smart-contracts/general/contract-schema.html) of the [Marketplace Contract](../marketplace-contract/src/lib.rs). The Index & Subindex of the deployed contract needs to be updated in [Contants](./src/Constants.ts).
-- [Schema](https://developer.concordium.software/en/mainnet/smart-contracts/general/contract-schema.html) of the deployed marketplace contract needs to be updated in [Contants](./src/Constants.ts)
-- Module reference of a CIS2 compliant smart contract. The module reference needs to be updated in [Contants](./src/Constants.ts)
-- [Concordium Browser Wallet](https://github.com/Concordium/concordium-browser-wallet/tree/main/packages/browser-wallet) running as an extention. WIth atleast one account setup.
+`market-ui` is a React based frontend DAPP. It interacts with the deployed on-chain marketplace-contract & cis2-multi contracts. To allow a user to
+
+- Buy a Token
+- Sell a Token
+- Mint a Token
+- Initialize a new instance of Marketplace Contract
+- Initialize a new instance of CIS2-Multi Contract
+
+## Setup
+
+- Install [Concordium chrome extension wallet](https://github.com/Concordium/concordium-browser-wallet/tree/main/packages/browser-wallet).
+- Create a new Concordium Account and get initial balance.
+- [Install yarn](https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable)
+- Install Dependencies
+  ```bash
+  yarn install
+  ```
+- Set Configuration
+  Various following [configuration params](./src/Constants.ts) are explained and initialized with default values. Which can be used with Concordium Testnet.
+  - `MARKET_CONTRACT_ADDRESS` : Default value for deployed and initialized market place contract address.
+  - `MARKET_CONTRACT_SCHEMA` : HEX string of `schema.bin` file got from compilation of rust code of marketplace-contract
+  - `MARKETPLACE_CONTRACT_INFO.moduleRef` : Module reference of deployed module with marketplace-contract.
+  - `MULTI_CONTRACT_MODULE_REF`: Module reference of deployed module with CIS2-Multi contract
+  - `MULTI_CONTRACT_SCHEMA` : HEX string of `schema.bin` file got from compilation of rust code of cis2-multi
+  - `IPFS_GATEWAY_URL`: gateway url for the IPFS gateway
+
+## Deploy
+
+Currently the browser wallet does not allow to deploy modules to Concordium chain. However node-cli and concordium client can be used to deploy contracts
+
+## Interact
+
+- Start the frontend
+  ```bash
+  yarn start
+  ```
+  This should start the server and you should be able to view the frontend at [http://localhost:3000](http://localhost:3000). If default port is used.
+- The UI provides following pages
+  - Buy : A list of all the tokens listed for sale on marketplace
+  - Sell : UI to add an owned token to the marketplace to be sold
+  - Mint : UI to interact with token contract and mint new tokens
+  - Create Marketplace : UI to initialize a new instance of Marketplace contract and use its address instead of the default one.
 
 ## Code Structure
 
-### Pages
+There are two high level parts to the code base
 
-- #### [Add Nft Page](./src/pages/AddNftPage.tsx)
+- React components that enable to user to use the rendered UI to interact with the clients to communicate with concordium chain.
+- Intermediatory layer that enables interaction between UI and concordium chain. This mainly comprises of
+  - Clients
+  - Deserializer(s)
 
-  Its a workflow of the of the following ordered list.
+### React Components
 
-  - [Cis2FindInstance](#cis2findinstance)
-  - [Cis2OperatorOf](#cis2operatorof)
-  - [Cis2UpdateOperator](#cis2updateoperator)
-  - [Cis2BalanceOf](#cis2balanceof)
-  - [MarketplaceAdd](#marketplaceadd)
+- Pages
 
-- #### [List Nft Page](./src/pages/ListNftPage.tsx)
+  - [Add Nft Page](./src/pages/AddNftPage.tsx)
 
-  Uses [Marketplace List](#marketplacelist) Component. To Display a list of NFT's for the input Marketplace Contract.
+    Its a workflow of the of the following ordered list.
 
-- #### [Mint Nft Page](./src/pages/MintNftPage.tsx)
-  Its a workflow of the of the following ordered list.
-  - [Cis2FindInstanceOrInit](#cis2findinstanceorinit)
-  - [Cis2MetadataPrepare](#cis2metadataprepare)
-  - [Cis2NftMint](#cis2nftmint)
+    - [Cis2FindInstance](#cis2findinstance)
+    - [Cis2OperatorOf](#cis2operatorof)
+    - [Cis2UpdateOperator](#cis2updateoperator)
+    - [Cis2BalanceOf](#cis2balanceof)
+    - [MarketplaceAdd](#marketplaceadd)
 
-### Components : CIS2 Contract
+  - [List Nft Page](./src/pages/ListNftPage.tsx)
 
-- #### [CIS2BalanceOf](./src/components/Cis2BalanceOf.tsx)
+    Uses [Marketplace List](#marketplacelist) Component. To Display a list of NFT's for the input Marketplace Contract.
 
-  Uses [Cis2Client](#cis2client) to get the balance of a CIS2 Token for the input account and displays an error message if the balance <= 0
+  - [Mint Nft Page](./src/pages/MintNftPage.tsx)
+    Its a workflow of the of the following ordered list.
+    - [Cis2FindInstanceOrInit](#cis2findinstanceorinit)
+    - [Cis2MetadataPrepare](#cis2metadataprepare)
+    - [Cis2NftMint](#cis2nftmint)
 
-- #### [CIS2FindInstance](./src/components/Cis2FindInstance.tsx)
+- Components : CIS2 Contract
 
-  - Uses [ConcordiumContractClient](#concordiumcontractclient) to get info about a Concordium Smart Contract.
-  - Uses [Cis2Client](#cis2client) to check if the instance supports CIS2 protocol.
+  - [CIS2BalanceOf](./src/components/Cis2BalanceOf.tsx)
+    Uses [Cis2Client](#cis2client) to get the balance of a CIS2 Token for the input account and displays an error message if the balance <= 0
 
-  Displays an error if the contract does not exist or does not support CIS2.
+  - [CIS2FindInstance](./src/components/Cis2FindInstance.tsx)
 
-- #### [Cis2FindInstanceOrInit](./src/components/Cis2FindInstanceOrInit.tsx)
+    - Uses [ConcordiumContractClient](#concordiumcontractclient) to get info about a Concordium Smart Contract.
+    - Uses [Cis2Client](#cis2client) to check if the instance supports CIS2 protocol.
+    - Displays an error if the contract does not exist or does not support CIS2.
 
-  - Either Finds an Existing Instance using [Cis2FindInstance](#cis2findinstance)
-  - Or Initializes the instance using [Cis2Init](#cis2init)
+  - [Cis2FindInstanceOrInit](./src/components/Cis2FindInstanceOrInit.tsx)
 
-- #### [Cis2Init](./src/components/Cis2Init.tsx)
+    - Either Finds an Existing Instance using [Cis2FindInstance](#cis2findinstance)
+    - Or Initializes the instance using [Cis2Init](#cis2init)
 
-  Uses [Cis2Client](#cis2client) and Initializes a new CIS2-NFT contract.
+  - [Cis2Init](./src/components/Cis2Init.tsx)
+    Uses [Cis2Client](#cis2client) and Initializes a new CIS2-NFT contract.
 
-- #### [Cis2MetadataDisplay](./src/components/Cis2MetadataDisplay.tsx)
+  - [Cis2MetadataDisplay](./src/components/Cis2MetadataDisplay.tsx)
+    Simply displays Metadata of an NFT. The [structure of the metadata](https://proposals.concordium.software/CIS/cis-2.html#token-metadata-json) should match the one defined in the CIS2-NFT protocol.
 
-  Simply displays Metadata of an NFT. The [structure of the metadata](https://proposals.concordium.software/CIS/cis-2.html#token-metadata-json) should match the one defined in the CIS2-NFT protocol.
+  - [Cis2MetadataPrepare](./src/components/Cis2MetadataPrepare.tsx)
+    Checks if the provided metadata url is correct. By trying to download the content.
 
-- #### [Cis2MetadataPrepare](./src/components/Cis2MetadataPrepare.tsx)
+  - [Cis2NftMint](./src/components/Cis2NftMint.tsx)
+    Uses [Cis2Client](#cis2client) to mint a new token/NFT.
 
-  Checks if the provided metadata url is correct. By trying to download the content.
+  - [Cis2OperatorOf](./src/components/Cis2OperatorOf.tsx)
+    Uses [Cis2Client](#cis2client) to to check if the Marketplace Contract is an owner of input account in input CIS2-NFT contract.
 
-- #### [Cis2NftMint](./src/components/Cis2NftMint.tsx)
+  - [Cis2UpdateOperator](./src/components/Cis2UpdateOperator.tsx)
+    Uses [Cis2Client](#cis2client) to update the account operator to Marketplace Contract in CIS-NFT contract.
 
-  Uses [Cis2Client](#cis2client) to mint a new token/NFT.
+  - [Nft](./src/components/Nft.tsx)
+    - Takes an input [MetadataUrl](https://proposals.concordium.software/CIS/cis-2.html#metadataurl).
+    - Fetches the [Metadata Json](https://proposals.concordium.software/CIS/cis-2.html#token-metadata-json)
+    - Displays the NFT image or an alternative error message.
 
-- #### [Cis2OperatorOf](./src/components/Cis2OperatorOf.tsx)
+- Components : Marketplace
 
-  Uses [Cis2Client](#cis2client) to to check if the Marketplace Contract is an owner of input account in input CIS2-NFT contract.
+  - [Marketplace Add](./src/components/MarketplaceAdd.tsx)
+    Uses [MarketplaceClient](#marketplaceclient) to adds an Token/NFT to the list of buyable NFTs.
 
-- #### [Cis2UpdateOperator](./src/components/Cis2UpdateOperator.tsx)
+  - [Marketplace List](./src/components/MarketplaceList.tsx)
+    Uses [MarketplaceClient](#marketplaceclient) to gets a list of buyable NFTs
 
-  Uses [Cis2Client](#cis2client) to update the account operator to Marketplace Contract in CIS-NFT contract.
+  - [Marketplace Transfer](./src/components/MarketplaceTransfer.tsx)
+    Uses [MarketplaceClient](#marketplaceclient) to allow users to pay for an NFT and buy transfer it to their ownership.
 
-- #### [Nft](./src/components/Nft.tsx)
-  - Takes an input [MetadataUrl](https://proposals.concordium.software/CIS/cis-2.html#metadataurl).
-  - Fetches the [Metdata Json](https://proposals.concordium.software/CIS/cis-2.html#token-metadata-json)
-  - Displays the NFT image or an alternative error message.
+### Chain Interaction
 
-### Components : Marketplace
+- Clients
 
-- #### [Marketplace Add](./src/components/MarketplaceAdd.tsx)
+  - [Cis2 Client](./src/models/Cis2Client.ts)
+    Provides interface to interact with [CIS2-NFT onchain contract](https://proposals.concordium.software/CIS/cis-2.html).
+    CIS2 client provides methods to call various functions exposed by cis2-multi contract and [cis2 standard](https://proposals.concordium.software/CIS/cis-2.html) in general.
+      - `isOperator` : calls [`operatorOf`](https://proposals.concordium.software/CIS/cis-2.html#operatorof) and returns wether the input contract address can operate on the input token.
+      - `ensureSupportsCis2`: calls [`supports`](https://proposals.concordium.software/CIS/cis-0.html#supports). and throws an error if the input contract does not support CIS2 standard.
+      - `balanceOf`: calls [`balanceOf`](https://proposals.concordium.software/CIS/cis-2.html#balanceof) function to fetch the balance of token for input address.
+      - `getTokenMetadata`: calls [`tokenMetadata`](https://proposals.concordium.software/CIS/cis-2.html#tokenmetadata) function to get the Metadata Url for a particular token. The contents of the token metadata is defined to be in [this](https://proposals.concordium.software/CIS/cis-2.html#example-token-metadata-fungible) format
+      - `updateOperator` : calls [`updateOperator`](https://proposals.concordium.software/CIS/cis-2.html#updateoperator) function to update the operator of a token.
+      - `mint` : calls the `mint` function of the cis2 token contract. To add a new token to the contract state.
+      - `isValidTokenId` : its a utility function that checks if the input token is a valid token id according to the TokenId type used in the CIS2 token contract. CIS2 standard defines a variety of numeric types which can be used as a token Id. Read more about them [here](https://proposals.concordium.software/CIS/cis-2.html#tokenid)
 
-  Uses [MarketplaceClient](#marketplaceclient) to adds an Token/NFT to the list of buyable NFTs.
+  - [Marketplace Client](./src/models/Cis2Client.ts)
+    Provides interface to interact with a on chain [Marketplace Contract](../marketplace-contract/)
+    - `list` : calls `list` function of market place contract to fetch a list of buyable tokens.
+    - `add` :  calls `add` function and enables to add a new token to the marketplace contract. So that it can be fetched using `list` function. 
+    - `transfer` : calls `transfer` function of marketplace contract which allows anyone to buy a token at the listed price.
 
-- #### [Marketplace List](./src/components/MarketplaceList.tsx)
+  - [Concordium Contract Client](./src/models/ConcordiumContractClient.ts)
+    Provides methods to interact with any on chain contract. Ex Init Contract, Invoke Contract & Update Contract.
 
-  Uses [MarketplaceClient](#marketplaceclient) to gets a list of buyable NFTs
+- Deserializer
 
-- #### [Marketplace Transfer](./src/components/MarketplaceTransfer.tsx)
-  Uses [MarketplaceClient](#marketplaceclient) to allow users to pay for an NFT and buy transfer it to their ownership.
+  - [Cis2 Deserializer](./src/models/Cis2Deserializer.ts)
+    Used by Clients to be able to deserialize byte arrays to [CIS2 types](https://proposals.concordium.software/CIS/cis-2.html#general-types-and-serialization). Represented in code by [Cis2 Types](./src/models/Cis2Types.ts)
 
-### Clients
+  - [Concordium Deserializer](./src/models/ConcordiumDeserializer.ts)
+    Used by clients to be able to deserialize bytes arrays to general Concordium Types like Account Address & Contract Address.
 
-- #### [Cis2Client](./src/models/Cis2Client.ts)
+  - [Generic Deserializer](./src/models/GenericDeserializer.ts)
+    Used by higher level Deserializer to deserialize generic types like numbers and strings from byte arrays. Its a wrapper over Buffer and keeps a counter of the bytes already read from the buffer.
 
-  Provides interface to interact with [CIS2-NFT onchain contract](https://proposals.concordium.software/CIS/cis-2.html).
-
-- #### [MarketplaceClient](./src/models/Cis2Client.ts)
-
-  Provides interface to interact with a on chain [Marketplace Contract](../marketplace-contract/)
-
-- #### [ConcordiumContractClient](./src/models/ConcordiumContractClient.ts)
-  Provides methods to interact with any on chain contract. Ex Init Contract, Invoke Contract & Update Contract.
-
-### Deserializers
-
-- #### [Cis2Deserializer](./src/models/Cis2Deserializer.ts)
-
-  Used by Clients to be able to deserialize byte arrays to [CIS2 types](https://proposals.concordium.software/CIS/cis-2.html#general-types-and-serialization). Represented in code by [Cis2 Types](./src/models/Cis2Types.ts)
-
-- #### [ConcordiumDeserializer](./src/models/ConcordiumDeserializer.ts)
-
-  Used by clients to be able to deserialize bytes arrays to general Concordium Types like Account Address & Contract Address.
-
-- #### [GenericDeserializer](./src/models/GenericDeserializer.ts)
-
-  Used by higher level Deserializers to deserialize generic types like numbers and strings from byte arrays. Its a wapper over Buffer and keeps a counter of the bytes already read from the buffer.
-
-- #### [MarketplaceDeserializer](./src/models/MarketplaceDeserializer.ts)
-
-  Used by clients to Deserialize Market Place contract return types. Refresented by the file [MarketplaceTypes](./src/models/MarketplaceTypes.ts)
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `yarn start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  - [Marketplace Deserializer](./src/models/MarketplaceDeserializer.ts)
+    Used by clients to Deserialize Market Place contract return types. Represented by the file [MarketplaceTypes](./src/models/MarketplaceTypes.ts)

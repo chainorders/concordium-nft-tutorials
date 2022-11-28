@@ -4,7 +4,7 @@ import { Typography, Grid } from "@mui/material";
 import { TokenInfo } from "../models/Cis2Types";
 import Cis2BatchItemMetadataPrepare from "./Cis2BatchItemMetadataPrepare";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
-import { toTokenId } from "../models/Cis2NftClient";
+import { toTokenId } from "../models/Cis2Client";
 
 function Cis2BatchMetadataPrepare(props: {
 	files: File[];

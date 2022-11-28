@@ -302,7 +302,7 @@ function toBigInt(num: BigInt | number): bigint {
 	return BigInt(num.toString(10));
 }
 
-const MICROCCD_IN_CCD = 1000000;
+const MICRO_CCD_IN_CCD = 1000000;
 function toGtu(ccdAmount: bigint): GtuAmount {
-	return new GtuAmount(ccdAmount * BigInt(MICROCCD_IN_CCD));
+	return new GtuAmount(ccdAmount * BigInt(MICRO_CCD_IN_CCD));
 }

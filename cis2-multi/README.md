@@ -4,7 +4,6 @@
     - Make sure your working directory is [cis2-multi](./) ie `cd cis2-multi`.
     - Execute the following commands
         ```bash
-        cis2-multi$ mkdir -p ../dist/smart-contract-multi
-        cis2-multi$ cargo concordium build --out ../dist/smart-contract-multi/module.wasm --schema-out ../dist/smart-contract-multi/schema.bin
+        cis2-multi$ cargo concordium build --out .//module.wasm --schema-out .//schema.bin
         ```
-    - You should have [module file](../dist/smart-contract-multi/schema.bin) & [schema file](../dist/smart-contract-multi/schema.bin) if everything has executed normally
+    - You should have [module file](.//schema.bin) & [schema file](.//schema.bin) if everything has executed normally

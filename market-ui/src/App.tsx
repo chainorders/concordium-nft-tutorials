@@ -16,7 +16,7 @@ import {
 	MARKETPLACE_CONTRACT_INFO,
 	MARKET_CONTRACT_ADDRESS,
 } from "./Constants";
-import BatchMintNftPage from "./pages/BatchMintNftPage";
+import MintNftPage from "./pages/MintNftPage";
 import ConnectWallet from "./components/ConnectWallet";
 import Header from "./components/ui/Header";
 import { ContractAddress } from "@concordium/web-sdk";
@@ -135,7 +135,7 @@ function App() {
 		path: "/mint-multi-batch",
 		name: "Mint",
 		component: (
-			<BatchMintNftPage
+			<MintNftPage
 				key={CIS2_MULTI_CONTRACT_INFO.contractName}
 				contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				provider={state.provider!}

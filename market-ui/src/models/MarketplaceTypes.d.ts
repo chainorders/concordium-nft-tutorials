@@ -1,4 +1,4 @@
-import { ContractAddress, AccountAddress } from '@concordium/web-sdk';
+import { ContractAddress } from '@concordium/web-sdk';
 
 export type TokenList = TokenListItem[];
 export interface TokenListItem {

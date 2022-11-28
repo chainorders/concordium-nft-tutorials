@@ -21,7 +21,7 @@ export const enum MethodName {
 }
 
 /**
- * Initilizes CIS2-NFT contract.
+ * Initializes CIS2-NFT contract.
  * @param provider Wallet Provider.
  * @param account Account to initialize the contract with.
  * @returns

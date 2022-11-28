@@ -2,7 +2,7 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
-import { getTokenMetadata } from "../models/Cis2NftClient";
+import { getTokenMetadata } from "../models/Cis2Client";
 import { Metadata } from "../models/Cis2Types";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import { fetchJson } from "../models/Utils";

@@ -1,10 +1,9 @@
 import { Buffer } from "buffer/";
-import { constants } from "crypto";
 
 /**
  * Handles deserialization from the underlying buffer.
  */
-export class GenericDeserializer {
+export class BufferStream {
 	private buffer: Buffer;
 
 	/**
@@ -15,40 +14,6 @@ export class GenericDeserializer {
 	constructor(buffer: Buffer) {
 		this.buffer = buffer;
 		this.counter = 0;
-	}
-
-	readVector<T>(itemDesrialFn: () => T, sizeLength: number = 4): T[] {
-		let ret: T[] = [];
-		const vectorLength = this.readNumberByByteSize(sizeLength);
-
-		for (let i = 0; i < vectorLength; i++) {
-			const item = itemDesrialFn.apply(this);
-			ret.push(item);
-		}
-
-		return ret;
-	}
-
-	readEnumType(): number {
-		return this.readUInt8();
-	}
-
-	readString(sizeLength = 2): string {
-		const size = this.readNumberByByteSize(sizeLength);
-		return this.readBytes(size).toString("utf8");
-	}
-
-	private readNumberByByteSize(sizeLength: number): number {
-		switch (sizeLength) {
-			case 1:
-				return this.readUInt8();
-			case 2:
-				return this.readUInt16();
-			case 4:
-				return this.readUInt32();
-			default:
-				throw new Error(`Invalid vector size length: ${sizeLength}`);
-		}
 	}
 
 	readUInt8(): number {

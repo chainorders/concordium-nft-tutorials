@@ -22,7 +22,7 @@ enum Steps {
 
 type StepType = { step: Steps; title: string };
 
-function BatchMintNftPage(props: {
+function MintNftPage(props: {
 	provider: WalletApi;
 	account: string;
 	contractInfo: Cis2ContractInfo;
@@ -182,4 +182,4 @@ function BatchMintNftPage(props: {
 	);
 }
 
-export default BatchMintNftPage;
+export default MintNftPage;

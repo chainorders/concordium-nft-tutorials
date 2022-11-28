@@ -10,7 +10,7 @@ import { Typography } from "@mui/material";
 
 import { fetchJson, toLocalstorageKey } from "../models/Utils";
 import { TokenListItem } from "../models/MarketplaceTypes";
-import { getTokenMetadata } from "../models/Cis2NftClient";
+import { getTokenMetadata } from "../models/Cis2Client";
 import { Metadata } from "../models/Cis2Types";
 import LazyCis2MetadataImage from "./LazyCis2MetadataImage";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";

@@ -11,7 +11,7 @@ import {
 	Theme,
 } from "@mui/material";
 
-import { isValidTokenId } from "../models/Cis2NftClient";
+import { isValidTokenId } from "../models/Cis2Client";
 import DisplayError from "./ui/DisplayError";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
