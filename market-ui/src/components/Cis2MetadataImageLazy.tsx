@@ -5,13 +5,9 @@ import { useEffect, useState } from "react";
 import { getTokenMetadata } from "../models/Cis2Client";
 import { Metadata } from "../models/Cis2Types";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
-import { fetchJson } from "../models/Utils";
+import { fetchJson, toLocalStorageKey } from "../models/Utils";
 
-function toLocalstorageKey(tokenId: string, contract: ContractAddress): string {
-	return `NFT_${tokenId}_${contract.index}_${contract.subindex}`;
-}
-
-function LazyCis2MetadataImage(props: {
+function Cis2MetadataImageLazy(props: {
 	provider: WalletApi;
 	account: string;
 	tokenId: string;
@@ -24,7 +20,7 @@ function LazyCis2MetadataImage(props: {
 		loading: boolean;
 	}>({ loading: false });
 
-	const localStorageKey = toLocalstorageKey(
+	const localStorageKey = toLocalStorageKey(
 		props.tokenId,
 		props.contractAddress
 	);
@@ -48,7 +44,6 @@ function LazyCis2MetadataImage(props: {
 			)
 				.then((m) => fetchJson<Metadata>(m.url))
 				.then((metadata) => {
-					// localStorage.setItem(localStorageKey, JSON.stringify(metadata));
 					setState({ ...state, loading: false, metadata });
 				});
 		}
@@ -71,4 +66,4 @@ function LazyCis2MetadataImage(props: {
 	);
 }
 
-export default LazyCis2MetadataImage;
+export default Cis2MetadataImageLazy;

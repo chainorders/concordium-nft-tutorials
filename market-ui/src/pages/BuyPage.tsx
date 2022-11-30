@@ -2,10 +2,10 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Paper } from "@mui/material";
 
-import MarketplaceList from "../components/MarketplaceList";
+import MarketplaceTokensList from "../components/MarketplaceTokensList";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
-function ListNftPage(props: {
+function BuyPage(props: {
 	provider: WalletApi;
 	marketContractAddress: ContractAddress;
 	contractInfo: Cis2ContractInfo;
@@ -13,7 +13,7 @@ function ListNftPage(props: {
 }) {
 	return (
 		<Paper>
-			<MarketplaceList
+			<MarketplaceTokensList
 				provider={props.provider as WalletApi}
 				marketContractAddress={props.marketContractAddress}
 				account={props.account}
@@ -23,4 +23,4 @@ function ListNftPage(props: {
 	);
 }
 
-export default ListNftPage;
+export default BuyPage;

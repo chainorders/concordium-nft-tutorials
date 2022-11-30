@@ -6,21 +6,26 @@ import {
 	WalletApi,
 } from "@concordium/browser-wallet-api-helpers";
 import { Box } from "@mui/material";
-import { Route, Routes, useParams, Navigate, useNavigate } from "react-router-dom";
+import {
+	Route,
+	Routes,
+	useParams,
+	Navigate,
+	useNavigate,
+} from "react-router-dom";
+import { ContractAddress } from "@concordium/web-sdk";
 
-import ListNftPage from "./pages/ListNftPage";
-import AddNftPage from "./pages/AddNftPage";
-
+import BuyPage from "./pages/BuyPage";
+import SellPage from "./pages/SellPage";
+import ContractFindInstanceOrInit from "./pages/ContractFindInstanceOrInit";
+import MintPage from "./pages/MintPage";
 import {
 	CIS2_MULTI_CONTRACT_INFO,
 	MARKETPLACE_CONTRACT_INFO,
 	MARKET_CONTRACT_ADDRESS,
 } from "./Constants";
-import MintNftPage from "./pages/MintNftPage";
 import ConnectWallet from "./components/ConnectWallet";
 import Header from "./components/ui/Header";
-import { ContractAddress } from "@concordium/web-sdk";
-import ContractFindInstanceOrInit from "./components/ContractFindInstanceOrInit";
 
 function App() {
 	let marketplaceContractAddress: ContractAddress | undefined =
@@ -107,7 +112,7 @@ function App() {
 			href: `/buy/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`,
 			name: "Buy",
 			component: (
-				<ListNftPage
+				<BuyPage
 					provider={state.provider!}
 					account={state.account!}
 					marketContractAddress={state.marketplaceContractAddress!}
@@ -121,7 +126,7 @@ function App() {
 			href: `/sell/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`,
 			name: "Sell",
 			component: (
-				<AddNftPage
+				<SellPage
 					provider={state.provider!}
 					account={state.account!}
 					marketContractAddress={state.marketplaceContractAddress!}
@@ -135,7 +140,7 @@ function App() {
 		path: "/mint-multi-batch",
 		name: "Mint",
 		component: (
-			<MintNftPage
+			<MintPage
 				key={CIS2_MULTI_CONTRACT_INFO.contractName}
 				contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				provider={state.provider!}

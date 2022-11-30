@@ -4,13 +4,16 @@ import ImageList from "@mui/material/ImageList";
 import Container from "@mui/material/Container";
 import { ContractAddress } from "@concordium/web-sdk";
 
-import MarketplaceTransfer from "./MarketplaceTransfer";
+import MarketplaceTokensListItem from "./MarketplaceTokensListItem";
 import { TokenListItem } from "../models/MarketplaceTypes";
 import { list } from "../models/MarketplaceClient";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import MarketplaceTransferDialog from "./MarketplaceTransferDialog";
 
-function MarketplaceList(props: {
+/**
+ * Gets the List of buyable tokens from Marketplace contract and displays them.
+ */
+function MarketplaceTokensList(props: {
 	marketContractAddress: ContractAddress;
 	provider: WalletApi;
 	contractInfo: Cis2ContractInfo;
@@ -34,7 +37,7 @@ function MarketplaceList(props: {
 		<Container maxWidth={"md"}>
 			<ImageList key="nft-image-list" cols={3}>
 				{state.tokens.map((t) => (
-					<MarketplaceTransfer
+					<MarketplaceTokensListItem
 						provider={props.provider}
 						account={props.account}
 						contractInfo={props.contractInfo}
@@ -59,4 +62,4 @@ function MarketplaceList(props: {
 	);
 }
 
-export default MarketplaceList;
+export default MarketplaceTokensList;

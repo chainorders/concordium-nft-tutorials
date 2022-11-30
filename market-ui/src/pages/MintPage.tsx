@@ -7,7 +7,7 @@ import { Container } from "@mui/system";
 import { TokenInfo } from "../models/Cis2Types";
 import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
 import ConnectPinata from "../components/ConnectPinata";
-import UploadFiles from "../components/UploadFiles";
+import UploadFiles from "../components/ui/UploadFiles";
 import Cis2BatchMint from "../components/Cis2BatchMint";
 import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
@@ -22,7 +22,7 @@ enum Steps {
 
 type StepType = { step: Steps; title: string };
 
-function MintNftPage(props: {
+function MintPage(props: {
 	provider: WalletApi;
 	account: string;
 	contractInfo: Cis2ContractInfo;
@@ -182,4 +182,4 @@ function MintNftPage(props: {
 	);
 }
 
-export default MintNftPage;
+export default MintPage;

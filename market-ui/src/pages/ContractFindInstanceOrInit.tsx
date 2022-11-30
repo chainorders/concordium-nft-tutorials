@@ -2,8 +2,8 @@ import { Container, Paper, Stack, Typography } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
-import ContractFindInstance from "./ContractFindInstance";
-import MarketplaceContractInit from "./MarketplaceContractInit";
+import ContractFindInstance from "../components/ContractFindInstance";
+import MarketplaceContractInit from "../components/MarketplaceContractInit";
 import { ContractInfo } from "../models/ConcordiumContractClient";
 
 function ContractFindInstanceOrInit(props: {

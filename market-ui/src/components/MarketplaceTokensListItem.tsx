@@ -8,14 +8,17 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Typography } from "@mui/material";
 
-import { fetchJson, toLocalstorageKey } from "../models/Utils";
+import { fetchJson, toLocalStorageKey } from "../models/Utils";
 import { TokenListItem } from "../models/MarketplaceTypes";
 import { getTokenMetadata } from "../models/Cis2Client";
 import { Metadata } from "../models/Cis2Types";
-import LazyCis2MetadataImage from "./LazyCis2MetadataImage";
+import Cis2MetadataImageLazy from "./Cis2MetadataImageLazy";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
-function MarketplaceTransfer(props: {
+/**
+ * Displays a single token from the list of all the tokens listed on Marketplace.
+ */
+function MarketplaceTokensListItem(props: {
 	item: TokenListItem;
 	provider: WalletApi;
 	account: string;
@@ -35,7 +38,7 @@ function MarketplaceTransfer(props: {
 	});
 
 	useEffect(() => {
-		let setStateMetdata = (metadata: Metadata) =>
+		let setStateMetadata = (metadata: Metadata) =>
 			setState({
 				...state,
 				isLoading: false,
@@ -45,9 +48,11 @@ function MarketplaceTransfer(props: {
 				price: item.price,
 			});
 
-		let nftJson = localStorage.getItem(toLocalstorageKey(item));
-		if (nftJson) {
-			setStateMetdata(JSON.parse(nftJson));
+		let metadataJson = localStorage.getItem(
+			toLocalStorageKey(item.tokenId, item.contract)
+		);
+		if (metadataJson) {
+			setStateMetadata(JSON.parse(metadataJson));
 		} else {
 			getTokenMetadata(
 				provider,
@@ -58,11 +63,7 @@ function MarketplaceTransfer(props: {
 			)
 				.then((m) => fetchJson<Metadata>(m.url))
 				.then((metadata) => {
-					// localStorage.setItem(
-					// 	toLocalstorageKey(item),
-					// 	JSON.stringify(metadata)
-					// );
-					setStateMetdata(metadata);
+					setStateMetadata(metadata);
 				});
 		}
 	}, [item]);
@@ -72,7 +73,7 @@ function MarketplaceTransfer(props: {
 			sx={{ display: state.isBought ? "none" : "" }}
 			key={item.tokenId + item.contract.index + item.contract.subindex}
 		>
-			<LazyCis2MetadataImage
+			<Cis2MetadataImageLazy
 				provider={props.provider}
 				account={props.account}
 				contractInfo={props.contractInfo}
@@ -119,4 +120,4 @@ function MarketplaceTransfer(props: {
 	);
 }
 
-export default MarketplaceTransfer;
+export default MarketplaceTokensListItem;

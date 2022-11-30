@@ -6,7 +6,7 @@ import { ContractAddress } from "@concordium/web-sdk";
 import { add } from "../models/MarketplaceClient";
 import { AddParams } from "../models/MarketplaceTypes";
 
-function MarkerplaceAdd(props: {
+interface MarketplaceAddProps {
 	provider: WalletApi;
 	account: string;
 	marketContractAddress: ContractAddress;
@@ -14,7 +14,12 @@ function MarkerplaceAdd(props: {
 	tokenId: string;
 	maxQuantity: bigint;
 	onDone: () => void;
-}) {
+}
+
+/**
+ * Displays UI to add a token to the list of buyable tokens on Marketplace.
+ */
+function MarketplaceAdd(props: MarketplaceAddProps) {
 	const [state, setState] = useState({
 		adding: false,
 		error: "",
@@ -136,4 +141,4 @@ function MarkerplaceAdd(props: {
 	);
 }
 
-export default MarkerplaceAdd;
+export default MarketplaceAdd;

@@ -24,6 +24,7 @@ import {
   UpdateContractArgs,
   ViewContractArgs,
 } from "./node-client/types";
+import { Cis2NftViewStateDeserializer } from "./models/cis2NftviewStateDeserializer";
 import { Cis2MultiViewStateDeserializer } from "./models/cis2MultiviewStateDeserializer";
 import path from "path";
 import { MetadataUrl, MintParams } from "./models/cis2Types";
@@ -173,7 +174,7 @@ function setupCliUpdateContract<T>(
                 args.contract,
                 args.function,
                 page,
-                Buffer.from(fs.readFileSync(args.schema)) as any,
+                Buffer.from(fs.readFileSync(args.schema)),
                 SchemaVersion.V2,
               ),
               amount: new GtuAmount(0n),
@@ -228,8 +229,13 @@ function setupCliInvokeContract(cli: commander.Command) {
     .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
     .action(async (args: ViewContractArgs) => {
       const contractState = await invokeContract(args);
-      const viewState = new Cis2MultiViewStateDeserializer(contractState).readViewState();
-      console.log(JSON.stringify(viewState, null, "\t"));
+      if (args.contract === "CIS2-NFT") {
+        const viewState = new Cis2NftViewStateDeserializer(contractState).readViewState();
+        console.log(JSON.stringify(viewState, null, "\t"));
+      } else if (args.contract === "CIS2-Multi") {
+        const viewState = new Cis2MultiViewStateDeserializer(contractState).readViewState();
+        console.log(JSON.stringify(viewState, null, "\t"));
+      }
     });
 }
 setupCliInvokeContract(cli);

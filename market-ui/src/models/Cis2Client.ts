@@ -1,3 +1,7 @@
+/**
+ * This file has functions to interact with the contract following CIS2 Standard {@link https://proposals.concordium.software/CIS/cis-2.html}
+ */
+
 import { Buffer } from "buffer/";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import {

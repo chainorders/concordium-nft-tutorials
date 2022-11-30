@@ -15,7 +15,7 @@ import Cis2BalanceOf from "../components/Cis2BalanceOf";
 import Cis2OperatorOf from "../components/Cis2OperatorOf";
 import Cis2UpdateOperator from "../components/Cis2UpdateOperator";
 import Cis2FindInstance from "../components/Cis2FindInstance";
-import MarkerplaceAdd from "../components/MarketplaceAdd";
+import MarketplaceAdd from "../components/MarketplaceAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 enum Steps {
@@ -27,7 +27,7 @@ enum Steps {
 }
 type StepType = { step: Steps; title: string };
 
-function AddNftPage(props: {
+function SellPage(props: {
 	provider: WalletApi;
 	account: string;
 	marketContractAddress: ContractAddress;
@@ -145,7 +145,7 @@ function AddNftPage(props: {
 				);
 			case Steps.AddToken:
 				return (
-					<MarkerplaceAdd
+					<MarketplaceAdd
 						provider={props.provider}
 						account={props.account}
 						marketContractAddress={props.marketContractAddress}
@@ -188,4 +188,4 @@ function AddNftPage(props: {
 	);
 }
 
-export default AddNftPage;
+export default SellPage;

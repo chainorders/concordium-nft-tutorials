@@ -11,21 +11,21 @@ function LazyCis2Metadata(props: {
 }) {
 	const [state, setState] = useState<{
 		metadata?: Metadata;
-		loadingMetdata: boolean;
+		loadingMetadata: boolean;
 		error: string;
-	}>({ loadingMetdata: false, error: "" });
+	}>({ loadingMetadata: false, error: "" });
 
 	useEffect(() => {
-		setState({ ...state, loadingMetdata: true });
+		setState({ ...state, loadingMetadata: true });
 		fetchJson<Metadata>(props.metadataUrl.url)
 			.then((metadata) => {
-				setState({ ...state, metadata, loadingMetdata: false });
+				setState({ ...state, metadata, loadingMetadata: false });
 				props.onMetadataLoaded && props.onMetadataLoaded(metadata);
 			})
 			.catch((err) => {
 				setState({
 					...state,
-					loadingMetdata: false,
+					loadingMetadata: false,
 					error: err.message,
 				});
 			});
@@ -33,7 +33,7 @@ function LazyCis2Metadata(props: {
 
 	if (state.error) {
 		return props.errorLoadingTemplate(state.error.toString());
-	} else if (state.loadingMetdata) {
+	} else if (state.loadingMetadata) {
 		return props.loadingTemplate();
 	} else if (state.metadata) {
 		return props.loadedTemplate(state.metadata);

@@ -25,14 +25,12 @@
 ## Deploy Contracts
 
 ```bash
-concordium-client module deploy ./marketplace-contract/module.wasm --sender $ACCOUNT --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT
+concordium-client module deploy <WASM-FILE-PATH> --sender $ACCOUNT --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT 
 ```
-
-Or
-
-```bash
-concordium-client module deploy ./cis2-multi/module.wasm --sender $ACCOUNT --grpc-ip $GRPC_IP --grpc-port $GRPC_PORT
-```
+here the `WASM-FILE-PATH` can be 
+- [cis2-nft wasm](../cis2-nft/module.wasm)
+- [cis2-multi wasm](../cis2-multi/module.wasm)
+- [marketplace wasm](../marketplace-contract/module.wasm)
 
 You can [read more](https://developer.concordium.software/en/mainnet/net/references/concordium-client.html#concordium-client) about `concordium-client` and its cli params like `--grpc-ip` & `--grpc-port`
 
@@ -41,10 +39,15 @@ You can [read more](https://developer.concordium.software/en/mainnet/net/referen
 Name the module
 
 ```bash
-concordium-client module name <MODULE-REFERENCE> --name market ## or token
+concordium-client module name <MODULE-REFERENCE> --name <MODULE-NAME>
 ```
+Here lets for the context of this repository name our contracts in the following format. The same format will be used for interaction with contracts 
+- for CIS2-NFT : cis2nft
+- for CIS2-Multi : cis2multi
+- for Marketplace Contract : market
 
 ## Interact with Contract
 
+- [CIS2 NFT](./cis2-nft.README.md)
 - [CIS2 Multi](./cis2-multi.README.md)
 - [Marketplace](./marketplace-contract.README.md)

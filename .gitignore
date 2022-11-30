@@ -8,4 +8,8 @@ cis2-multi/module.wasm
 cis2-multi/schema.bin
 marketplace-contract/module.wasm
 marketplace-contract/schema.bin
+cis2-nft/module.wasm
+cis2-nft/schema.bin
 .vscode
+Cargo.lock
+target
