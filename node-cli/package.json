@@ -8,7 +8,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@concordium/node-sdk": "^3.0.2",
+    "@concordium/node-sdk": "^4.0.0",
     "@types/fs-extra": "^9.0.13",
     "commander": "^9.4.0",
     "fs-extra": "^10.1.0"
