@@ -11,16 +11,51 @@ import {
 	MenuItem,
 	Button,
 } from "@mui/material";
-import AdbIcon from "@mui/icons-material/Adb";
 import MenuIcon from "@mui/icons-material/Menu";
 import { styled } from "@mui/system";
 import { useLocation } from "react-router-dom";
 
-function Header(props: {
-	pages: {
-		href?: string; path: string; name: string; component: JSX.Element 
-}[];
+interface IPage {
+	href?: string;
+	path: string;
+	name: string;
+	component: JSX.Element;
+	display: "primary" | "secondary";
+}
+
+function PageButton(props: {
+	page: IPage;
+	isSelected: boolean;
+	onClick: (path: string) => void;
 }) {
+	const { page, isSelected, onClick } = props;
+
+	return (
+		<Button
+			variant={isSelected ? "outlined" : "contained"}
+			key={page.name}
+			onClick={() => onClick(page.href || page.path)}
+			sx={{
+				my: 2,
+				color: "white",
+				display: "block",
+				borderColor: "white",
+				borderRadius: "4px",
+				":hover": {
+					my: 2,
+					color: "white",
+					display: "block",
+					borderColor: "white",
+					borderRadius: "4px",
+				},
+			}}
+		>
+			{page.name}
+		</Button>
+	);
+}
+
+function Header(props: { pages: IPage[] }) {
 	const StyledAppBar = styled(AppBar)({
 		backgroundImage:
 			'url("https://cdn-gpbbj.nitrocdn.com/eWGcFpraIsZGbNFvSyLAtmgXkWlgLXiK/assets/static/optimized/rev-c02a987/wp-content/uploads/2022/07/pexels-andrea-piacquadio-3931501-1-1.png")',
@@ -29,7 +64,9 @@ function Header(props: {
 	const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
 	const navigate = useNavigate();
 	const location = useLocation();
-    const title = props.pages.find((p) => p.path === location.pathname)?.name;
+	const selectedPageName = props.pages.find(
+		(p) => p.href === location.pathname || p.path === location.pathname
+	)?.name;
 
 	const handleCloseNavMenu = (href?: string) => {
 		setAnchorElNav(null);
@@ -51,7 +88,7 @@ function Header(props: {
 						variant="h6"
 						noWrap
 						component="a"
-						href="/"
+						onClick={()=>handleCloseNavMenu("/")}
 						sx={{
 							mr: 2,
 							display: { xs: "none", md: "flex" },
@@ -98,14 +135,13 @@ function Header(props: {
 								<MenuItem
 									key={page.name}
 									onClick={() => handleCloseNavMenu(page.href || page.path)}
-                                    sx={{border: "1px", borderColor: "white"}}
+									sx={{ border: "1px", borderColor: "white" }}
 								>
 									<Typography textAlign="center">{page.name}</Typography>
 								</MenuItem>
 							))}
 						</Menu>
 					</Box>
-					<AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
 					<Typography
 						variant="h5"
 						noWrap
@@ -124,21 +160,40 @@ function Header(props: {
 						Concordium
 					</Typography>
 					<Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-						{props.pages.map((page) => (
-							<Button
-								key={page.name}
-								onClick={() => handleCloseNavMenu(page.href || page.path)}
-								sx={{ my: 2, color: "white", display: "block" }}
-							>
-								{page.name}
-							</Button>
-						))}
+						{props.pages
+							.filter((p) => p.display === "primary")
+							.map((page) => (
+								<PageButton
+									key={page.name}
+									page={page}
+									isSelected={selectedPageName === page.name}
+									onClick={(path) => handleCloseNavMenu(path)}
+								/>
+							))}
+					</Box>
+					<Box
+						sx={{
+							flexGrow: 1,
+							display: { xs: "none", md: "flex" },
+							flexDirection: "row-reverse",
+						}}
+					>
+						{props.pages
+							.filter((p) => p.display === "secondary")
+							.map((page) => (
+								<PageButton
+									key={page.name}
+									page={page}
+									isSelected={selectedPageName === page.name}
+									onClick={(path) => handleCloseNavMenu(path)}
+								/>
+							))}
 					</Box>
 				</Toolbar>
 			</Container>
-			<Container sx={{ width: "100%" }}>
-				<Typography variant="h2" textAlign={"center"}>
-					{title}
+			<Container sx={{ width: "100%", display: { xs: "block", md: "none" } }}>
+				<Typography variant="h2" textAlign={"center"} fontSize={40}>
+					{selectedPageName}
 				</Typography>
 			</Container>
 		</StyledAppBar>

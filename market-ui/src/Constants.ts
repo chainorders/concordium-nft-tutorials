@@ -38,6 +38,10 @@ export const CIS2_MULTI_CONTRACT_INFO: Cis2ContractInfo = {
 	tokenIdByteSize: 1,
 };
 export const IPFS_GATEWAY_URL = "https://ipfs.io/ipfs";
+
+export const CREATE_NEW_MARKETPLACE = true;
+export const MINTING_UI_ONLY = false;
+
 export const tokenIdToNftImageFileName = (
 	originalFileName: string,
 	tokenId: string

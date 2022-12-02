@@ -12,7 +12,7 @@ function BuyPage(props: {
 	account: string;
 }) {
 	return (
-		<Paper>
+		<Paper variant="outlined">
 			<MarketplaceTokensList
 				provider={props.provider as WalletApi}
 				marketContractAddress={props.marketContractAddress}

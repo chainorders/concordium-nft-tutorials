@@ -92,12 +92,12 @@ function MarketplaceTokensListItem(props: {
 							{state.desc}
 						</Typography>
 						<Typography variant="caption" component={"div"}>
-							{item.contract.index.toString()} /{" "}
+							Index : {item.contract.index.toString()} /{" "}
 							{item.contract.subindex.toString()}
 						</Typography>
-						{item.owner === props.account && (
-							<Typography>Owned by you</Typography>
-						)}
+						<Typography variant="caption" component={"div"} title={item.owner}>
+							Owner : {item.owner.slice(0, 5)}...
+						</Typography>
 					</>
 				}
 				actionIcon={

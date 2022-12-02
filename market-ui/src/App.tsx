@@ -5,7 +5,7 @@ import {
 	detectConcordiumProvider,
 	WalletApi,
 } from "@concordium/browser-wallet-api-helpers";
-import { Box } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import {
 	Route,
 	Routes,
@@ -21,22 +21,28 @@ import ContractFindInstanceOrInit from "./pages/ContractFindInstanceOrInit";
 import MintPage from "./pages/MintPage";
 import {
 	CIS2_MULTI_CONTRACT_INFO,
+	CREATE_NEW_MARKETPLACE,
 	MARKETPLACE_CONTRACT_INFO,
 	MARKET_CONTRACT_ADDRESS,
 } from "./Constants";
 import ConnectWallet from "./components/ConnectWallet";
 import Header from "./components/ui/Header";
+import { MINTING_UI_ONLY } from "./Constants";
 
 function App() {
-	let marketplaceContractAddress: ContractAddress | undefined =
-		MARKET_CONTRACT_ADDRESS;
 	const params = useParams();
 	const navigate = useNavigate();
-	if (params.index && params.subindex) {
-		marketplaceContractAddress = {
-			index: BigInt(params.index),
-			subindex: BigInt(params.subindex),
-		};
+
+	let marketplaceContractAddress: ContractAddress | undefined = undefined;
+	if (!MINTING_UI_ONLY) {
+		marketplaceContractAddress = MARKET_CONTRACT_ADDRESS;
+
+		if (params.index && params.subindex) {
+			marketplaceContractAddress = {
+				index: BigInt(params.index),
+				subindex: BigInt(params.subindex),
+			};
+		}
 	}
 
 	const [state, setState] = useState<{
@@ -104,6 +110,7 @@ function App() {
 		href?: string;
 		name: string;
 		component: JSX.Element;
+		display: "primary" | "secondary";
 	}>();
 
 	if (state.marketplaceContractAddress) {
@@ -119,6 +126,7 @@ function App() {
 					contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				/>
 			),
+			display: "primary",
 		});
 
 		pages.push({
@@ -133,6 +141,7 @@ function App() {
 					contractInfo={CIS2_MULTI_CONTRACT_INFO}
 				/>
 			),
+			display: "primary",
 		});
 	}
 
@@ -147,20 +156,41 @@ function App() {
 				account={state.account!}
 			/>
 		),
+		display: "primary",
 	});
 
-	pages.push({
-		path: "/marketplace-init-or-add",
-		name: "Create Marketplace",
-		component: (
-			<ContractFindInstanceOrInit
-				provider={state.provider!}
-				account={state.account!}
-				contractInfo={MARKETPLACE_CONTRACT_INFO}
-				onDone={(address) => onMarketplaceContractChanged(address)}
-			/>
-		),
-	});
+	if (CREATE_NEW_MARKETPLACE) {
+		pages.push({
+			path: "/marketplace-init-or-add",
+			name: "Create My Marketplace",
+			component: (
+				<ContractFindInstanceOrInit
+					provider={state.provider!}
+					account={state.account!}
+					contractInfo={MARKETPLACE_CONTRACT_INFO}
+					onDone={(address) => onMarketplaceContractChanged(address)}
+				/>
+			),
+			display: "secondary",
+		});
+	}
+
+	function DefaultRouteElement() {
+		if (MINTING_UI_ONLY) {
+			return <Navigate replace to={"/mint-multi-batch"} />;
+		} else if (state.marketplaceContractAddress) {
+			return (
+				<Navigate
+					replace
+					to={`/buy/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`}
+				/>
+			);
+		} else if (CREATE_NEW_MARKETPLACE) {
+			return <Navigate replace to={"/marketplace-init-or-add"} />;
+		} else {
+			return <Navigate replace to={"/mint-multi-batch"} />;
+		}
+	}
 
 	return (
 		<>
@@ -171,24 +201,17 @@ function App() {
 						{pages.map((p) => (
 							<Route path={p.path} element={p.component} key={p.name} />
 						))}
-						<Route
-							path="/"
-							element={
-								state.marketplaceContractAddress ? (
-									<Navigate
-										replace
-										to={`/buy/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`}
-									/>
-								) : (
-									<Navigate replace to={"/marketplace-init-or-add"} />
-								)
-							}
-						/>
+						<Route path="/" element={<DefaultRouteElement />} />
 					</Routes>
 				) : (
 					<ConnectWallet connect={connect} />
 				)}
 			</Box>
+			<footer className="footer">
+				<Typography textAlign={"center"}>
+					<Link href="https://developer.concordium.software/en/mainnet/index.html" target={"_blank"}>Concordium Developer Documentation</Link>
+				</Typography>
+			</footer>
 		</>
 	);
 }
