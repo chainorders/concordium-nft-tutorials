@@ -44,6 +44,7 @@
 	bottom: 0;
 	margin-top: auto;
 	height: 30px;
-	background-color: white;
+	background-color: black;
+	color: white;
 	border-top: 1px solid black;
 }

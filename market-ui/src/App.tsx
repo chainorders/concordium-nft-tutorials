@@ -208,8 +208,8 @@ function App() {
 				)}
 			</Box>
 			<footer className="footer">
-				<Typography textAlign={"center"}>
-					<Link href="https://developer.concordium.software/en/mainnet/index.html" target={"_blank"}>Concordium Developer Documentation</Link>
+				<Typography textAlign={"center"} sx={{color: "white"}}>
+					<Link sx={{color: "white"}} href="https://developer.concordium.software/en/mainnet/index.html" target={"_blank"}>Concordium Developer Documentation</Link>
 				</Typography>
 			</footer>
 		</>
