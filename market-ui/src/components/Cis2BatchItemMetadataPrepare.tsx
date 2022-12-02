@@ -22,9 +22,9 @@ import {
 	tokenIdToNftMetadataFileName,
 } from "../Constants";
 import { Theme } from "@mui/system";
-import DisplayError from "./DisplayError";
+import DisplayError from "./ui/DisplayError";
 import GetTokenIdCardStep from "./GetTokenIdCardStep";
-import GetNftMintCardStep from "./GetNftMintCardStep";
+import GetMintCardStep from "./GetMintCardStep";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import GetQuantityCardStep from "./GetQuantityCardStep";
 
@@ -128,6 +128,7 @@ function UploadMetadataIpfsCardStep(props: {
 			display: {
 				url: props.imageIpfsUrl,
 			},
+			unique: !!formData.get("unique")?.toString(),
 			attributes: [
 				{
 					name: "ContractName",
@@ -210,6 +211,16 @@ function UploadMetadataIpfsCardStep(props: {
 								}
 								label="Include Hash?"
 							/>
+							<FormControlLabel
+								control={
+									<Checkbox
+										defaultChecked
+										name="unique"
+										id="unique"
+									/>
+								}
+								label="Unique?"
+							/>
 						</Stack>
 						<DisplayError error={state.error} />
 					</CardContent>
@@ -255,12 +266,7 @@ function Cis2BatchItemMetadataPrepare(props: {
 	}
 
 	function metadataUploaded(tokenId: string, metadataUrl: MetadataUrl) {
-		if (props.contractInfo.contractName === "CIS2-NFT") {
-			setState({ ...state, tokenId, step: Steps.Mint, metadataUrl });
-			props.onDone({ tokenId, tokenInfo: metadataUrl });
-		} else if (props.contractInfo.contractName === "CIS2-Multi") {
-			setState({ ...state, tokenId, step: Steps.GetQuantity, metadataUrl });
-		}
+		setState({ ...state, tokenId, step: Steps.GetQuantity, metadataUrl });
 	}
 
 	function quantityUpdated(tokenId: string, quantity: string) {
@@ -314,7 +320,7 @@ function Cis2BatchItemMetadataPrepare(props: {
 			);
 		case Steps.Mint:
 			return (
-				<GetNftMintCardStep
+				<GetMintCardStep
 					imageUrl={state.imageDisplayUrl}
 					imageIpfsUrl={state.imageIpfsUrl}
 					tokenId={state.tokenId}

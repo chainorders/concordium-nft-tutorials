@@ -1,0 +1,14 @@
+{
+  "name": "Sample NFT",
+  "description": "Sample NFT for Concordium NFT Tutorial",
+  "display": {
+    "url": "https://ipfs.io/ipfs/QmV5REE3HJRLTHdmqG18Wc5PBF3Nc9W5dQL4Rp7MxBsx8q?filename=nft.jpg"
+  },
+  "attributes": [
+    {
+      "name": "Repository",
+      "type": "string",
+      "value": "https://github.com/chainorders/concordium-nft-tutorials"
+    }
+  ]
+}

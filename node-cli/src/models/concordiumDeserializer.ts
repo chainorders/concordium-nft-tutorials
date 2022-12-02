@@ -12,12 +12,12 @@ export class ConcordiumDeserializer {
     this.counter = 0;
   }
 
-  readVector<T>(itemDesrialFn: () => T, sizeLength: number = 2): T[] {
+  readVector<T>(itemDeserialFn: () => T, sizeLength: number = 2): T[] {
     let ret: T[] = [];
     let vectorLength: bigint = this.getSizeLengthValue(sizeLength);
 
     for (let i = 0; i < vectorLength; i++) {
-      const item = itemDesrialFn.apply(this);
+      const item = itemDeserialFn.apply(this);
       ret.push(item);
     }
 

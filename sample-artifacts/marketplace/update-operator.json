@@ -1,0 +1,10 @@
+[
+  {
+    "update": {
+      "Add": []
+    },
+    "operator": {
+      "Contract": [{ "index": 2099, "subindex": 0 }]
+    }
+  }
+]

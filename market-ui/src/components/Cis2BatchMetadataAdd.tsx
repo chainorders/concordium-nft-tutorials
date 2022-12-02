@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, Grid, Typography } from "@mui/material";
 import { useState } from "react";
 
-import { toTokenId } from "../models/Cis2NftClient";
+import { toTokenId } from "../models/Cis2Client";
 import { TokenInfo } from "../models/Cis2Types";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import Cis2BatchItemMetadataAdd from "./Cis2BatchItemMetadataAdd";

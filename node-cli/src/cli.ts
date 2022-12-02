@@ -40,8 +40,8 @@ function setupCliWalletDecryption(cli: commander.Command) {
     .requiredOption("--password <wallet>", "Wallet export password")
     .requiredOption("--out <out>", "Wallet out path", "../concordium-backup.decrypted.json")
     .action(async (args: { wallet: string; password: string; out: string }) => {
-      const excryptedExport = JSON.parse(fs.readFileSync(args.wallet, "utf8"));
-      const decryptedExport = decryptMobileWalletExport(excryptedExport, args.password);
+      const encryptedExport = JSON.parse(fs.readFileSync(args.wallet, "utf8"));
+      const decryptedExport = decryptMobileWalletExport(encryptedExport, args.password);
       fs.writeFileSync(args.out, Buffer.from(JSON.stringify(decryptedExport)));
     });
 }
@@ -53,14 +53,14 @@ function setupCliDeployModule(cli: commander.Command) {
     cli
       .command("deploy")
       .description(`Deploy Smart Contract Wasm Module`)
-      .requiredOption("--wasm <wasm>", "Compile Module file path", "../dist/smart-contract/module.wasm")
+      .requiredOption("--wasm <wasm>", "Compile Module file path")
       // Sender Account Args
       .requiredOption("--sign-key <signKey>", "Account Signing Key")
       .requiredOption("--sender <sender>", "Sender Account Address. This should be the owner of the Contract")
       // Node Client args
       .requiredOption("--auth-token <authToken>", "Concordium Node Auth Token", "rpcadmin")
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
-      .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
+      .requiredOption("--port <port>", "Concordium Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
       .option("--wait", "Should wait for transaction finalization", false)
       .option("--wait", "Should wait for transaction finalization", false)
@@ -96,7 +96,7 @@ function setupCliInitContract(cli: commander.Command) {
       // Node Client args
       .requiredOption("--auth-token <authToken>", "Concordium Node Auth Token", "rpcadmin")
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
-      .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
+      .requiredOption("--port <port>", "Concordium Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
       .option("--wait", "Should wait for transaction finalization", false)
       .action(
@@ -138,12 +138,7 @@ function setupCliUpdateContract<T>(
     cli
       .command(contractFnName)
       .description(`${contractFnName} an NFT`)
-      .requiredOption(
-        "--params <params>",
-        "params file path",
-        (f) => fs.realpathSync(f),
-        `../nft-artifacts/${contractFnName}-params.json`,
-      )
+      .requiredOption("--params <params>", "params file path", (f) => fs.realpathSync(f))
       .requiredOption("--schema <schema>", "Contract schema file path", (f) => fs.realpathSync(f))
       .requiredOption("--energy <energy>", "Maximum Contract Execution Energy", (v) => BigInt(v), 6000n)
       .requiredOption("--contract <contract>", "Contract name", "CIS2-NFT")
@@ -156,7 +151,7 @@ function setupCliUpdateContract<T>(
       // Node Client args
       .requiredOption("--auth-token <authToken>", "Concordium Node Auth Token", "rpcadmin")
       .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
-      .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
+      .requiredOption("--port <port>", "Concordium Node Port", (v) => parseInt(v), 10001)
       .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
       .requiredOption(
         "--batch-size <batchsize>",
@@ -212,7 +207,6 @@ setupCliUpdateContract<MintParams>(cli, "mint", (params, pageSize) => {
 
   return ret;
 });
-
 // Transfer
 setupCliUpdateContract(cli, "transfer");
 
@@ -231,7 +225,7 @@ function setupCliInvokeContract(cli: commander.Command) {
     // Node Client args
     .requiredOption("--auth-token <authToken>", "Concordium Node Auth Token", "rpcadmin")
     .requiredOption("--ip <ip>", "Concordium Node IP", "127.0.0.1")
-    .requiredOption("--port <port>", "Concordum Node Port", (v) => parseInt(v), 10001)
+    .requiredOption("--port <port>", "Concordium Node Port", (v) => parseInt(v), 10001)
     .requiredOption("--timeout <timeout>", "Concordium Node request timeout", (v) => parseInt(v), 15000)
     .action(async (args: ViewContractArgs) => {
       const contractState = await invokeContract(args);
@@ -255,16 +249,12 @@ function setupPinataUploads(cli: commander.Command) {
     .requiredOption("--pinata-key <file>", "Pinata Key")
     .requiredOption("--pinata-secret <file>", "Pinata Secret")
     .requiredOption("--gateway-prefix", "IPFS gateway prefix", "https://ipfs.io/ipfs/")
-    .requiredOption(
-      "--mint-params-file",
-      "File to save Smart Contract Mint Params",
-      `../nft-artifacts/mint-params.json`,
-    )
+    .requiredOption("--mint-params-file", "File to save Smart Contract Mint Params")
     .action(async (args: PinataUploadArgs) => {
       const pinata = pinataSdk(args.pinataKey, args.pinataSecret);
       const mintParams: MintParams = fs.readJsonSync(args.mintParamsFile);
       const metadataUrlsMap = new Map(mintParams.tokens);
-      
+
       var files = fs
         .readdirSync(args.dir, { withFileTypes: true })
         .filter((f) => f.isFile() && f.name.endsWith(".jpg"))

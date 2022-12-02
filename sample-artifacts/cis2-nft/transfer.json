@@ -1,0 +1,11 @@
+[
+	{
+		"token_id": "00000001",
+		"amount": "1",
+		"from": {
+			"Account": ["48x2Uo8xCMMxwGuSQnwbqjzKtVqK5MaUud4vG7QEUgDmYkV85e"]
+		},
+		"to": { "Account": ["35qmpUFbhiTD4sRvnFuFMm31xLmptsbwQkSPPTxnyHTmRziimB"] },
+		"data": ""
+	}
+]

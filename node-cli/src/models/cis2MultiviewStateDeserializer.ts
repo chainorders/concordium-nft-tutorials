@@ -43,25 +43,6 @@ export class Cis2MultiViewStateDeserializer extends Cis2Deserializer {
     return [tokenId, amount];
   }
 
-  /**
-   * @deprecated The method should not be used
-   */
-  readTokenAmount2(): ContractTokenAmount {
-    let result = BigInt(0);
-
-    for (let index = 0; index <= 37; index++) {
-      let byte = this.readUInt8();
-      let valueByte = byte & 0b0111_1111;
-      const res = valueByte << (index * 7);
-      result = result + BigInt(res);
-      if (0 === (byte & 0b1000_0000)) {
-        return result;
-      }
-    }
-
-    return result;
-  }
-
   readTokenAmount(): ContractTokenAmount {
     let buff = new Buffer(37);
 

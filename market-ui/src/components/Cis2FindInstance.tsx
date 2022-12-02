@@ -3,21 +3,17 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { TextField, Typography, Button, Stack } from "@mui/material";
 
-import { ensureSupportsCis2 } from "../models/Cis2NftClient";
-import { CIS2_NFT_CONTRACT_INFO, CIS2_MULTI_CONTRACT_INFO } from "../Constants";
+import { ensureSupportsCis2 } from "../models/Cis2Client";
 import {
 	Cis2ContractInfo,
 	getInstanceInfo,
 } from "../models/ConcordiumContractClient";
-import ContractSelect from "./ContractSelect";
 
 function Cis2FindInstance(props: {
 	provider: WalletApi;
-	contractInfo?: Cis2ContractInfo;
+	contractInfo: Cis2ContractInfo;
 	onDone: (address: ContractAddress, contractInfo: Cis2ContractInfo) => void;
 }) {
-	const contractInfos = [CIS2_NFT_CONTRACT_INFO, CIS2_MULTI_CONTRACT_INFO];
-
 	const [state, setState] = useState({
 		error: "",
 		checking: false,
@@ -43,24 +39,12 @@ function Cis2FindInstance(props: {
 			return;
 		}
 
-		const contractName =
-			props.contractInfo?.contractName ||
-			formData.get("contractName")?.toString() ||
-			"";
-		const contractInfo =
-			props.contractInfo ||
-			contractInfos.find((i) => i.contractName === contractName);
-		if (!contractInfo) {
-			setState({ ...state, error: "Invalid Contract Name" });
-			return;
-		}
-
 		const address = { index, subindex };
 		getInstanceInfo(props.provider, address)
-			.then((_) => ensureSupportsCis2(props.provider, contractInfo, address))
+			.then((_) => ensureSupportsCis2(props.provider, props.contractInfo, address))
 			.then(() => {
 				setState({ ...state, checking: false, error: "" });
-				props.onDone(address, contractInfo);
+				props.onDone(address, props.contractInfo);
 			})
 			.catch((e: Error) => {
 				setState({ ...state, checking: false, error: e.message });
@@ -74,7 +58,6 @@ function Cis2FindInstance(props: {
 			onSubmit={submit}
 			autoComplete={"true"}
 		>
-			<ContractSelect contractName={props.contractInfo?.contractName}/>
 			<TextField
 				id="contract-index"
 				name="contractIndex"

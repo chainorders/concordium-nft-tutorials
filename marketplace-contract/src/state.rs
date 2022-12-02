@@ -1,3 +1,5 @@
+//! Defines the State (persisted data) for the contract.
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use concordium_cis2::{IsTokenAmount, IsTokenId};
@@ -34,10 +36,12 @@ pub struct TokenPriceState<A: IsTokenAmount + Clone> {
 
 #[derive(Clone, Serialize, Copy, PartialEq, Eq, Debug)]
 pub struct TokenRoyaltyState {
+    /// Primary Owner (Account Address which added the token first time on a Marketplace Instance)
     pub primary_owner: AccountAddress,
     pub royalty: u16,
 }
 
+/// Marketplace Commission
 #[derive(Serialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct Commission {
     /// Commission basis points. equals to percent * 100
