@@ -10,6 +10,8 @@ marketplace-contract/module.wasm
 marketplace-contract/schema.bin
 cis2-nft/module.wasm
 cis2-nft/schema.bin
+cis2-fractionalizer/module.wasm
+cis2-fractionalizer/schema.bin
 .vscode
 Cargo.lock
 target
