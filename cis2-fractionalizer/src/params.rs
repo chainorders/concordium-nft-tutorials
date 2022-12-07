@@ -2,7 +2,10 @@ use concordium_cis2::*;
 use concordium_std::*;
 use core::convert::TryInto;
 
-use crate::{ContractTokenAmount, ContractTokenId};
+use crate::{
+    state::{CollateralKey, CollateralState},
+    ContractTokenAmount, ContractTokenId,
+};
 
 #[derive(Serial, Deserial, SchemaType)]
 pub struct TokenMintParams {
@@ -75,6 +78,7 @@ pub struct ViewAddressState {
 pub struct ViewState {
     pub state: Vec<(Address, ViewAddressState)>,
     pub tokens: Vec<ContractTokenId>,
+    pub collaterals: Vec<(CollateralKey, CollateralState)>,
 }
 
 /// Parameter type for the CIS-2 function `balanceOf` specialized to the subset

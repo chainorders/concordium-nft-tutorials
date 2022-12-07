@@ -64,6 +64,7 @@ fn contract_view<S: HasStateApi>(
     Ok(ViewState {
         state: inner_state,
         tokens,
+        collaterals: state.collaterals.iter().map(|(a, b)| (*a, *b)).collect(),
     })
 }
 

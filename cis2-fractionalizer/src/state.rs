@@ -26,14 +26,14 @@ impl<S: HasStateApi> AddressState<S> {
     }
 }
 
-#[derive(Serial, Deserial, Clone)]
+#[derive(Serial, Deserial, Clone, SchemaType, Copy)]
 pub struct CollateralKey {
     pub contract: ContractAddress,
     pub token_id: ContractTokenId,
     pub owner: AccountAddress,
 }
 
-#[derive(Serial, Deserial, Clone, Copy)]
+#[derive(Serial, Deserial, Clone, Copy, SchemaType)]
 pub struct CollateralState {
     pub received_token_amount: ContractTokenAmount,
     pub minted_token_id: Option<ContractTokenId>,
