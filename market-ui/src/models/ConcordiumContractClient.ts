@@ -13,7 +13,7 @@ import {
 	InstanceInfo,
 	TransactionStatusEnum,
 	TransactionSummary,
-	GtuAmount,
+	CcdAmount,
 } from "@concordium/web-sdk";
 
 export interface ContractInfo {
@@ -53,13 +53,13 @@ export async function initContract<T>(
 
 	let txnHash = await provider.sendTransaction(
 		account,
-		AccountTransactionType.InitializeSmartContractInstance,
+		AccountTransactionType.InitContract,
 		{
-			moduleRef,
-			maxContractExecutionEnergy,
-			contractName,
-			parameter: serializedParams || Buffer.from([]),
 			amount: toGtu(ccdAmount),
+			moduleRef,
+			initName: contractName,
+			param: serializedParams || Buffer.from([]),
+			maxContractExecutionEnergy,
 		} as InitContractPayload,
 		params || {},
 		schemaBuffer.toString("base64"),
@@ -151,11 +151,11 @@ export async function updateContract<T>(
 	);
 	let txnHash = await provider.sendTransaction(
 		account,
-		AccountTransactionType.UpdateSmartContractInstance,
+		AccountTransactionType.Update,
 		{
 			maxContractExecutionEnergy,
-			contractAddress,
-			parameter,
+			address: contractAddress,
+			message: parameter,
 			amount: toGtu(amount),
 			receiveName: `${contractName}.${methodName}`,
 		} as UpdateContractPayload,
@@ -241,14 +241,24 @@ function serializeParams<T>(
 	schema: Buffer,
 	methodName: string,
 	params: T
-) {
-	return serializeUpdateContractParameters(
+): Buffer {
+	console.log({
+		contractName,
+		schema: schema.toString("hex"),
+		methodName,
+		params
+	});
+
+	const serializedParams = serializeUpdateContractParameters(
 		contractName,
 		methodName,
 		params,
-		schema as any,
-		SchemaVersion.V2
+		schema,
 	);
+
+	console.log("serialized params", serializedParams.byteLength);
+
+	return serializedParams;
 }
 
 function _wait(
@@ -303,6 +313,6 @@ function toBigInt(num: BigInt | number): bigint {
 }
 
 const MICRO_CCD_IN_CCD = 1000000;
-function toGtu(ccdAmount: bigint): GtuAmount {
-	return new GtuAmount(ccdAmount * BigInt(MICRO_CCD_IN_CCD));
+function toGtu(ccdAmount: bigint): CcdAmount {
+	return new CcdAmount(ccdAmount * BigInt(MICRO_CCD_IN_CCD));
 }

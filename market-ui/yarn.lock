@@ -1082,20 +1082,20 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@concordium/browser-wallet-api-helpers@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@concordium/browser-wallet-api-helpers/-/browser-wallet-api-helpers-0.2.0.tgz#b7b4f027566edef4b85b5c9261199377525e0ec0"
-  integrity sha512-WwQwPGo2NKpSfzBrtssYuxytLy15A99ieNsvowIr1QBShQf0qkC3Sz0uZ4JDSb1W6e+Z/tmNt9lXmfm/Ml0g5Q==
+"@concordium/browser-wallet-api-helpers@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@concordium/browser-wallet-api-helpers/-/browser-wallet-api-helpers-2.0.0.tgz#f8279e76369420077b4440472abd245c98a34749"
+  integrity sha512-iUBp5svMFDsNbqg72n9qFpssmzokLpASrt+uZMmUbf0ortEqoU5i8Qk9Mgrr+yg0o0d37Pfj7IWItTRXZiUMCg==
   dependencies:
-    "@concordium/web-sdk" "^0.4.0"
+    "@concordium/web-sdk" "^3.0.0"
 
-"@concordium/common-sdk@2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@concordium/common-sdk/-/common-sdk-2.4.0.tgz#6d33f88189289d63765d59c5b0865da4d191e0f6"
-  integrity sha512-PXqdsoY3+WGKYrjJMP30w4Odr/BuzrhY7RjjbvZUMUnG02Dm4vFv/Nt99A7h8/i3Q4Rozrh3XdDNCDygvhS/Aw==
+"@concordium/common-sdk@6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@concordium/common-sdk/-/common-sdk-6.0.0.tgz#82093fbaac444ba6365264cb492353434b9fb382"
+  integrity sha512-YWY2ecPEIbIk5Ed8U7WJBR7TUlpIOL0NbUIZMS86feXynQFVdqpBtYJQmxtbBpIXNXlHtTXR0QG3nBR+PHygFA==
   dependencies:
-    "@concordium/rust-bindings" "0.3.0"
-    "@noble/ed25519" "^1.6.0"
+    "@concordium/rust-bindings" "0.7.0"
+    "@noble/ed25519" "^1.7.1"
     "@scure/bip39" "^1.1.0"
     bs58check "^2.1.2"
     buffer "^6.0.3"
@@ -1104,48 +1104,18 @@
     json-bigint "^1.0.0"
     uuid "^8.3.2"
 
-"@concordium/common-sdk@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@concordium/common-sdk/-/common-sdk-4.0.0.tgz#fb4f1acbf93b79344e5ae8970cc509b2c529bf47"
-  integrity sha512-1cB3+mytZcFyn4pW8KsphuMI8RwsPwHurCxwZYOSrpAaNMV+jEzAsrmcKh7eW0wsbi+F1yr6J4OAKGIvM4wvgg==
+"@concordium/rust-bindings@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@concordium/rust-bindings/-/rust-bindings-0.7.0.tgz#ecddb02431663ebf5361d4663e1022ce8216e7f7"
+  integrity sha512-2KdWnt0AVuyQQwQV5m3XjSQJkl9cckDlf/JP7/yReKb5zyL24CfIJ44zipUj1gR5pXo3UUxtX0B1+VTSW0/eOA==
+
+"@concordium/web-sdk@3.0.0", "@concordium/web-sdk@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@concordium/web-sdk/-/web-sdk-3.0.0.tgz#601f702e83ebf6bf8d6f5b20eb50c9f4b7836469"
+  integrity sha512-SBvEHhEMNZjFey75rYIVKPg24nbSBpl3NnCI5p848l2Bl6CbwDEnZ+aqWMa1k5vG/4btHpYE9KzQPdMOcutoTQ==
   dependencies:
-    "@concordium/rust-bindings" "0.4.0"
-    "@noble/ed25519" "^1.6.0"
-    "@scure/bip39" "^1.1.0"
-    bs58check "^2.1.2"
-    buffer "^6.0.3"
-    cross-fetch "3.1.5"
-    hash.js "^1.1.7"
-    json-bigint "^1.0.0"
-    uuid "^8.3.2"
-
-"@concordium/rust-bindings@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@concordium/rust-bindings/-/rust-bindings-0.3.0.tgz#74c3767adcca115e56b6d799f9b62d80a8d6f5a9"
-  integrity sha512-Y4Xj7K+RTnNW86ZQ4bTed7iCZicEIbOwamJPPhWToMGuChGm1tcCFaOHuhGWvW1YziwxzlYAfopQJyxGrN22TA==
-
-"@concordium/rust-bindings@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@concordium/rust-bindings/-/rust-bindings-0.4.0.tgz#02d2cad01c44ba8b5e08a18704ec29222c21a43e"
-  integrity sha512-w4R36qE0TeUxtZlrkmyrUxPcCSpRvsVMtGuNxfl4S8v2R8gfTlUgW0/vINs9Sx4MD3ooNbnJ7/bru+wBrZ9Uqw==
-
-"@concordium/web-sdk@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@concordium/web-sdk/-/web-sdk-0.4.0.tgz#04af2daabcec53708c1b75a175fe056b72311dbb"
-  integrity sha512-rqD70RW+IRgKkGyNRiD4Xsk+w9xFS7penRECx/tkUcYxvIRc2ewTbdYGN28up57/M6hCcUEyO3jeJTa31kmM1Q==
-  dependencies:
-    "@concordium/common-sdk" "2.4.0"
-    "@concordium/rust-bindings" "0.3.0"
-    buffer "^6.0.3"
-    process "^0.11.10"
-
-"@concordium/web-sdk@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@concordium/web-sdk/-/web-sdk-1.0.0.tgz#80d818e9a1a30ec5ba341bccd67d1540afd1282b"
-  integrity sha512-xmjL/CpHIxSnB1PfEnW4w2YeLTlGWN08cLg+RgHQDRhX11CYPp1CRvuvVJIvPy8KCddlweE1EQZqda4kpQ04Kw==
-  dependencies:
-    "@concordium/common-sdk" "4.0.0"
-    "@concordium/rust-bindings" "0.4.0"
+    "@concordium/common-sdk" "6.0.0"
+    "@concordium/rust-bindings" "0.7.0"
     buffer "^6.0.3"
     process "^0.11.10"
 
@@ -1805,10 +1775,10 @@
     prop-types "^15.8.1"
     react-is "^18.2.0"
 
-"@noble/ed25519@^1.6.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@noble/ed25519/-/ed25519-1.7.0.tgz#583ac38340a479314b9e348d4572101ed9492f9d"
-  integrity sha512-LeAxFK0+181zQOhOUuKE8Jnd3duzYhDNd3iCLxpmzA5K+e4I1FdbrK3Ot0ZHBwZMeRD/6EojyUfTbpHZ+hkQHg==
+"@noble/ed25519@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@noble/ed25519/-/ed25519-1.7.1.tgz#6899660f6fbb97798a6fbd227227c4589a454724"
+  integrity sha512-Rk4SkJFaXZiznFyC/t77Q0NKS4FL7TLJJsVG2V2oiEq3kJVeTdxysEe/yRWSpnWMe808XRDJ+VFh5pt/FN5plw==
 
 "@noble/hashes@~1.1.1":
   version "1.1.2"
