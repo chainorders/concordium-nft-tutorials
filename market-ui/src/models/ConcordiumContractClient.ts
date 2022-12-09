@@ -7,7 +7,6 @@ import {
 	AccountTransactionType,
 	UpdateContractPayload,
 	serializeUpdateContractParameters,
-	SchemaVersion,
 	ModuleReference,
 	InitContractPayload,
 	InstanceInfo,
@@ -15,6 +14,7 @@ import {
 	TransactionSummary,
 	CcdAmount,
 } from "@concordium/web-sdk";
+import { ParamContractAddress } from "./ConcordiumTypes";
 
 export interface ContractInfo {
 	schemaBuffer: Buffer;
@@ -29,7 +29,7 @@ export interface Cis2ContractInfo extends ContractInfo {
 /**
  * Initializes a Smart Contract.
  * @param provider Wallet Provider.
- * @param moduleRef Contract Module Reference. Hash of the Deployed Conctract Module.
+ * @param moduleRef Contract Module Reference. Hash of the Deployed Contract Module.
  * @param schemaBuffer Buffer of Contract Schema.
  * @param contractName Name of the Contract.
  * @param account Account to Initialize the contract with.
@@ -55,7 +55,7 @@ export async function initContract<T>(
 		account,
 		AccountTransactionType.InitContract,
 		{
-			amount: toGtu(ccdAmount),
+			amount: toCcd(ccdAmount),
 			moduleRef,
 			initName: contractName,
 			param: serializedParams || Buffer.from([]),
@@ -156,7 +156,7 @@ export async function updateContract<T>(
 			maxContractExecutionEnergy,
 			address: contractAddress,
 			message: parameter,
-			amount: toGtu(amount),
+			amount: toCcd(amount),
 			receiveName: `${contractName}.${methodName}`,
 		} as UpdateContractPayload,
 		paramJson as any,
@@ -242,23 +242,12 @@ function serializeParams<T>(
 	methodName: string,
 	params: T
 ): Buffer {
-	console.log({
-		contractName,
-		schema: schema.toString("hex"),
-		methodName,
-		params
-	});
-
-	const serializedParams = serializeUpdateContractParameters(
+	return serializeUpdateContractParameters(
 		contractName,
 		methodName,
 		params,
-		schema,
+		schema
 	);
-
-	console.log("serialized params", serializedParams.byteLength);
-
-	return serializedParams;
 }
 
 function _wait(
@@ -313,6 +302,15 @@ function toBigInt(num: BigInt | number): bigint {
 }
 
 const MICRO_CCD_IN_CCD = 1000000;
-function toGtu(ccdAmount: bigint): CcdAmount {
+function toCcd(ccdAmount: bigint): CcdAmount {
 	return new CcdAmount(ccdAmount * BigInt(MICRO_CCD_IN_CCD));
+}
+
+export function toParamContractAddress(
+	marketAddress: ContractAddress
+): ParamContractAddress {
+	return {
+		index: parseInt(marketAddress.index.toString()),
+		subindex: parseInt(marketAddress.subindex.toString()),
+	};
 }
