@@ -1,4 +1,5 @@
-import { ContractAddress } from '@concordium/web-sdk';
+import { ContractAddress } from "@concordium/web-sdk";
+import { ParamContractAddress } from "./ConcordiumTypes";
 
 export type TokenList = TokenListItem[];
 export interface TokenListItem {
@@ -15,12 +16,17 @@ export interface TokenListItem {
 }
 
 export interface AddParams {
-	nft_contract_address: {
-		index: string;
-		subindex: string;
-	};
+	nft_contract_address: ParamContractAddress;
 	token_id: string;
 	price: string;
 	royalty: number;
+	quantity: string;
+}
+
+export interface TransferParams {
+	nft_contract_address: ParamContractAddress;
+	token_id: string;
+	to: string;
+	owner: string;
 	quantity: string;
 }

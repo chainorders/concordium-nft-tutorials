@@ -11,7 +11,12 @@ import {
 } from "@concordium/web-sdk";
 
 import { Cis2Deserializer } from "./Cis2Deserializer";
-import { MetadataUrl, OperatorOfQueryParams } from "./Cis2Types";
+import {
+	MetadataUrl,
+	OperatorOfQuery,
+	OperatorOfQueryParams,
+	UpdateOperatorParams,
+} from "./Cis2Types";
 import { ContractInfo, Cis2ContractInfo } from "./ConcordiumContractClient";
 import * as connClient from "./ConcordiumContractClient";
 
@@ -59,9 +64,9 @@ export async function isOperator(
 				Account: [account],
 			},
 			address: {
-				Contract: [marketAddress],
+				Contract: [connClient.toParamContractAddress(marketAddress)],
 			},
-		},
+		} as OperatorOfQuery,
 	] as OperatorOfQueryParams;
 
 	const retValue = await invokeContract(
@@ -191,15 +196,10 @@ export async function updateOperator(
 		{
 			update: { Add: {} },
 			operator: {
-				Contract: [
-					{
-						index: marketAddress.index.toString(),
-						subindex: marketAddress.subindex.toString(),
-					},
-				],
+				Contract: [connClient.toParamContractAddress(marketAddress)],
 			},
 		},
-	];
+	] as UpdateOperatorParams;
 
 	return updateContract(
 		provider,

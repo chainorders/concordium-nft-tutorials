@@ -1,4 +1,5 @@
 import { ContractAddress } from "@concordium/web-sdk";
+import { ParamContractAddress } from "./ConcordiumTypes";
 
 export type TokenIdU32 = number;
 export type Address = string | ContractAddress;
@@ -19,7 +20,7 @@ export interface SupportsQueryResponse {
 
 export type ParamAddress =
 	| { Account: string[] }
-	| { Contract: ContractAddress[] };
+	| { Contract: ParamContractAddress[] };
 export interface OperatorOfQuery {
 	owner: ParamAddress;
 	address: ParamAddress;

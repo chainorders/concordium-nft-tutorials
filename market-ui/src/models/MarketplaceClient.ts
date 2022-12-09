@@ -2,9 +2,13 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress, TransactionSummary } from "@concordium/web-sdk";
 
 import { MarketplaceDeserializer } from "./MarketplaceDeserializer";
-import { AddParams, TokenList } from "./MarketplaceTypes";
+import { AddParams, TokenList, TransferParams } from "./MarketplaceTypes";
 import { MARKETPLACE_CONTRACT_INFO } from "../Constants";
-import { invokeContract, updateContract } from "./ConcordiumContractClient";
+import {
+	invokeContract,
+	toParamContractAddress,
+	updateContract,
+} from "./ConcordiumContractClient";
 
 const enum MethodNames {
 	add = "add",
@@ -28,7 +32,7 @@ export async function list(
 		marketContractAddress,
 		MethodNames.list
 	);
-	
+
 	return new MarketplaceDeserializer(retValue).readTokenList();
 }
 
@@ -81,15 +85,12 @@ export async function transfer(
 	quantity: bigint,
 	maxContractExecutionEnergy = BigInt(6000)
 ): Promise<Record<string, TransactionSummary>> {
-	const paramJson = {
-		nft_contract_address: {
-			index: nftContractAddress.index.toString(),
-			subindex: nftContractAddress.subindex.toString(),
-		},
+	const paramJson: TransferParams = {
+		nft_contract_address: toParamContractAddress(nftContractAddress),
 		token_id: tokenId,
 		to: account,
 		owner,
-		quantity: quantity.toString()
+		quantity: quantity.toString(),
 	};
 
 	return updateContract(

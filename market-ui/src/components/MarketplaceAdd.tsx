@@ -4,6 +4,7 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 
 import { add } from "../models/MarketplaceClient";
+import { toParamContractAddress } from "../models/ConcordiumContractClient";
 import { AddParams } from "../models/MarketplaceTypes";
 
 interface MarketplaceAddProps {
@@ -59,10 +60,7 @@ function MarketplaceAdd(props: MarketplaceAddProps) {
 		const paramJson: AddParams = {
 			price,
 			royalty: parseInt(royalty) * 100, //conversion to basis points
-			nft_contract_address: {
-				index: props.nftContractAddress.index.toString(),
-				subindex: props.nftContractAddress.subindex.toString(),
-			},
+			nft_contract_address: toParamContractAddress(props.nftContractAddress),
 			token_id: props.tokenId,
 			quantity,
 		};
