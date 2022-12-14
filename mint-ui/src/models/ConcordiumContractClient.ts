@@ -3,26 +3,20 @@ import { Buffer } from "buffer/";
 
 import {
 	ContractAddress,
-	AccountAddress,
 	AccountTransactionType,
 	UpdateContractPayload,
 	serializeUpdateContractParameters,
 	ModuleReference,
 	InitContractPayload,
-	InstanceInfo,
 	TransactionStatusEnum,
 	TransactionSummary,
 	CcdAmount,
 } from "@concordium/web-sdk";
-import { ParamContractAddress } from "./ConcordiumTypes";
 
-interface ContractInfo {
+export interface Cis2ContractInfo{
 	schemaBuffer: Buffer;
-	contractName: "CIS2-Multi" | "Market-NFT";
-	moduleRef?: ModuleReference;
-}
-
-export interface Cis2ContractInfo extends ContractInfo {
+	contractName: string;
+	moduleRef: ModuleReference;
 	tokenIdByteSize: number;
 }
 
@@ -39,7 +33,7 @@ export interface Cis2ContractInfo extends ContractInfo {
  */
 export async function initContract<T>(
 	provider: WalletApi,
-	contractInfo: ContractInfo,
+	contractInfo: Cis2ContractInfo,
 	account: string,
 	params?: T,
 	serializedParams?: Buffer,
@@ -47,9 +41,6 @@ export async function initContract<T>(
 	ccdAmount = BigInt(0)
 ): Promise<ContractAddress> {
 	const { moduleRef, schemaBuffer, contractName } = contractInfo;
-	if (!moduleRef) {
-		throw new Error("Cannot instantiate a Module without Provided Module Ref");
-	}
 
 	let txnHash = await provider.sendTransaction(
 		account,
@@ -72,54 +63,6 @@ export async function initContract<T>(
 }
 
 /**
- * Invokes a Smart Contract.
- * @param provider Wallet Provider.
- * @param contractInfo Contract Constant Info.
- * @param contract Contract Address.
- * @param methodName Contract Method name to Call.
- * @param params Parameters to call the Contract Method with.
- * @param invoker Invoker Account.
- * @returns Buffer of the return value.
- */
-export async function invokeContract<T>(
-	provider: WalletApi,
-	contractInfo: ContractInfo,
-	contract: ContractAddress,
-	methodName: string,
-	params?: T,
-	invoker?: ContractAddress | AccountAddress
-): Promise<Buffer> {
-	const { schemaBuffer, contractName } = contractInfo;
-	const parameter = !!params
-		? serializeParams(contractName, schemaBuffer, methodName, params)
-		: undefined;
-	let res = await provider.getJsonRpcClient().invokeContract({
-		parameter,
-		contract,
-		invoker,
-		method: `${contractName}.${methodName}`,
-	});
-
-	if (!res || res.tag === "failure") {
-		const msg =
-			`failed invoking contract ` +
-			`method:${methodName}, ` +
-			`contract:(index: ${contract.index.toString()}, subindex: ${contract.subindex.toString()})`;
-		return Promise.reject(new Error(msg, { cause: res }));
-	}
-
-	if (!res.returnValue) {
-		const msg =
-			`failed invoking contract, null return value` +
-			`method:${methodName}, ` +
-			`contract:(index: ${contract.index.toString()}, subindex: ${contract.subindex.toString()})`;
-		return Promise.reject(new Error(msg, { cause: res }));
-	}
-
-	return Buffer.from(res.returnValue, "hex");
-}
-
-/**
  * Updates a Smart Contract.
  * @param provider Wallet Provider.
  * @param contractName Name of the Contract.
@@ -134,10 +77,10 @@ export async function invokeContract<T>(
  */
 export async function updateContract<T>(
 	provider: WalletApi,
-	contractInfo: ContractInfo,
+	contractInfo: Cis2ContractInfo,
 	paramJson: T,
 	account: string,
-	contractAddress: ContractAddress,
+	contractAddress: { index: number; subindex: number },
 	methodName: string,
 	maxContractExecutionEnergy: bigint = BigInt(9999),
 	amount: bigint = BigInt(0)
@@ -154,7 +97,10 @@ export async function updateContract<T>(
 		AccountTransactionType.Update,
 		{
 			maxContractExecutionEnergy,
-			address: contractAddress,
+			address: {
+				index: BigInt(contractAddress.index),
+				subindex: BigInt(contractAddress.subindex),
+			},
 			message: parameter,
 			amount: toCcd(amount),
 			receiveName: `${contractName}.${methodName}`,
@@ -167,27 +113,6 @@ export async function updateContract<T>(
 	let outcomes = await waitForTransaction(provider, txnHash);
 
 	return ensureValidOutcome(outcomes);
-}
-
-/**
- * Gets Information about a Smart Contract Instance.
- * @param provider Wallet Provider.
- * @param address Contract Address.
- * @returns Smart Contract instance information.
- */
-export async function getInstanceInfo(
-	provider: WalletApi,
-	address: ContractAddress
-): Promise<InstanceInfo> {
-	let instanceInfo = await provider.getJsonRpcClient().getInstanceInfo(address);
-
-	if (!instanceInfo) {
-		throw Error(
-			"Could not get Contract Information. Please confirm the address is correct"
-		);
-	}
-
-	return instanceInfo;
 }
 
 /**
@@ -304,13 +229,4 @@ function toBigInt(num: BigInt | number): bigint {
 const MICRO_CCD_IN_CCD = 1000000;
 function toCcd(ccdAmount: bigint): CcdAmount {
 	return new CcdAmount(ccdAmount * BigInt(MICRO_CCD_IN_CCD));
-}
-
-export function toParamContractAddress(
-	marketAddress: ContractAddress
-): ParamContractAddress {
-	return {
-		index: parseInt(marketAddress.index.toString()),
-		subindex: parseInt(marketAddress.subindex.toString()),
-	};
 }

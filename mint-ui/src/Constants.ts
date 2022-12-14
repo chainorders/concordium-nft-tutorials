@@ -14,16 +14,3 @@ export const CIS2_MULTI_CONTRACT_INFO: Cis2ContractInfo = {
 	schemaBuffer: Buffer.from(MULTI_CONTRACT_SCHEMA, "hex"),
 	tokenIdByteSize: 1,
 };
-export const IPFS_GATEWAY_URL = "https://ipfs.io/ipfs";
-
-export const tokenIdToNftImageFileName = (
-	originalFileName: string,
-	tokenId: string
-) => {
-	const ext = originalFileName.substring(originalFileName.lastIndexOf("."));
-
-	return `nft_${tokenId}.${ext}`;
-};
-export const tokenIdToNftMetadataFileName = (tokenId: string) => {
-	return `nft_${tokenId}_metadata.json`;
-};
