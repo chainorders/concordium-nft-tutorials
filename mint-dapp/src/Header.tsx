@@ -46,7 +46,7 @@ export default function Header(props: {
 	}
 
 	return (
-		<AppBar>
+		<AppBar position="static">
 			<Toolbar>
 				<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 					Concordium NFT Minting

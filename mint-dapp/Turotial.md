@@ -16,7 +16,7 @@
 
 ### Connect
 
-- Add a component `Header.tsx` with following code
+- Add a component [`Header.tsx`](./src/Header.tsx) with following code
 
 ```tsx
 import {
@@ -80,7 +80,9 @@ export default function Header(props: {
 	);
 }
 ```
-and update the `App.tsx` to use the newly created component
+
+- Update the [`App.tsx`](./src/App.tsx) to use the newly created component
+
 ```tsx
 import "./App.css";
 import Header from "./Header";
@@ -96,6 +98,93 @@ export default function App() {
 	);
 }
 ```
+
 ### Initialize
+- Add Env Variables by adding a `.env` file to the root
+```
+REACT_APP_CONTRACT_NAME="CIS2-Multi"
+REACT_APP_MODULE_REF="312f99d6406868e647359ea816e450eac0ecc4281c2665a24936e6793535c9f6"
+```
+- Add Initialize Component [`InitializeContract.tsx`](./src/InitializeContract.tsx)
+
+```tsx
+import { detectConcordiumProvider } from "@concordium/browser-wallet-api-helpers";
+import {
+	AccountTransactionType,
+	CcdAmount,
+	InitContractPayload,
+	ModuleReference,
+} from "@concordium/web-sdk";
+import { Button, Link } from "@mui/material";
+import { Buffer } from "buffer/";
+import { useState } from "react";
+
+export default function InitializeContract() {
+	const [hash, setHash] = useState("");
+
+	const initialize = async () => {
+		const provider = await detectConcordiumProvider();
+		const account = await provider.connect();
+
+		if (!account) {
+			alert("Please connect");
+		}
+
+		const txnHash = await provider.sendTransaction(
+			account!,
+			AccountTransactionType.InitContract,
+			{
+				amount: new CcdAmount(BigInt(0)),
+				initName: process.env.REACT_APP_CONTRACT_NAME!,
+				moduleRef: new ModuleReference(process.env.REACT_APP_MODULE_REF!),
+				param: Buffer.alloc(0),
+				maxContractExecutionEnergy: BigInt(9999),
+			} as InitContractPayload
+		);
+
+		setHash(txnHash);
+	};
+
+	return hash ? (
+		<Link
+			href={`https://dashboard.testnet.concordium.com/lookup/${hash}`}
+			target="_blank"
+		>
+			View Transaction <br />
+			{hash}
+		</Link>
+	) : (
+		<Button fullWidth variant="outlined" onClick={initialize}>
+			Initialize Contract
+		</Button>
+	);
+}
+```
+
+- Update the [`App.tsx`](./src/App.tsx) to add the newly added component
+
+```tsx
+import "./App.css";
+import Header from "./Header";
+import { useState } from "react";
+import { Container } from "@mui/material";
+import InitializeContract from "./InitializeContract";
+
+export default function App() {
+	const [isConnected, setConnected] = useState(false);
+
+	return (
+		<div className="App">
+			<Header
+				onConnected={() => setConnected(true)}
+				onDisconnected={() => setConnected(false)}
+			/>
+			<Container sx={{ mt: 5 }}>
+				{isConnected && <InitializeContract />}
+			</Container>
+		</div>
+	);
+}
+```
 
 ### Mint
