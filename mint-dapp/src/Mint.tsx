@@ -83,7 +83,7 @@ export default function Mint() {
 		try {
 			const schemaBuffer = Buffer.from(
 				process.env.REACT_APP_CONTRACT_SCHEMA!,
-				"base64"
+				"hex"
 			);
 			const serializedParams = serializeUpdateContractParameters(
 				process.env.REACT_APP_CONTRACT_NAME!,
@@ -102,7 +102,7 @@ export default function Mint() {
 					maxContractExecutionEnergy: BigInt(9999),
 				} as UpdateContractPayload,
 				paramJson,
-				process.env.REACT_APP_CONTRACT_SCHEMA!
+				schemaBuffer.toString("base64")
 			);
 
 			setState({ checking: false, error: "", hash: txnHash });
