@@ -1,3 +1,6 @@
+//! Defines parameters for Marketplace contract. 
+//! [Read more](https://developer.concordium.software/en/mainnet/smart-contracts/general/develop-contracts.html#working-with-parameters) about working with parameters
+
 use concordium_std::{
     AccountAddress, Amount, ContractAddress, Deserial, SchemaType, Serial, Serialize,
 };
@@ -10,7 +13,7 @@ pub(crate) struct AddParams {
     pub token_id: ContractTokenId,
 
     /// Price per Unit of Token at this the Token is to be sold.
-    /// This includes Selling Price + Marketplace Comission
+    /// This includes Selling Price + Marketplace Commission
     pub price: Amount,
     pub royalty: u16,
 

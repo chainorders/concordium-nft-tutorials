@@ -13,7 +13,7 @@ import {
 	RejectReasonTag,
 } from "@concordium/web-sdk";
 
-import { balanceOf, isValidCis2NftTokenId as isValidCis2TokenId } from "../models/Cis2NftClient";
+import { balanceOf, isValidTokenId } from "../models/Cis2Client";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
 function Cis2BalanceOf(props: {
@@ -78,7 +78,7 @@ function Cis2BalanceOf(props: {
 	function isValid() {
 		return (
 			!!state.tokenId &&
-			isValidCis2TokenId(state.tokenId, props.contractInfo)
+			isValidTokenId(state.tokenId, props.contractInfo)
 		);
 	}
 

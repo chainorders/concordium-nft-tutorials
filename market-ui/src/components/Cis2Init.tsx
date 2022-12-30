@@ -3,18 +3,15 @@ import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import { Typography, Button, Stack } from "@mui/material";
 
-import { initCis2NftContract } from "../models/Cis2NftClient";
-import { CIS2_NFT_CONTRACT_INFO, CIS2_MULTI_CONTRACT_INFO } from "../Constants";
+import { initContract } from "../models/Cis2Client";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
-import ContractSelect from "./ContractSelect";
 
 function Cis2Init(props: {
 	provider: WalletApi;
 	account: string;
-	contractInfo?: Cis2ContractInfo;
+	contractInfo: Cis2ContractInfo;
 	onDone: (address: ContractAddress, contractInfo: Cis2ContractInfo) => void;
 }) {
-	const contractInfos = [CIS2_NFT_CONTRACT_INFO, CIS2_MULTI_CONTRACT_INFO];
 	const [state, setState] = useState({
 		error: "",
 		processing: false,
@@ -23,24 +20,10 @@ function Cis2Init(props: {
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setState({ ...state, processing: true });
-		const formData = new FormData(event.currentTarget);
-		const contractName =
-			props.contractInfo?.contractName ||
-			formData.get("contractName")?.toString() ||
-			"";
-		const contractInfo =
-			props.contractInfo ||
-			contractInfos.find((i) => i.contractName === contractName);
-
-		if (!contractInfo) {
-			setState({ ...state, error: "Invalid Contract Name" });
-			return;
-		}
-
-		initCis2NftContract(props.provider, contractInfo, props.account)
+		initContract(props.provider, props.contractInfo, props.account)
 			.then((address) => {
 				setState({ ...state, processing: false });
-				props.onDone(address, contractInfo);
+				props.onDone(address, props.contractInfo);
 			})
 			.catch((err: Error) => {
 				setState({ ...state, processing: false, error: err.message });
@@ -59,7 +42,6 @@ function Cis2Init(props: {
 					Deploying..
 				</Typography>
 			)}
-			<ContractSelect contractName={props.contractInfo?.contractName}/>
 			<Button variant="contained" disabled={state.processing} type="submit">
 				Deploy New
 			</Button>

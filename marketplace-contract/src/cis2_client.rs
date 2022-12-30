@@ -1,3 +1,12 @@
+//! CIS2 client is the intermediatory layer between marketplace contract and CIS2 contract.
+//!
+//! # Description
+//! It allows Marketplace contract to abstract away logic of calling CIS2 contract for the following methods
+//! - `supports_cis2` : Calls [`supports`](https://proposals.concordium.software/CIS/cis-0.html#supports) 
+//! - `is_operator_of` : Calls [`operatorOf`](https://proposals.concordium.software/CIS/cis-2.html#operatorof)
+//! - `get_balance` : Calls [`balanceOf`](https://proposals.concordium.software/CIS/cis-2.html#balanceof)
+//! - `transfer` : Calls [`transfer`](https://proposals.concordium.software/CIS/cis-2.html#transfer)
+
 use std::vec;
 
 use concordium_cis2::*;

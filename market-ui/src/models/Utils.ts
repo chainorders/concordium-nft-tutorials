@@ -1,7 +1,7 @@
-import { TokenListItem } from "./MarketplaceTypes";
+import { ContractAddress } from "@concordium/web-sdk";
 
-export function toLocalstorageKey(item: TokenListItem): string {
-	return `NFT_${item.tokenId}_${item.contract.index}_${item.contract.subindex}`;
+export function toLocalStorageKey(tokenId: string, contract: ContractAddress): string {
+	return `NFT_${tokenId}_${contract.index}_${contract.subindex}`;
 }
 
 export async function fetchJson<T>(metadataUrl: string): Promise<T> {

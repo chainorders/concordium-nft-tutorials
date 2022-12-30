@@ -18,12 +18,11 @@ import {
 
 export interface ContractInfo {
 	schemaBuffer: Buffer;
-	contractName: "CIS2-NFT" | "CIS2-Multi" | "Market-NFT";
+	contractName: "CIS2-Multi" | "Market-NFT";
 	moduleRef?: ModuleReference;
 }
 
 export interface Cis2ContractInfo extends ContractInfo {
-	tokenAmountByteSize: 1 | 8;
 	tokenIdByteSize: number;
 }
 
@@ -38,10 +37,12 @@ export interface Cis2ContractInfo extends ContractInfo {
  * @param ccdAmount CCD Amount to initialize the contract with.
  * @returns Contract Address.
  */
-export async function initContract(
+export async function initContract<T>(
 	provider: WalletApi,
 	contractInfo: ContractInfo,
 	account: string,
+	params?: T,
+	serializedParams?: Buffer,
 	maxContractExecutionEnergy = BigInt(9999),
 	ccdAmount = BigInt(0)
 ): Promise<ContractAddress> {
@@ -57,10 +58,10 @@ export async function initContract(
 			moduleRef,
 			maxContractExecutionEnergy,
 			contractName,
-			parameter: Buffer.from([]),
+			parameter: serializedParams || Buffer.from([]),
 			amount: toGtu(ccdAmount),
 		} as InitContractPayload,
-		{},
+		params || {},
 		schemaBuffer.toString("base64"),
 		2
 	);
@@ -301,7 +302,7 @@ function toBigInt(num: BigInt | number): bigint {
 	return BigInt(num.toString(10));
 }
 
-const MICROCCD_IN_CCD = 1000000;
+const MICRO_CCD_IN_CCD = 1000000;
 function toGtu(ccdAmount: bigint): GtuAmount {
-	return new GtuAmount(ccdAmount * BigInt(MICROCCD_IN_CCD));
+	return new GtuAmount(ccdAmount * BigInt(MICRO_CCD_IN_CCD));
 }

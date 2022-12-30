@@ -1,3 +1,6 @@
+//! Provides error types which can be returned by Marketplace Contract.
+//! Read more about errors which can be returned by a Concordium Contract [here](https://developer.concordium.software/en/mainnet/smart-contracts/guides/custom-errors.html)
+
 use concordium_std::*;
 
 #[derive(Serialize, Debug, PartialEq, Eq, Reject)]

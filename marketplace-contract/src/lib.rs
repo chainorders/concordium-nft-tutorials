@@ -1,3 +1,11 @@
+//! Marketplace Contract
+//! This module provides implementation of the marketplace contract.
+//! Marketplace Contract provides following functions
+//! - `list` : returns a list of buyable tokens added to the contract instance.
+//! - `add` : adds the token to the list of buyable tokens taking the price of the token as input.
+//! - `transfer` : transfer the authority of the input listed token from one address to another.
+//! 
+//! This code has not been checked for production readiness. Please use for reference purposes
 mod cis2_client;
 mod errors;
 mod params;
@@ -17,10 +25,20 @@ use crate::{params::TransferParams, state::TokenOwnerInfo};
 type ContractResult<A> = Result<A, MarketplaceError>;
 
 const MAX_BASIS_POINTS: u16 = 10000;
+
+/// Type of token Id used by the CIS2 contract.
 type ContractTokenId = TokenIdU8;
+
+/// Type of Token Amount used by the CIS2 contract.
 type ContractTokenAmount = TokenAmountU64;
+
+/// Type of state.
 type ContractState<S> = State<S, ContractTokenId, ContractTokenAmount>;
 
+/// Initializes a new Marketplace Contract
+///
+/// This function can be called by using InitParams.
+/// The commission should be less than the maximum allowed value of 10000 basis points
 #[init(contract = "Market-NFT", parameter = "InitParams")]
 fn init<S: HasStateApi>(
     ctx: &impl HasInitContext,
@@ -84,6 +102,10 @@ fn add<S: HasStateApi>(
     ContractResult::Ok(())
 }
 
+/// Allows for transferring the token specified by TransferParams.
+///
+/// This function is the typical buuy function of a Marketplace where one account can transfer an Asset by paying a price.
+/// The transfer will fail of the Amount paid is < token_quantity * token_price
 #[receive(
     contract = "Market-NFT",
     name = "transfer",
@@ -151,6 +173,7 @@ fn transfer<S: HasStateApi>(
     ContractResult::Ok(())
 }
 
+/// Returns a list of Added Tokens with Metadata which contains the token price
 #[receive(contract = "Market-NFT", name = "list", return_value = "TokenList")]
 fn list<S: HasStateApi>(
     _ctx: &impl HasReceiveContext,
@@ -173,6 +196,8 @@ struct DistributableAmounts {
     to_marketplace: Amount,
 }
 
+/// Calls the [supports](https://proposals.concordium.software/CIS/cis-0.html#supports) function of CIS2 contract.
+/// Returns error If the contract does not support the standard.
 fn ensure_supports_cis2<
     S: HasStateApi,
     T: IsTokenId + Clone + Copy,
@@ -187,6 +212,8 @@ fn ensure_supports_cis2<
     Ok(())
 }
 
+/// Calls the [operatorOf](https://proposals.concordium.software/CIS/cis-2.html#operatorof) function of CIS contract. 
+/// Returns error if Current Contract Address is not an Operator of Transaction Sender.
 fn ensure_is_operator<
     S: HasStateApi,
     T: IsTokenId + Clone + Copy,
@@ -206,7 +233,8 @@ fn ensure_is_operator<
     ensure!(is_operator, MarketplaceError::NotOperator);
     Ok(())
 }
-
+/// Calls the [balanceOf](https://proposals.concordium.software/CIS/cis-2.html#balanceof) function of the CIS2 contract. 
+/// Returns error if the returned balance < input balance (balance param).
 fn ensure_balance<
     S: HasStateApi,
     T: IsTokenId + Clone + Copy,
@@ -232,6 +260,7 @@ fn ensure_balance<
     Ok(())
 }
 
+// Distributes Selling Price, Royalty & Commission amounts.
 fn distribute_amounts<
     S: HasStateApi,
     T: IsTokenId + Clone + Copy,
@@ -273,6 +302,7 @@ fn distribute_amounts<
     Ok(())
 }
 
+/// Callculates the amounts (Commission, Royalty & Selling Price) to be distributed
 fn calculate_amounts(
     amount: &Amount,
     commission: &Commission,
