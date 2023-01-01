@@ -46,7 +46,7 @@ impl AuctionState {
 /// The state of the smart contract.
 /// This state can be viewed by querying the node with the command
 /// `concordium-client contract invoke` using the `view` function as entrypoint.
-#[derive(Debug, SchemaType, StateClone, Serial, DeserialWithState)]
+#[derive(Debug, StateClone, Serial, DeserialWithState)]
 #[concordium(state_parameter = "S")]
 pub struct State<S: HasStateApi> {
     /// State of the auction

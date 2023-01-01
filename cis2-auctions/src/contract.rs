@@ -137,13 +137,38 @@ pub fn auction_bid<S: HasStateApi>(
     Ok(())
 }
 
+#[derive(Serial, SchemaType)]
+pub struct ViewState {
+    pub auction_state: AuctionState,
+    /// The highest bidder so far; The variant `None` represents
+    /// that no bidder has taken part in the auction yet.
+    pub highest_bidder: Option<AccountAddress>,
+    /// The minimum accepted raise to over bid the current bidder in Euro cent.
+    pub minimum_raise: u64,
+    /// Time when auction ends (to be displayed by the front-end)
+    pub end: Timestamp,
+    /// Token needed to participate in the Auction
+    pub participation_token: TokenIdentifier,
+    pub participants: Vec<AccountAddress>,
+}
+
 /// View function that returns the content of the state
-#[receive(contract = "auction", name = "view", return_value = "State")]
-pub fn view<'a, 'b, S: HasStateApi>(
-    _ctx: &'a impl HasReceiveContext,
-    host: &'b impl HasHost<State<S>, StateApiType = S>,
-) -> ReceiveResult<&'b State<S>> {
-    Ok(host.state())
+#[receive(contract = "auction", name = "view", return_value = "ViewState")]
+pub fn view<S: HasStateApi>(
+    _ctx: &impl HasReceiveContext,
+    host: &impl HasHost<State<S>, StateApiType = S>,
+) -> ReceiveResult<ViewState> {
+    let state = host.state();
+    let participants = state.participants.iter().map(|a| *a).collect();
+
+    Ok(ViewState {
+        auction_state: state.auction_state.to_owned(),
+        highest_bidder: state.highest_bidder,
+        minimum_raise: state.minimum_raise,
+        end: state.end,
+        participation_token: state.participation_token.to_owned(),
+        participants,
+    })
 }
 
 /// ViewHighestBid function that returns the highest bid which is the balance of
