@@ -9,13 +9,35 @@ pub type ContractTokenId = TokenIdU8;
 pub type ContractTokenAmount = TokenAmountU64;
 
 #[derive(Debug, Serialize, SchemaType, Eq, PartialEq, PartialOrd, Clone)]
-pub struct TokenIdentifier {
+pub struct AuctionTokenIdentifier {
+    pub(crate) contract: ContractAddress,
+    pub(crate) token_id: ContractTokenId,
+    pub(crate) amount: ContractTokenAmount,
+}
+
+#[derive(Serial, Deserial, SchemaType, Clone)]
+pub struct ParticipationTokenIdentifier {
     pub(crate) contract: ContractAddress,
     pub(crate) token_id: ContractTokenId,
 }
-impl TokenIdentifier {
-    pub(crate) fn new(contract: ContractAddress, token_id: TokenIdU8) -> Self {
-        TokenIdentifier { contract, token_id }
+
+impl ParticipationTokenIdentifier {
+    pub(crate) fn token_eq(&self, token_identifier: &AuctionTokenIdentifier) -> bool {
+        self.contract.eq(&token_identifier.contract) && self.token_id.eq(&token_identifier.token_id)
+    }
+}
+
+impl AuctionTokenIdentifier {
+    pub(crate) fn new(
+        contract: ContractAddress,
+        token_id: ContractTokenId,
+        amount: ContractTokenAmount,
+    ) -> Self {
+        AuctionTokenIdentifier {
+            contract,
+            token_id,
+            amount,
+        }
     }
 }
 
@@ -27,7 +49,7 @@ pub enum AuctionState {
     /// - still accepting bids or
     /// - not accepting bids because it's past the auction end, but nobody has
     ///   finalized the auction yet.
-    NotSoldYet(TokenIdentifier),
+    NotSoldYet(AuctionTokenIdentifier),
     /// The auction has been finalized and the item has been sold to the
     /// winning `AccountAddress`.
     Sold(AccountAddress),
@@ -46,7 +68,7 @@ impl AuctionState {
 /// The state of the smart contract.
 /// This state can be viewed by querying the node with the command
 /// `concordium-client contract invoke` using the `view` function as entrypoint.
-#[derive(Debug, StateClone, Serial, DeserialWithState)]
+#[derive(StateClone, Serial, DeserialWithState)]
 #[concordium(state_parameter = "S")]
 pub struct State<S: HasStateApi> {
     /// State of the auction
@@ -59,7 +81,7 @@ pub struct State<S: HasStateApi> {
     /// Time when auction ends (to be displayed by the front-end)
     pub end: Timestamp,
     /// Token needed to participate in the Auction
-    pub participation_token: TokenIdentifier,
+    pub participation_token: ParticipationTokenIdentifier,
     pub participants: StateSet<AccountAddress, S>,
 }
 

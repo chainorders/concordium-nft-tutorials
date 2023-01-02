@@ -32,6 +32,7 @@ here the `WASM-FILE-PATH` can be
 - [cis2-multi wasm](../cis2-multi/module.wasm)
 - [marketplace wasm](../marketplace-contract/module.wasm)
 - [Fractionalizer wasm](../cis2-fractionalizer/module.wasm)
+- [Auctions Wasm](../cis2-auctions/module.wasm)
 
 You can [read more](https://developer.concordium.software/en/mainnet/net/references/concordium-client.html#concordium-client) about `concordium-client` and its cli params like `--grpc-ip` & `--grpc-port`
 
@@ -43,9 +44,10 @@ Name the module
 concordium-client module name <MODULE-REFERENCE> --name <MODULE-NAME>
 ```
 Here lets for the context of this repository name our contracts in the following format. The same format will be used for interaction with contracts 
-- for CIS2-NFT : cis2nft
-- for CIS2-Multi : cis2multi
-- for Marketplace Contract : market
+- for CIS2-NFT : `cis2nft`
+- for CIS2-Multi : `cis2multi`
+- for Marketplace Contract : `market`
+- for Auctions Contract : `auction`
 
 ## Interact with Contract
 
@@ -53,3 +55,4 @@ Here lets for the context of this repository name our contracts in the following
 - [CIS2 Multi](./cis2-multi.README.md)
 - [Marketplace](./marketplace-contract.README.md)
 - [CIS2 Fractionalizer](./cis2-fractionalizer.README.md)
+- [CIS2 Auctions](./cis2-auctions.README.md.README.md)

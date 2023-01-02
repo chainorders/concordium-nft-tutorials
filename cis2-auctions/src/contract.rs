@@ -1,7 +1,7 @@
-use concordium_cis2::OnReceivingCis2Params;
+use concordium_cis2::{OnReceivingCis2Params, Receiver};
 use concordium_std::*;
 
-use crate::{error::*, state::*};
+use crate::{cis2_client::Cis2Client, error::*, state::*};
 
 pub type ContractOnReceivingCis2Params =
     OnReceivingCis2Params<ContractTokenId, ContractTokenAmount>;
@@ -14,7 +14,7 @@ pub struct InitParameter {
     /// The minimum accepted raise to over bid the current bidder in Euro cent.
     pub minimum_raise: u64,
     /// Token needed to participate in the Auction.
-    pub participation_token: TokenIdentifier,
+    pub participation_token: ParticipationTokenIdentifier,
 }
 
 /// Init function that creates a new auction
@@ -55,10 +55,10 @@ fn auction_on_cis2_received<S: HasStateApi>(
         Address::Contract(_) => bail!(ReceiveError::OnlyAccount),
     };
 
-    let token_identifier = TokenIdentifier::new(sender, params.token_id);
+    let token_identifier = AuctionTokenIdentifier::new(sender, params.token_id, params.amount);
     let state = host.state_mut();
 
-    if state.participation_token.eq(&token_identifier) {
+    if state.participation_token.token_eq(&token_identifier) {
         state.participants.insert(from_account);
     } else {
         ensure!(from_account.eq(&ctx.owner()), ReceiveError::UnAuthorized);
@@ -99,6 +99,11 @@ pub fn auction_bid<S: HasStateApi>(
         Address::Contract(_) => bail!(BidError::OnlyAccount),
         Address::Account(account_address) => account_address,
     };
+
+    ensure!(
+        host.state().participants.contains(&sender_address),
+        BidError::NotAParticipant
+    );
 
     // Balance of the contract
     let balance = host.self_balance();
@@ -148,7 +153,7 @@ pub struct ViewState {
     /// Time when auction ends (to be displayed by the front-end)
     pub end: Timestamp,
     /// Token needed to participate in the Auction
-    pub participation_token: TokenIdentifier,
+    pub participation_token: ParticipationTokenIdentifier,
     pub participants: Vec<AccountAddress>,
 }
 
@@ -203,6 +208,18 @@ pub fn auction_finalize<S: HasStateApi>(
     ensure!(slot_time > state.end, FinalizeError::AuctionStillActive);
 
     if let Some(account_address) = state.highest_bidder {
+        if let AuctionState::NotSoldYet(token_identifier) = &state.auction_state {
+            Cis2Client::transfer(
+                host,
+                token_identifier.token_id,
+                token_identifier.contract,
+                token_identifier.amount,
+                Address::Contract(ctx.self_address()),
+                Receiver::Account(account_address),
+            )
+            .map_err(|_| FinalizeError::Cis2TransferError)?
+        }
+
         // Marking the highest bid (the last bidder) as winner of the auction
         host.state_mut().auction_state = AuctionState::Sold(account_address);
         let owner = ctx.owner();
@@ -233,7 +250,7 @@ mod tests {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 1,
     ]);
-    const PARTICIPATION_TOKEN: TokenIdentifier = TokenIdentifier {
+    const PARTICIPATION_TOKEN: ParticipationTokenIdentifier = ParticipationTokenIdentifier {
         contract: ContractAddress {
             index: 1,
             subindex: 0,
@@ -413,6 +430,10 @@ mod tests {
         // at the AUCTION_END time)
         let mut ctx4 = TestReceiveContext::empty();
         ctx4.set_metadata_slot_time(Timestamp::from_timestamp_millis(AUCTION_END));
+        ctx4.set_self_address(ContractAddress {
+            index: 1,
+            subindex: 0,
+        });
         let fin_res = auction_finalize(&ctx4, &mut host);
         expect_error(
             fin_res,
@@ -423,8 +444,19 @@ mod tests {
         // Finalizing auction
         let carol = new_account();
         let dave = new_account();
-        let ctx5 = new_ctx(carol, Address::Account(dave), AUCTION_END + 1);
-
+        let mut ctx5 = new_ctx(carol, Address::Account(dave), AUCTION_END + 1);
+        ctx5.set_self_address(ContractAddress {
+            index: 1,
+            subindex: 0,
+        });
+        host.setup_mock_entrypoint(
+            ContractAddress {
+                index: 1,
+                subindex: 0,
+            },
+            OwnedEntrypointName::new_unchecked("transfer".into()),
+            MockFn::returning_ok(()),
+        );
         let fin_res2 = auction_finalize(&ctx5, &mut host);
         fin_res2.expect_report("Finalizing the auction should work");
         let transfers = host.get_transfers();
@@ -493,7 +525,8 @@ mod tests {
         });
 
         initialize_auction(&mut host);
-        add_auction_participant(&mut host, Address::Account(OWNER_ACCOUNT));
+        add_auction_participant(&mut host, ctx1.sender());
+        add_auction_participant(&mut host, ctx2.sender());
 
         // 1st bid: Account1 bids `amount`.
         // The current_smart_contract_balance before the invoke is 0.

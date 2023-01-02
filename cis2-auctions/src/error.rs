@@ -15,6 +15,7 @@ pub enum BidError {
     BidTooLate,
     /// Raised when bid is placed after auction has been finalized.
     AuctionNotOpen,
+    NotAParticipant
 }
 
 /// `finalize` function errors
@@ -24,6 +25,7 @@ pub enum FinalizeError {
     AuctionStillActive,
     /// Raised when finalizing an auction that is already finalized
     AuctionNotOpen,
+    Cis2TransferError,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Reject, Serial, SchemaType)]

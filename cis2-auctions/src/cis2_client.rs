@@ -27,7 +27,7 @@ impl Cis2Client {
         T: IsTokenId + Clone + Copy,
         A: IsTokenAmount + Clone + Copy + ops::Sub<Output = A>,
     >(
-        host: &mut impl HasHost<State<S>, StateApiType = S>,
+        host: &impl HasHost<State<S>, StateApiType = S>,
         token_id: T,
         nft_contract_address: ContractAddress,
         amount: A,
@@ -57,7 +57,7 @@ impl Cis2Client {
     }
 
     fn invoke_contract_read_only<S: HasStateApi, R: Deserial, P: Serial>(
-        host: &mut impl HasHost<State<S>, StateApiType = S>,
+        host: &impl HasHost<State<S>, StateApiType = S>,
         contract_address: &ContractAddress,
         entrypoint_name: &str,
         params: &P,

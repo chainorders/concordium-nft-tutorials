@@ -27,6 +27,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod cis2_client;
 pub mod contract;
 mod error;
 mod state;
