@@ -1,6 +1,0 @@
-node_modules
-build
-*.sh
-yarn.lock
-yarn-error.log
-.vscode

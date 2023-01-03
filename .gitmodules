@@ -1,0 +1,9 @@
+[submodule "concordium-contracts"]
+	path = concordium-contracts
+	url = https://github.com/chainorders/concordium-contracts.git
+[submodule "concordium-contracts-node-cli"]
+	path = concordium-contracts-node-cli
+	url = https://github.com/chainorders/concordium-contracts-node-cli.git
+[submodule "concordium-contracts-react"]
+	path = concordium-contracts-react
+	url = https://github.com/chainorders/concordium-contracts-react.git
