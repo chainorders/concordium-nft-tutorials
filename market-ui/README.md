@@ -1,6 +1,6 @@
 # Interaction with Concordium Smart Contracts
 
-`market-ui` is a React based frontend DAPP. It interacts with the deployed on-chain marketplace-contract & cis2-multi contracts. To allow a user to
+`market-ui` is a React based frontend DAPP. It interacts with the deployed on-chain cis2-market & cis2-multi contracts. To allow a user to
 
 - Buy a Token
 - Sell a Token
@@ -20,8 +20,8 @@
 - Set Configuration
   Various following [configuration params](./src/Constants.ts) are explained and initialized with default values. Which can be used with Concordium Testnet.
   - `MARKET_CONTRACT_ADDRESS` : Default value for deployed and initialized market place contract address.
-  - `MARKET_CONTRACT_SCHEMA` : HEX string of `schema.bin` file got from compilation of rust code of marketplace-contract
-  - `MARKETPLACE_CONTRACT_INFO.moduleRef` : Module reference of deployed module with marketplace-contract.
+  - `MARKET_CONTRACT_SCHEMA` : HEX string of `schema.bin` file got from compilation of rust code of cis2-market
+  - `MARKETPLACE_CONTRACT_INFO.moduleRef` : Module reference of deployed module with cis2-market.
   - `MULTI_CONTRACT_MODULE_REF`: Module reference of deployed module with CIS2-Multi contract
   - `MULTI_CONTRACT_SCHEMA` : HEX string of `schema.bin` file got from compilation of rust code of cis2-multi
   - `IPFS_GATEWAY_URL`: gateway url for the IPFS gateway
@@ -103,7 +103,7 @@ There are two high level parts to the code base
     - `isValidTokenId` : its a utility function that checks if the input token is a valid token id according to the TokenId type used in the CIS2 token contract. CIS2 standard defines a variety of numeric types which can be used as a token Id. Read more about them [here](https://proposals.concordium.software/CIS/cis-2.html#tokenid)
 
   - [Marketplace Client](./src/models/Cis2Client.ts)
-    Provides interface to interact with a on chain [Marketplace Contract](../marketplace-contract/)
+    Provides interface to interact with a on chain [Marketplace Contract](../cis2-market/)
 
     - `list` : calls `list` function of market place contract to fetch a list of buyable tokens.
     - `add` : calls `add` function and enables to add a new token to the marketplace contract. So that it can be fetched using `list` function.
