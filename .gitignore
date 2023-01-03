@@ -15,3 +15,5 @@ cis2-fractionalizer/schema.bin
 .vscode
 Cargo.lock
 target
+cis2-auctions/module.wasm
+cis2-auctions/schema.bin

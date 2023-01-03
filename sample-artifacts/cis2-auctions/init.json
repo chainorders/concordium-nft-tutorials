@@ -1,0 +1,11 @@
+{
+	"end": "2023-01-10T00:00:00+00:00",
+	"minimum_raise": 10,
+	"participation_token": {
+		"contract": {
+			"index": 2371,
+			"subindex": 0
+		},
+		"token_id": "01"
+	}
+}
