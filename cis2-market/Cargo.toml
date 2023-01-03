@@ -1,5 +1,5 @@
 [package]
-name = "marketplace-contract"
+name = "cis2-market"
 version = "0.1.0"
 edition = "2021"
 

@@ -14,7 +14,7 @@ Please do note that this is **not** an exhaustive list of the languages supporte
 
 - [CIS2 Multi / Semi Fungible Smart Contract](./cis2-multi/README.md)
   Reference CIS2 Multi Smart Contract Implementation. [Read more about CIS2 - Contract Token Standard](https://proposals.concordium.software/CIS/cis-2.html)
-- [Marketplace Contract](./marketplace-contract/README.md)
+- [Marketplace Contract](./cis2-market/README.md)
   Reference Marketplace Smart Contract Implementation for CIS2 tokens.
 - [market-ui](./market-ui/README.md)
   React based frontend DAPP for marketplace contract. This is the typescript code which can be used with Concordium Browser Wallet to interact with CIS2-Multi and Marketplace Contract in Browser based environments.
@@ -24,7 +24,7 @@ Please do note that this is **not** an exhaustive list of the languages supporte
   nodejs based, reference cli implementation for interacting with CIS2-Multi Smart Contract.
 - Sample scripts for interacting with Smart Contract using Concordium Client
   - [For CIS2 Multi](./concordium-client/rust-cli-cis2-multi.README.md)
-  - [For Marketplace Contract](./concordium-client/rust-cli-marketplace-contract.README.md)
+  - [For Marketplace Contract](./concordium-client/rust-cli-cis2-market.README.md)
 
 ## Get Started
 
@@ -45,7 +45,7 @@ Throughout this repository [Concordium Testnet](https://testnet.ccdscan.io/) is 
 - Build Contracts
 
   ```bash
-  cd cis2-multi ## Or cd marketplace-contract
+  cd cis2-multi ## Or cd cis2-market
   cargo concordium build --out module.wasm --schema-out schema.bin
   ```
 
