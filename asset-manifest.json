@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.75213381.css",
-    "main.js": "/static/js/main.565a99f4.js",
-    "static/js/787.1d3220f0.chunk.js": "/static/js/787.1d3220f0.chunk.js",
-    "index.html": "/index.html",
-    "main.75213381.css.map": "/static/css/main.75213381.css.map",
-    "main.565a99f4.js.map": "/static/js/main.565a99f4.js.map",
-    "787.1d3220f0.chunk.js.map": "/static/js/787.1d3220f0.chunk.js.map"
+    "main.css": "https://chainorders.github.io/concordium-nft-tutorials/static/css/main.75213381.css",
+    "main.js": "https://chainorders.github.io/concordium-nft-tutorials/static/js/main.3717373b.js",
+    "static/js/787.1d3220f0.chunk.js": "https://chainorders.github.io/concordium-nft-tutorials/static/js/787.1d3220f0.chunk.js",
+    "index.html": "https://chainorders.github.io/concordium-nft-tutorials/index.html",
+    "main.75213381.css.map": "https://chainorders.github.io/concordium-nft-tutorials/static/css/main.75213381.css.map",
+    "main.3717373b.js.map": "https://chainorders.github.io/concordium-nft-tutorials/static/js/main.3717373b.js.map",
+    "787.1d3220f0.chunk.js.map": "https://chainorders.github.io/concordium-nft-tutorials/static/js/787.1d3220f0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.75213381.css",
-    "static/js/main.565a99f4.js"
+    "static/js/main.3717373b.js"
   ]
 }
