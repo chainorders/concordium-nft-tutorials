@@ -15,7 +15,7 @@ import {
 	Typography,
 } from "@mui/material";
 
-import MintPage from "./components/Cis2Mint";
+import Cis2Mint from "./components/Cis2Mint";
 import { CIS2_MULTI_CONTRACT_INFO } from "./Constants";
 import HeaderButton from "./components/HeaderButton";
 import Cis2Init from "./components/Cis2Init";
@@ -111,17 +111,13 @@ function App() {
 			</AppBar>
 			<Box className="App">
 				<Paper>
-					<MintPage
+					<Cis2Mint
 						key={CIS2_MULTI_CONTRACT_INFO.contractName}
 						contractInfo={CIS2_MULTI_CONTRACT_INFO}
-						provider={state.provider!}
-						account={state.account!}
 					/>
 				</Paper>
 				<Paper>
 					<Cis2Init
-						account={state.account!}
-						provider={state.provider!}
 						contractInfo={CIS2_MULTI_CONTRACT_INFO}
 						onDone={(contract) =>
 							alert(

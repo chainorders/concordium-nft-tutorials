@@ -1,66 +1,120 @@
-import { FormEvent, useState } from "react";
-import { WalletApi } from "@concordium/browser-wallet-api-helpers";
-import { Typography, Button, Stack, TextField } from "@mui/material";
-import { Container } from "@mui/system";
-import { TransactionSummary, ContractAddress } from "@concordium/web-sdk";
+import { detectConcordiumProvider } from "@concordium/browser-wallet-api-helpers";
+import {
+	AccountTransactionType,
+	CcdAmount,
+	serializeUpdateContractParameters,
+	UpdateContractPayload,
+} from "@concordium/web-sdk";
+import {
+	Button,
+	Container,
+	Link,
+	Stack,
+	TextField,
+	Typography,
+} from "@mui/material";
+import { ChangeEvent, FormEvent, useState } from "react";
 
-import * as connClient from "../models/ConcordiumContractClient";
+import MetadataUrlInput from "./MetadataUrlInput";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 
-async function mint(
-	provider: WalletApi,
-	account: string,
-	tokens: { [tokenId: string]: [{ url: string; hash: string }, string] },
-	nftContractAddress: { index: number; subindex: number },
+const mint = async (
 	contractInfo: Cis2ContractInfo,
-	maxContractExecutionEnergy = BigInt(9999)
-): Promise<Record<string, TransactionSummary>> {
+	formValues: {
+		index: bigint;
+		subindex: bigint;
+		metadataUrl: string;
+		tokenId: string;
+		quantity: number;
+	}
+) => {
+	const provider = await detectConcordiumProvider();
+	const account = await provider.connect();
+
+	if (!account) {
+		return Promise.reject(new Error("Could not connect"));
+	}
+
+	const address = { index: formValues.index, subindex: formValues.subindex };
 	const paramJson = {
 		owner: {
 			Account: [account],
 		},
-		tokens: Object.keys(tokens).map((tokenId) => [tokenId, tokens[tokenId]]),
+		tokens: [
+			[
+				formValues.tokenId,
+				[
+					{
+						url: formValues.metadataUrl,
+						hash: "",
+					},
+					formValues.quantity.toString(),
+				],
+			],
+		],
 	};
 
-	return connClient.updateContract(
-		provider,
-		contractInfo,
-		paramJson,
-		account,
-		nftContractAddress,
+	const serializedParams = serializeUpdateContractParameters(
+		process.env.REACT_APP_CONTRACT_NAME!,
 		"mint",
-		maxContractExecutionEnergy,
-		BigInt(0)
+		paramJson,
+		contractInfo.schemaBuffer
 	);
-}
+	return provider.sendTransaction(
+		account!,
+		AccountTransactionType.Update,
+		{
+			address,
+			message: serializedParams,
+			receiveName: `${process.env.REACT_APP_CONTRACT_NAME!}.mint`,
+			amount: new CcdAmount(BigInt(0)),
+			maxContractExecutionEnergy: BigInt(9999),
+		} as UpdateContractPayload,
+		paramJson,
+		contractInfo.schemaBuffer.toString("base64")
+	);
+};
 
-function MintPage(props: {
-	provider: WalletApi;
-	account: string;
-	contractInfo: Cis2ContractInfo;
-	contract?: ContractAddress;
-}) {
-	let [state, setState] = useState<{
-		checking: boolean;
-		error: string;
-	}>({
+export default function Cis2Mint(props: { contractInfo: Cis2ContractInfo }) {
+	let [state, setState] = useState({
 		checking: false,
 		error: "",
+		hash: "",
 	});
 
-	function submit(event: FormEvent<HTMLFormElement>) {
+	const [formData, setFormData] = useState({
+		contractIndex: "",
+		contractSubIndex: "0",
+		metadataUrl: "",
+		tokenId: "01",
+		quantity: "1",
+	});
+
+	const handleChange = (name?: string, value?: string) => {
+		name &&
+			setFormData({
+				...formData,
+				[name]: value,
+			});
+	};
+
+	const handleChangeEvent = (event: ChangeEvent<HTMLInputElement>) => {
+		handleChange(event.target.name, event.target.value);
+	};
+
+	const submit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		setState({ ...state, error: "", checking: true });
-		const formData = new FormData(event.currentTarget);
+		setState({ ...state, error: "", checking: true, hash: "" });
 
 		var formValues = {
-			index: parseInt(formData.get("contractIndex")?.toString() || "-1"),
-			subindex: parseInt(formData.get("contractSubindex")?.toString() || "-1"),
-			metadataUrl: formData.get("metadataUrl")?.toString() || "",
-			tokenId: formData.get("tokenId")?.toString() || "",
-			quantity: parseInt(formData.get("quantity")?.toString() || "-1"),
+			index: BigInt(formData.contractIndex || "-1"),
+			subindex: BigInt(formData.contractSubIndex || "-1"),
+			metadataUrl: formData.metadataUrl || "",
+			tokenId: formData.tokenId || "",
+			quantity: parseInt(formData.quantity || "-1"),
 		};
 
+		//form validations
 		if (!(formValues.index >= 0)) {
 			setState({ ...state, error: "Invalid Contract Index" });
 			return;
@@ -81,31 +135,19 @@ function MintPage(props: {
 			return;
 		}
 
-		if (!isValidTokenId(formValues.tokenId, props.contractInfo)) {
+		if (!formValues.tokenId) {
 			setState({ ...state, error: "Invalid Token Id" });
+			return;
 		}
 
-		const address = { index: formValues.index, subindex: formValues.subindex };
-		mint(
-			props.provider,
-			props.account,
-			{
-				[formValues.tokenId]: [
-					{ url: formValues.metadataUrl, hash: "" },
-					formValues.quantity.toString(),
-				],
-			},
-			address,
-			props.contractInfo
-		)
-			.then((_) => {
-				setState({ ...state, error: "", checking: false });
-				alert("Minted");
-			})
-			.catch((err: Error) =>
-				setState({ ...state, error: err.message, checking: false })
+		mint(props.contractInfo, formValues)
+			.then((txnHash) =>
+				setState({ checking: false, error: "", hash: txnHash })
+			)
+			.catch((err) =>
+				setState({ checking: false, error: err.message, hash: "" })
 			);
-	}
+	};
 
 	return (
 		<Container sx={{ maxWidth: "xl", pt: "10px" }}>
@@ -122,6 +164,8 @@ function MintPage(props: {
 					variant="standard"
 					type={"number"}
 					disabled={state.checking}
+					value={formData.contractIndex}
+					onChange={handleChangeEvent}
 				/>
 				<TextField
 					id="contract-subindex"
@@ -130,14 +174,17 @@ function MintPage(props: {
 					variant="standard"
 					type={"number"}
 					disabled={state.checking}
-					value={0}
+					value={formData.contractSubIndex}
+					onChange={handleChangeEvent}
 				/>
-				<TextField
+				<MetadataUrlInput
 					id="metadata-url"
 					name="metadataUrl"
 					label="Metadata Url"
 					variant="standard"
 					disabled={state.checking}
+					value={formData.metadataUrl}
+					onChange={handleChange}
 				/>
 				<TextField
 					id="token-id"
@@ -146,6 +193,8 @@ function MintPage(props: {
 					variant="standard"
 					disabled={state.checking}
 					defaultValue="01"
+					value={formData.tokenId}
+					onChange={handleChangeEvent}
 				/>
 				<TextField
 					id="quantity"
@@ -155,6 +204,7 @@ function MintPage(props: {
 					type="number"
 					disabled={state.checking}
 					defaultValue="1"
+					onChange={handleChangeEvent}
 				/>
 				{state.error && (
 					<Typography component="div" color="error">
@@ -162,35 +212,25 @@ function MintPage(props: {
 					</Typography>
 				)}
 				{state.checking && <Typography component="div">Checking..</Typography>}
+				{state.hash && (
+					<Link
+						href={`https://dashboard.testnet.concordium.com/lookup/${state.hash}`}
+						target="_blank"
+					>
+						View Transaction <br />
+						{state.hash}
+					</Link>
+				)}
 				<Button
 					type="submit"
 					variant="contained"
-					disabled={state.checking}
 					fullWidth
 					size="large"
+					disabled={state.checking}
 				>
 					Mint
 				</Button>
 			</Stack>
 		</Container>
 	);
-}
-
-export default MintPage;
-
-function isValidTokenId(
-	tokenIdHex: string,
-	contractInfo: Cis2ContractInfo
-): boolean {
-	try {
-		let buff = Buffer.from(tokenIdHex, "hex");
-		let parsedTokenIdHex = Buffer.from(
-			buff.subarray(0, contractInfo.tokenIdByteSize)
-		).toString("hex");
-
-		return parsedTokenIdHex === tokenIdHex;
-	} catch (error) {
-		console.error(error);
-		return false;
-	}
 }
