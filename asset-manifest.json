@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/concordium-nft-tutorials/static/css/main.75213381.css",
-    "main.js": "/concordium-nft-tutorials/static/js/main.04270d83.js",
+    "main.js": "/concordium-nft-tutorials/static/js/main.dc959c4a.js",
     "static/js/787.1d3220f0.chunk.js": "/concordium-nft-tutorials/static/js/787.1d3220f0.chunk.js",
     "index.html": "/concordium-nft-tutorials/index.html",
     "main.75213381.css.map": "/concordium-nft-tutorials/static/css/main.75213381.css.map",
-    "main.04270d83.js.map": "/concordium-nft-tutorials/static/js/main.04270d83.js.map",
+    "main.dc959c4a.js.map": "/concordium-nft-tutorials/static/js/main.dc959c4a.js.map",
     "787.1d3220f0.chunk.js.map": "/concordium-nft-tutorials/static/js/787.1d3220f0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.75213381.css",
-    "static/js/main.04270d83.js"
+    "static/js/main.dc959c4a.js"
   ]
 }
