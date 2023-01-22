@@ -5,20 +5,13 @@ import {
 	detectConcordiumProvider,
 	WalletApi,
 } from "@concordium/browser-wallet-api-helpers";
-import {
-	AppBar,
-	Box,
-	Container,
-	Link,
-	Paper,
-	Toolbar,
-	Typography,
-} from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
+import { Route, Routes, Navigate } from "react-router-dom";
 
-import Cis2Mint from "./components/Cis2Mint";
+import MintPage from "./pages/MintPage";
 import { CIS2_MULTI_CONTRACT_INFO } from "./Constants";
-import HeaderButton from "./components/HeaderButton";
-import Cis2Init from "./components/Cis2Init";
+import ConnectWallet from "./components/ConnectWallet";
+import Header from "./components/ui/Header";
 
 function App() {
 	const [state, setState] = useState<{
@@ -57,10 +50,11 @@ function App() {
 	}
 
 	useEffect(() => {
-		if (!state.provider || !state.account) {
-			connect();
+		if (state.provider && state.account) {
+			return;
 		}
 
+		connect();
 		return () => {
 			state.provider?.removeAllListeners();
 		};
@@ -70,62 +64,46 @@ function App() {
 		return !!state.provider && !!state.account;
 	}
 
-	const isConnectedVar = isConnected();
+	let pages = new Array<{
+		path: string;
+		href?: string;
+		name: string;
+		component: JSX.Element;
+		display: "primary" | "secondary";
+	}>();
+
+	pages.push({
+		path: "/mint-multi-batch",
+		name: "Mint",
+		component: (
+			<MintPage
+				key={CIS2_MULTI_CONTRACT_INFO.contractName}
+				contractInfo={CIS2_MULTI_CONTRACT_INFO}
+				provider={state.provider!}
+				account={state.account!}
+			/>
+		),
+		display: "primary",
+	});
+
+	function DefaultRouteElement() {
+		return <Navigate replace to={"/mint-multi-batch"} />;
+	}
 
 	return (
 		<>
-			<AppBar position="static">
-				<Container maxWidth="xl" sx={{ height: "100%" }}>
-					<Toolbar disableGutters>
-						<Typography
-							variant="h6"
-							noWrap
-							component="a"
-							sx={{
-								mr: 2,
-								display: "flex",
-								fontFamily: "monospace",
-								fontWeight: 700,
-								letterSpacing: ".3rem",
-								color: "inherit",
-								textDecoration: "none",
-							}}
-						>
-							Concordium
-						</Typography>
-						<Box
-							sx={{
-								flexGrow: 1,
-								display: "flex",
-								flexDirection: "row-reverse",
-							}}
-						>
-							<HeaderButton
-								name={isConnectedVar ? "Connected" : "Connect"}
-								isSelected={isConnectedVar}
-								onClick={connect}
-							/>
-						</Box>
-					</Toolbar>
-				</Container>
-			</AppBar>
+			<Header pages={pages} />
 			<Box className="App">
-				<Paper>
-					<Cis2Mint
-						key={CIS2_MULTI_CONTRACT_INFO.contractName}
-						contractInfo={CIS2_MULTI_CONTRACT_INFO}
-					/>
-				</Paper>
-				<Paper>
-					<Cis2Init
-						contractInfo={CIS2_MULTI_CONTRACT_INFO}
-						onDone={(contract) =>
-							alert(
-								`Contract Initialized index: ${contract.index}, subindex: ${contract.subindex}`
-							)
-						}
-					/>
-				</Paper>
+				{isConnected() ? (
+					<Routes>
+						{pages.map((p) => (
+							<Route path={p.path} element={p.component} key={p.name} />
+						))}
+						<Route path="/" element={<DefaultRouteElement />} />
+					</Routes>
+				) : (
+					<ConnectWallet connect={connect} />
+				)}
 			</Box>
 			<footer className="footer">
 				<Typography textAlign={"center"} sx={{ color: "white" }}>
