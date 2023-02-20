@@ -1,8 +1,6 @@
 import { Buffer } from "buffer/";
 import { ModuleReference } from "@concordium/web-sdk";
-import {
-	Cis2ContractInfo,
-} from "./models/ConcordiumContractClient";
+import { Cis2ContractInfo } from "./models/ConcordiumContractClient";
 
 const MULTI_CONTRACT_MODULE_REF =
 	"312f99d6406868e647359ea816e450eac0ecc4281c2665a24936e6793535c9f6";
@@ -13,4 +11,19 @@ export const CIS2_MULTI_CONTRACT_INFO: Cis2ContractInfo = {
 	moduleRef: new ModuleReference(MULTI_CONTRACT_MODULE_REF),
 	schemaBuffer: Buffer.from(MULTI_CONTRACT_SCHEMA, "hex"),
 	tokenIdByteSize: 1,
+};
+export const IPFS_GATEWAY_URL = "https://ipfs.io/ipfs";
+
+export const CREATE_NEW_MARKETPLACE = true;
+
+export const tokenIdToNftImageFileName = (
+	originalFileName: string,
+	tokenId: string
+) => {
+	const ext = originalFileName.substring(originalFileName.lastIndexOf("."));
+
+	return `nft_${tokenId}.${ext}`;
+};
+export const tokenIdToNftMetadataFileName = (tokenId: string) => {
+	return `nft_${tokenId}_metadata.json`;
 };

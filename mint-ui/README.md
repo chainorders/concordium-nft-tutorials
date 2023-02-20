@@ -18,10 +18,11 @@
   Various following [configuration params](./src/Constants.ts) are explained and initialized with default values. Which can be used with Concordium Testnet.
   - `MULTI_CONTRACT_MODULE_REF`: Module reference of deployed module with CIS2-Multi contract
   - `MULTI_CONTRACT_SCHEMA` : HEX string of `schema.bin` file got from compilation of rust code of cis2-multi
+  - `IPFS_GATEWAY_URL`: gateway url for the IPFS gateway
 
 ## Deploy
 
-Currently the browser wallet does not allow to deploy modules to Concordium chain. However node-cli and concordium client can be used to deploy contracts
+Currently the browser wallet does not allow to deploy modules to Concordium chain. However [node-cli](https://github.com/chainorders/concordium-contracts-node-cli) and [concordium client](https://github.com/chainorders/concordium-contracts/tree/main/concordium-client) can be used to deploy contracts
 
 ## Interact
 

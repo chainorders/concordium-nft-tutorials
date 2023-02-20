@@ -5,7 +5,7 @@ import {
 	detectConcordiumProvider,
 	WalletApi,
 } from "@concordium/browser-wallet-api-helpers";
-import { Box, Link, Typography } from "@mui/material";
+import { AlertColor, Box, Link, Typography } from "@mui/material";
 import {
 	Route,
 	Routes,
@@ -28,6 +28,7 @@ import {
 import ConnectWallet from "./components/ConnectWallet";
 import Header from "./components/ui/Header";
 import { MINTING_UI_ONLY } from "./Constants";
+import Alert from "./components/ui/Alert";
 
 function App() {
 	const params = useParams();
@@ -53,6 +54,15 @@ function App() {
 		marketplaceContractAddress,
 	});
 
+	const [alertState, setAlertState] = useState<{
+		open: boolean;
+		message: string;
+		severity?: AlertColor;
+	}>({
+		open: false,
+		message: "",
+	});
+
 	function connect() {
 		detectConcordiumProvider()
 			.then((provider) => {
@@ -65,7 +75,11 @@ function App() {
 						setState({ ...state, provider, account });
 					})
 					.catch((_) => {
-						alert("Please allow wallet connection");
+						setAlertState({
+							open: true,
+							message: "Please allow wallet connection",
+							severity: "error"
+						});
 					});
 				provider.on("accountDisconnected", () => {
 					setState({ ...state, account: undefined });
@@ -206,6 +220,13 @@ function App() {
 				) : (
 					<ConnectWallet connect={connect} />
 				)}
+				<Alert
+					open={alertState.open}
+					message={alertState.message}
+					onClose={() => setAlertState({ open: false, message: "" })}
+					severity={alertState.severity}
+					anchorOrigin={{ vertical: "top", horizontal: "center" }}
+				/>
 			</Box>
 			<footer className="footer">
 				<Typography textAlign={"center"} sx={{color: "white"}}>

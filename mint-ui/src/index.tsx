@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from 'react-router-dom';
 
 import "./index.css";
 import App from "./App";
@@ -21,11 +21,11 @@ const customTheme = createTheme({
 });
 
 root.render(
-	<BrowserRouter>
+	<HashRouter>
 		<ThemeProvider theme={customTheme}>
 			<App />
 		</ThemeProvider>
-	</BrowserRouter>
+	</HashRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function
