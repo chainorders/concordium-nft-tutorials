@@ -142,10 +142,37 @@ impl<
         }
     }
 
+    pub(crate) fn list_item(
+        &self,
+        token_owner_info: &TokenOwnerInfo<T>,
+    ) -> Option<TokenListItem<T, A>> {
+        match self.token_prices.get(token_owner_info) {
+            Some(token_price_state) => {
+                let token_info = TokenInfo {
+                    id: token_owner_info.id,
+                    address: token_owner_info.address,
+                };
+
+                self.token_royalties
+                    .get(&token_info)
+                    .map(|token_royalty_state| TokenListItem {
+                        token_id: token_info.id,
+                        contract: token_info.address,
+                        price: token_price_state.price,
+                        owner: token_owner_info.owner,
+                        royalty: token_royalty_state.royalty,
+                        primary_owner: token_royalty_state.primary_owner,
+                        quantity: token_price_state.quantity,
+                    })
+            }
+            None => None,
+        }
+    }
+
     pub(crate) fn list(&self) -> Vec<TokenListItem<T, A>> {
         self.token_prices
             .iter()
-            .map(|p| -> Option<TokenListItem<T, A>> {
+            .filter_map(|p| -> Option<TokenListItem<T, A>> {
                 let token_info = TokenInfo {
                     id: p.0.id,
                     address: p.0.address,
@@ -164,7 +191,6 @@ impl<
                     }),
                 }
             })
-            .flatten()
             .collect()
     }
 }

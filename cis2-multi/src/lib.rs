@@ -343,7 +343,7 @@ impl<S: HasStateApi> State<S> {
 
 // Contract functions
 /// Initialize contract instance with a no token types.
-#[init(contract = "CIS2-Multi")]
+#[init(contract = "CIS2-Multi", event = "Cis2Event<ContractTokenId, ContractTokenAmount>")]
 fn contract_init<S: HasStateApi>(
     _ctx: &impl HasInitContext,
     state_builder: &mut StateBuilder<S>,

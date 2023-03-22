@@ -4,10 +4,11 @@
 //! - `list` : returns a list of buyable tokens added to the contract instance.
 //! - `add` : adds the token to the list of buyable tokens taking the price of the token as input.
 //! - `transfer` : transfer the authority of the input listed token from one address to another.
-//! 
+//!
 //! This code has not been checked for production readiness. Please use for reference purposes
 mod cis2_client;
 mod errors;
+pub mod events;
 mod params;
 mod state;
 
@@ -17,6 +18,7 @@ use cis2_client::Cis2Client;
 use concordium_cis2::{IsTokenAmount, IsTokenId, TokenAmountU64, TokenIdU8};
 use concordium_std::*;
 use errors::MarketplaceError;
+use events::MarketEvent;
 use params::{AddParams, InitParams, TokenList};
 use state::{Commission, State, TokenInfo, TokenListItem, TokenRoyaltyState};
 
@@ -39,7 +41,7 @@ type ContractState<S> = State<S, ContractTokenId, ContractTokenAmount>;
 ///
 /// This function can be called by using InitParams.
 /// The commission should be less than the maximum allowed value of 10000 basis points
-#[init(contract = "Market-NFT", parameter = "InitParams")]
+#[init(contract = "Market-NFT", parameter = "InitParams", event="MarketEvent")]
 fn init<S: HasStateApi>(
     ctx: &impl HasInitContext,
     state_builder: &mut StateBuilder<S>,
@@ -60,11 +62,13 @@ fn init<S: HasStateApi>(
     contract = "Market-NFT",
     name = "add",
     parameter = "AddParams",
-    mutable
+    mutable,
+    enable_logger
 )]
 fn add<S: HasStateApi>(
     ctx: &impl HasReceiveContext,
     host: &mut impl HasHost<ContractState<S>, StateApiType = S>,
+    logger: &mut impl HasLogger,
 ) -> ContractResult<()> {
     let params: AddParams = ctx
         .parameter_cursor()
@@ -99,6 +103,19 @@ fn add<S: HasStateApi>(
         params.royalty,
         params.quantity,
     );
+
+    let event = host
+        .state()
+        .list_item(&TokenOwnerInfo {
+            id: token_info.id,
+            address: token_info.address,
+            owner: sender_account_address,
+        })
+        .ok_or(MarketplaceError::ErrorGettingEvent)?;
+    logger
+        .log(&MarketEvent::QuantityUpdated(event))
+        .map_err(|_e| MarketplaceError::InvalidEvent)?;
+
     ContractResult::Ok(())
 }
 
@@ -111,12 +128,14 @@ fn add<S: HasStateApi>(
     name = "transfer",
     parameter = "TransferParams",
     mutable,
-    payable
+    payable,
+    enable_logger
 )]
 fn transfer<S: HasStateApi>(
     ctx: &impl HasReceiveContext,
     host: &mut impl HasHost<ContractState<S>, StateApiType = S>,
     amount: Amount,
+    logger: &mut impl HasLogger,
 ) -> ContractResult<()> {
     let params: TransferParams = ctx
         .parameter_cursor()
@@ -166,10 +185,16 @@ fn transfer<S: HasStateApi>(
         &ctx.owner(),
     )?;
 
-    host.state_mut().decrease_listed_quantity(
-        &TokenOwnerInfo::from(token_info, &params.owner),
-        params.quantity,
-    );
+    let owner_info = &TokenOwnerInfo::from(token_info, &params.owner);
+    host.state_mut()
+        .decrease_listed_quantity(owner_info, params.quantity);
+    let event = host
+        .state()
+        .list_item(owner_info)
+        .ok_or(MarketplaceError::ErrorGettingEvent)?;
+    logger
+        .log(&MarketEvent::QuantityUpdated(event))
+        .map_err(|_e| MarketplaceError::InvalidEvent)?;
     ContractResult::Ok(())
 }
 
@@ -212,7 +237,7 @@ fn ensure_supports_cis2<
     Ok(())
 }
 
-/// Calls the [operatorOf](https://proposals.concordium.software/CIS/cis-2.html#operatorof) function of CIS contract. 
+/// Calls the [operatorOf](https://proposals.concordium.software/CIS/cis-2.html#operatorof) function of CIS contract.
 /// Returns error if Current Contract Address is not an Operator of Transaction Sender.
 fn ensure_is_operator<
     S: HasStateApi,
@@ -233,7 +258,7 @@ fn ensure_is_operator<
     ensure!(is_operator, MarketplaceError::NotOperator);
     Ok(())
 }
-/// Calls the [balanceOf](https://proposals.concordium.software/CIS/cis-2.html#balanceof) function of the CIS2 contract. 
+/// Calls the [balanceOf](https://proposals.concordium.software/CIS/cis-2.html#balanceof) function of the CIS2 contract.
 /// Returns error if the returned balance < input balance (balance param).
 fn ensure_balance<
     S: HasStateApi,
@@ -375,7 +400,7 @@ mod test {
         let mut state_builder = TestStateBuilder::new();
         let state = State::new(&mut state_builder, 250);
         let mut host = TestHost::new(state, state_builder);
-
+        let mut logger = TestLogger::init();
         fn mock_supports(
             _p: Parameter,
             _a: Amount,
@@ -434,7 +459,7 @@ mod test {
             MockFn::new_v1(mock_balance_of),
         );
 
-        let res = add(&ctx, &mut host);
+        let res = add(&ctx, &mut host, &mut logger);
 
         unsafe {
             claim!(res.is_ok(), "Results in rejection");
