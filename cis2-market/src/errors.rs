@@ -16,6 +16,8 @@ pub enum MarketplaceError {
     NotOperator,
     InvalidCommission,
     InvalidTokenQuantity,
+    ErrorGettingEvent,
+    InvalidEvent,
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq, Reject)]
